@@ -1,5 +1,9 @@
 default: testacc
 
+.PHONY: docs
+docs:
+	go generate
+
 # Run acceptance tests
 .PHONY: testacc
 testacc:
