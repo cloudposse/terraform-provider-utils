@@ -80,7 +80,9 @@ required_providers {
   }
 ```
 
-Then run `terraform plan` and `terraform apply` as normal. NOTE: `terraform init` will give an error similar to the one below, but per the documentation, that is to be expected and can be ignored.
+Then run `terraform plan` and `terraform apply` as normal.
+
+NOTE: `terraform init` will give an error similar to the one below, but per the documentation, that is to be expected and can be ignored.
 
 ```sh
 $ terraform init
@@ -104,4 +106,49 @@ Error: Failed to query available provider packages
 Could not retrieve the list of available versions for provider
 cloudposse/utils: provider registry registry.terraform.io does not have a
 provider named registry.terraform.io/cloudposse/utils
+```
+
+```sh
+terraform apply
+
+Warning: Provider development overrides are in effect
+
+The following provider development overrides are set in the CLI configuration:
+ - cloudposse/utils in /Users/matt/code/src/github.com/cloudposse/terraform-provider-utils
+
+The behavior may therefore not match any released version of the provider and
+applying changes may cause the state to become incompatible with published
+releases.
+
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+
+Terraform will perform the following actions:
+
+Plan: 0 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + deep_merge_output = {
+      + "baz" = "zzed"
+      + "foo" = "ood"
+      + "my"  = "dinner"
+    }
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+deep_merge_output = tomap({
+  "baz" = "zzed"
+  "foo" = "ood"
+  "my" = "dinner"
+})
 ```
