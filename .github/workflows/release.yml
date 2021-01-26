@@ -31,7 +31,7 @@ jobs:
         uses: paultyng/ghaction-import-gpg@v2.1.0
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+          PASSPHRASE: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
