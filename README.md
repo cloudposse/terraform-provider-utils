@@ -50,3 +50,23 @@ _Note:_ Acceptance tests create real resources, and often cost money to run.
 ```sh
 $ make testacc
 ```
+
+### Testing Locally
+
+You can test the provider locally by using the [provider_installation](https://www.terraform.io/docs/cli/config/config-file.html#provider-installation) functionality.
+
+In our case, you can edit your `~/.terraformrc` file with the following:
+
+```hcl
+ cat ~/.terraformrc
+provider_installation {
+  dev_overrides  {
+    "cloudposse/utils" = "/path/to/your/code/github.com/cloudposse/terraform-provider-utils/"
+  }
+
+  # For all other providers, install them directly from their origin provider
+  # registries as normal. If you omit this, Terraform will _only_ use
+  # the dev_overrides block, and so no other providers will be available.
+  direct {}
+}
+```
