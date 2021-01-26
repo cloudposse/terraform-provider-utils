@@ -58,7 +58,6 @@ You can test the provider locally by using the [provider_installation](https://w
 In our case, you can edit your `~/.terraformrc` file with the following:
 
 ```hcl
- cat ~/.terraformrc
 provider_installation {
   dev_overrides  {
     "cloudposse/utils" = "/path/to/your/code/github.com/cloudposse/terraform-provider-utils/"
