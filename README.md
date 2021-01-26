@@ -69,3 +69,39 @@ provider_installation {
   direct {}
 }
 ```
+
+With that in place, you can build the provider (see above) and add a provider block:
+
+```hcl
+required_providers {
+    utils = {
+      source = "cloudposse/utils"
+    }
+  }
+```
+
+Then run `terraform plan` and `terraform apply` as normal. NOTE: `terraform init` will give an error similar to the one below, but per the documentation, that is to be expected and can be ignored.
+
+```sh
+$ terraform init
+Initializing the backend...
+
+Initializing provider plugins...
+- Finding latest version of cloudposse/utils...
+
+Warning: Provider development overrides are in effect
+
+The following provider development overrides are set in the CLI configuration:
+ - cloudposse/utils in /Users/matt/code/src/github.com/cloudposse/terraform-provider-utils
+
+The behavior may therefore not match any released version of the provider and
+applying changes may cause the state to become incompatible with published
+releases.
+
+
+Error: Failed to query available provider packages
+
+Could not retrieve the list of available versions for provider
+cloudposse/utils: provider registry registry.terraform.io does not have a
+provider named registry.terraform.io/cloudposse/utils
+```
