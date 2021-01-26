@@ -5,6 +5,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
 )
 
 func dataSourceDeepMerge() *schema.Resource {
@@ -15,8 +17,9 @@ func dataSourceDeepMerge() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"inputs": {
-				Description: "A listx of arbitrary maps that is deep merged into the `output` attribute.",
-				Type:        schema.TypeMap,
+				Description: "A list of arbitrary maps that is deep merged into the `output` attribute.",
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeMap},
 				Required:    true,
 			},
 			"output": {
@@ -30,10 +33,15 @@ func dataSourceDeepMerge() *schema.Resource {
 
 func dataSourceDeepMergeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	inputs := d.Get("inputs")
-	d.Set("output", inputs)
+
+	result, err := m.Merge(inputs.([]interface{}))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.Set("output", result)
 
 	d.SetId("static")
 
-	// diag.Errorf("an error")
 	return nil
 }

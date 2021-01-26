@@ -18,7 +18,7 @@ func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"deep_merge": dataSourceDeepMerge(),
+				"utils_deep_merge": dataSourceDeepMerge(),
 			},
 		}
 
