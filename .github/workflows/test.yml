@@ -4,9 +4,11 @@
 name: Tests
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths-ignore:
       - "README.md"
-  push:
+  release:
+    types: [created]
     paths-ignore:
       - "README.md"
   # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
