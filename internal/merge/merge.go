@@ -5,7 +5,7 @@ import (
 )
 
 // Merge takes a list of maps as input and returns a single map with the merged contents
-func Merge(inputs []interface{}) (map[string]interface{}, error) {
+func Merge(inputs []map[string]interface{}) (map[string]interface{}, error) {
 	merged := map[string]interface{}{}
 
 	for index := range inputs {
