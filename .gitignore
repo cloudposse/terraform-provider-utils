@@ -28,6 +28,10 @@ website/node_modules
 
 website/vendor
 
+# Cloud Posse Build Harness https://github.com/cloudposse/build-harness
+**/.build-harness
+**/build-harness
+
 # Test exclusions
 !command/test-fixtures/**/*.tfstate
 !command/test-fixtures/**/.terraform/
