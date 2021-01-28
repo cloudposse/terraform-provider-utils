@@ -65,4 +65,4 @@ jobs:
           TF_ACC: "1"
           TF_ACC_TERRAFORM_VERSION: ${{ matrix.terraform }}
         run: |
-          make test
+          make testacc
