@@ -148,13 +148,6 @@ The following provider development overrides are set in the CLI configuration:
 The behavior may therefore not match any released version of the provider and
 applying changes may cause the state to become incompatible with published
 releases.
-
-
-Error: Failed to query available provider packages
-
-Could not retrieve the list of available versions for provider
-cloudposse/utils: provider registry registry.terraform.io does not have a
-provider named registry.terraform.io/cloudposse/utils
 ```
 
 ```sh
