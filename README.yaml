@@ -74,8 +74,8 @@ examples: |-
   - [`examples/data-sources/deep_merge_yaml`](./examples/data-sources/deep_merge_yaml)
 
 #include:
-  - "docs/index.md"
-  - "docs/data-sources/deep_merge.md"
+#  - "docs/index.md"
+#  - "docs/data-sources/deep_merge.md"
 
 # Contributors to this project
 contributors:
