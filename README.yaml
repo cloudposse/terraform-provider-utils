@@ -69,7 +69,7 @@ usage: |-
 
 # Example usage
 examples: |-
-  Here is an examples of using this provider:
+  Here is an example of using this provider:
 
   ```hcl
   terraform {

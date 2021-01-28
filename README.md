@@ -80,7 +80,7 @@ See the [Docs](./docs) for additional information.
 
 ## Examples
 
-Here is an examples of using this provider:
+Here is an example of using this provider:
 
 ```hcl
 terraform {
