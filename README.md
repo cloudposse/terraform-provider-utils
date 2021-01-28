@@ -68,7 +68,7 @@ terraform {
   required_providers {
     utils = {
       source = "cloudposse/utils"
-      version = "0.0.1-alpha5"
+      version = "0.1.0"
     }
   }
 }
@@ -80,7 +80,36 @@ See the [Docs](./docs) for additional information.
 
 ## Examples
 
-Here are some examples of using this provider:
+Here is an example of using this provider:
+
+```hcl
+terraform {
+  required_providers {
+    utils = {
+      source = "cloudposse/utils"
+    }
+  }
+}
+
+locals {
+  yaml_data_1 = file("${path.module}/data1.yaml")
+  yaml_data_2 = file("${path.module}/data2.yaml")
+}
+
+data "utils_deep_merge_yaml" "example" {
+  inputs = [
+    local.yaml_data_1,
+    local.yaml_data_2
+  ]
+}
+
+output "deep_merge_output" {
+  value = data.utils_deep_merge_yaml.example.output
+}
+```
+
+Here are some additional examples:
+
 - [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json/)
 - [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml/)
 
