@@ -1,0 +1,83 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-provider-utils
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Copyrights
+copyrights:
+  - name: "Cloud Posse, LLC"
+    url: "https://cloudposse.com"
+    year: "2021"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-provider-utils
+
+# Badges to display
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg"
+    url: "https://github.com/cloudposse/terraform-provider-utils/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+  - name: "Discourse Forum"
+    image: "https://img.shields.io/discourse/https/ask.sweetops.com/posts.svg"
+    url: "https://ask.sweetops.com/"
+
+related:
+
+# List any resources helpful for someone to get started. For example, link to the hashicorp documentation or AWS documentation.
+references:
+  - name: "Terraform Plugins"
+    description:
+      "Terraform is logically split into two main parts: Terraform Core and Terraform Plugins. Each plugin exposes an
+      implementation for a specific service, such as the AWS provider or the cloud-init provider."
+    url: "https://www.terraform.io/docs/extend/plugin-types.html#providers"
+
+# Short description of this project
+description: |-
+  Terraform provider to add additional missing functionality to Terraform
+
+#introduction: |-
+#  This is an introduction.
+
+# How to use this module. Should be an easy example to copy and paste.
+usage: |-
+  Here is how to use this provider in your own Terraform code:
+
+  ```hcl
+  terraform {
+    required_providers {
+      utils = {
+        source = "cloudposse/utils"
+        version = "0.0.1-alpha5"
+      }
+    }
+  }
+  ```
+  See the [Docs](./docs) for additional information.
+
+# Example usage
+examples: |-
+  Here are some examples of using this provider:
+  - [`examples/data-sources/deep_merge_json`](./examples/data-sources/deep_merge_json)
+  - [`examples/data-sources/deep_merge_yaml`](./examples/data-sources/deep_merge_yaml)
+
+#include:
+  - "docs/index.md"
+  - "docs/data-sources/deep_merge.md"
+
+# Contributors to this project
+contributors:
+  - name: "Matt Calhoun"
+    github: "mcalhoun"
