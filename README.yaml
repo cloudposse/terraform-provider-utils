@@ -70,8 +70,8 @@ usage: |-
 # Example usage
 examples: |-
   Here are some examples of using this provider:
-  - [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json)
-  - [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml)
+  - [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json/)
+  - [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml/)
 
 #include:
 #  - "docs/index.md"

@@ -81,8 +81,8 @@ See the [Docs](./docs) for additional information.
 ## Examples
 
 Here are some examples of using this provider:
-- [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json)
-- [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml)
+- [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json/)
+- [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml/)
 
 
 
