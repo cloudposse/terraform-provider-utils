@@ -18,8 +18,8 @@ func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"utils_deep_merge_json": dataSourceDeepMergeJson(),
-				"utils_deep_merge_yaml": dataSourceDeepMergeYaml(),
+				"utils_deep_merge_json": dataSourceDeepMergeJSON(),
+				"utils_deep_merge_yaml": dataSourceDeepMergeYAML(),
 			},
 		}
 
@@ -31,10 +31,6 @@ func New(version string) func() *schema.Provider {
 
 func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	return func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		// Setup a User-Agent for your API client (replace the provider name for yours):
-		// userAgent := p.UserAgent("terraform-provider-utils", version)
-		// TODO: myClient.UserAgent = userAgent
-
 		return nil, nil
 	}
 }
