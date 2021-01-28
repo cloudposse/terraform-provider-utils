@@ -46,7 +46,11 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	d.Set("output", string(jsonResult))
+	err = d.Set("output", string(jsonResult))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId("static")
 
 	return nil

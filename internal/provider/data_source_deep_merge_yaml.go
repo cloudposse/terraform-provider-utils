@@ -46,7 +46,11 @@ func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	d.Set("output", string(yamlResult))
+	err = d.Set("output", string(yamlResult))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId("static")
 
 	return nil
