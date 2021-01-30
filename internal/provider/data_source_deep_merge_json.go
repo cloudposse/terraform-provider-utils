@@ -18,7 +18,7 @@ func dataSourceDeepMergeJSON() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"inputs": {
-				Description: "A list JSON strings that is deep merged into the `output` attribute.",
+				Description: "A list of JSON strings that is deep merged into the `output` attribute.",
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
