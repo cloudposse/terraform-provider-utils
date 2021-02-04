@@ -13,7 +13,7 @@ The utils provider contains data sources to perform tasks that are difficult to 
 
 ```terraform
 provider "utils" {
-  # no provider-specfic config
+  # no provider-specific config
 }
 ```
 
