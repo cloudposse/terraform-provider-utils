@@ -2,11 +2,11 @@ package provider
 
 import (
 	"context"
+	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 
 	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/yaml.v2"
 )
 
 func dataSourceStackConfigYAML() *schema.Resource {
@@ -35,22 +35,18 @@ func dataSourceStackConfigYAML() *schema.Resource {
 
 func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	input := d.Get("input")
-	paths := input.([]interface{})
-	var result []string
 
-	for _, path := range paths {
-		config, err := s.ProcessYAMLConfigFile(path.(string))
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		yamlConfig, err := yaml.Marshal(config)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		result = append(result, string(yamlConfig))
+	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	err := d.Set("output", result)
+	result, err := s.ProcessYAMLConfigFiles(paths)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("output", result)
 	if err != nil {
 		return diag.FromErr(err)
 	}

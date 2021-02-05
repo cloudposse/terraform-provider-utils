@@ -1,5 +1,6 @@
 import:
 - uw2-globals
+- eks/eks-defaults
 
 vars:
   stage: dev
