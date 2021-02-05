@@ -13,6 +13,17 @@ func YAMLToMap(input string) (map[string]interface{}, error) {
 	return data, nil
 }
 
+// YAMLToMapOfInterfaces takes a YAML string as input and returns a map[interface{}]interface{}
+func YAMLToMapOfInterfaces(input string) (map[interface{}]interface{}, error) {
+	var data map[interface{}]interface{}
+	byt := []byte(input)
+
+	if err := yaml.Unmarshal(byt, &data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 // YAMLSliceOfInterfaceToSliceOfMaps takes a slice of JSON strings as input and returns a slice of map[string]interface{}
 func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[string]interface{}, error) {
 	outputMap := make([]map[string]interface{}, 0)

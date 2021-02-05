@@ -37,9 +37,9 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
-// and returns stack config as map[string]interface{}
-func ProcessYAMLConfigFile(filePath string) (map[string]interface{}, error) {
-	var configs []map[string]interface{}
+// and returns stack config as map[interface{}]interface{}
+func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error) {
+	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
 	stackYamlConfig, err := ioutil.ReadFile(filePath)
@@ -47,7 +47,7 @@ func ProcessYAMLConfigFile(filePath string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	stackMapConfig, err := c.YAMLToMap(string(stackYamlConfig))
+	stackMapConfig, err := c.YAMLToMapOfInterfaces(string(stackYamlConfig))
 	if err != nil {
 		return nil, err
 	}
@@ -78,59 +78,59 @@ func ProcessYAMLConfigFile(filePath string) (map[string]interface{}, error) {
 
 // ProcessConfig takes a raw stack config, deep-merges all variables and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(config map[string]interface{}) (map[string]interface{}, error) {
-	globalVars := map[string]interface{}{}
-	terraformVars := map[string]interface{}{}
-	helmfileVars := map[string]interface{}{}
+func ProcessConfig(config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
+	globalVars := map[interface{}]interface{}{}
+	terraformVars := map[interface{}]interface{}{}
+	helmfileVars := map[interface{}]interface{}{}
 	backendType := "s3"
-	backend := map[string]interface{}{}
-	terraformComponents := map[string]interface{}{}
-	helmfileComponents := map[string]interface{}{}
-	allComponents := map[string]interface{}{}
+	backend := map[interface{}]interface{}{}
+	terraformComponents := map[interface{}]interface{}{}
+	helmfileComponents := map[interface{}]interface{}{}
+	allComponents := map[interface{}]interface{}{}
 
 	if i, ok := config["vars"]; ok {
-		globalVars = i.(map[string]interface{})
+		globalVars = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["vars"]; ok {
-		terraformVars = i.(map[string]interface{})
+	if i, ok := config["terraform"].(map[interface{}]interface{})["vars"]; ok {
+		terraformVars = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["helmfile"].(map[string]interface{})["vars"]; ok {
-		helmfileVars = i.(map[string]interface{})
+	if i, ok := config["helmfile"].(map[interface{}]interface{})["vars"]; ok {
+		helmfileVars = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["backend_type"]; ok {
+	if i, ok := config["terraform"].(map[interface{}]interface{})["backend_type"]; ok {
 		backendType = i.(string)
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["backend"].(map[string]interface{})[backendType]; ok {
-		backend = i.(map[string]interface{})
+	if i, ok := config["terraform"].(map[interface{}]interface{})["backend"].(map[interface{}]interface{})[backendType]; ok {
+		backend = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["components"].(map[string]interface{})["terraform"].(map[string]interface{}); ok {
+	if i, ok := config["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{}); ok {
 		for k, v := range i {
-			componentVars := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["vars"]; ok2 {
-				componentVars = i2.(map[string]interface{})
+			componentVars := map[interface{}]interface{}{}
+			if i2, ok2 := v.(map[interface{}]interface{})["vars"]; ok2 {
+				componentVars = i2.(map[interface{}]interface{})
 			}
 
-			componentBackend := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["backend"].(map[string]interface{})[backendType]; ok2 {
-				componentBackend = i2.(map[string]interface{})
+			componentBackend := map[interface{}]interface{}{}
+			if i2, ok2 := v.(map[interface{}]interface{})["backend"].(map[interface{}]interface{})[backendType]; ok2 {
+				componentBackend = i2.(map[interface{}]interface{})
 			}
 
-			allComponentVars, err := m.Merge([]map[string]interface{}{globalVars, terraformVars, componentVars})
+			allComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, terraformVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			allComponentBackend, err := m.Merge([]map[string]interface{}{backend, componentBackend})
+			allComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, componentBackend})
 			if err != nil {
 				return nil, err
 			}
 
-			comp := map[string]interface{}{}
+			comp := map[interface{}]interface{}{}
 			comp["vars"] = allComponentVars
 			comp["backend_type"] = backendType
 			comp["backend"] = allComponentBackend
@@ -138,19 +138,19 @@ func ProcessConfig(config map[string]interface{}) (map[string]interface{}, error
 		}
 	}
 
-	if i, ok := config["components"].(map[string]interface{})["helmfile"].(map[string]interface{}); ok {
+	if i, ok := config["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{}); ok {
 		for k, v := range i {
-			componentVars := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["vars"]; ok2 {
-				componentVars = i2.(map[string]interface{})
+			componentVars := map[interface{}]interface{}{}
+			if i2, ok2 := v.(map[interface{}]interface{})["vars"]; ok2 {
+				componentVars = i2.(map[interface{}]interface{})
 			}
 
-			allComponentVars, err := m.Merge([]map[string]interface{}{globalVars, helmfileVars, componentVars})
+			allComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			comp := map[string]interface{}{}
+			comp := map[interface{}]interface{}{}
 			comp["vars"] = allComponentVars
 			helmfileComponents[k] = comp
 		}
@@ -159,7 +159,7 @@ func ProcessConfig(config map[string]interface{}) (map[string]interface{}, error
 	allComponents["terraform"] = terraformComponents
 	allComponents["helmfile"] = helmfileComponents
 
-	result := map[string]interface{}{
+	result := map[interface{}]interface{}{
 		"config":     config,
 		"components": allComponents,
 	}
