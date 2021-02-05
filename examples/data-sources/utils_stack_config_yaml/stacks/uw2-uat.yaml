@@ -1,0 +1,52 @@
+import:
+  - uw2-globals
+
+vars:
+  stage: uat
+
+terraform:
+  vars: {}
+
+helmfile:
+  vars:
+    account_number: "1234567893"
+
+components:
+  terraform:
+
+    dns-delegated:
+      vars:
+        request_acm_certificate: true
+        zone_config:
+          - subdomain: uat
+            zone_name: uw2.example.com
+
+    eks:
+      vars:
+        spotinst_instance_profile: eg-gbl-uat-spotinst-worker
+        spotinst_oceans:
+          main:
+            desired_group_size: 1
+            max_group_size: 3
+            min_group_size: 1
+            kubernetes_version: null
+            ami_release_version: null
+            attributes: null
+            disk_size: 100
+            instance_types: null
+            ami_type: "AL2_x86_64"
+            tags: null
+
+    vpc:
+      vars:
+        cidr_block: "10.120.0.0/18"
+
+  helmfile:
+
+    datadog:
+      vars:
+        installed: true
+        datadogTags:
+          - "env:uw2-uat"
+          - "region:us-west-2"
+          - "stage:uat"
