@@ -92,32 +92,32 @@ func ProcessConfig(config map[string]interface{}) (map[string]interface{}, error
 		globalVars = i.(map[string]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["vars"].(map[string]interface{}); ok {
-		terraformVars = i
+	if i, ok := config["terraform"].(map[string]interface{})["vars"]; ok {
+		terraformVars = i.(map[string]interface{})
 	}
 
-	if i, ok := config["helmfile"].(map[string]interface{})["vars"].(map[string]interface{}); ok {
-		helmfileVars = i
+	if i, ok := config["helmfile"].(map[string]interface{})["vars"]; ok {
+		helmfileVars = i.(map[string]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["backend_type"].(string); ok {
-		backendType = i
+	if i, ok := config["terraform"].(map[string]interface{})["backend_type"]; ok {
+		backendType = i.(string)
 	}
 
-	if i, ok := config["terraform"].(map[string]interface{})["backend"].(map[string]interface{})[backendType].(map[string]interface{}); ok {
-		backend = i
+	if i, ok := config["terraform"].(map[string]interface{})["backend"].(map[string]interface{})[backendType]; ok {
+		backend = i.(map[string]interface{})
 	}
 
 	if i, ok := config["components"].(map[string]interface{})["terraform"].(map[string]interface{}); ok {
 		for k, v := range i {
 			componentVars := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["vars"].(map[string]interface{}); ok2 {
-				componentVars = i2
+			if i2, ok2 := v.(map[string]interface{})["vars"]; ok2 {
+				componentVars = i2.(map[string]interface{})
 			}
 
 			componentBackend := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["backend"].(map[string]interface{})[backendType].(map[string]interface{}); ok2 {
-				componentBackend = i2
+			if i2, ok2 := v.(map[string]interface{})["backend"].(map[string]interface{})[backendType]; ok2 {
+				componentBackend = i2.(map[string]interface{})
 			}
 
 			allComponentVars, err := m.Merge([]map[string]interface{}{globalVars, terraformVars, componentVars})
@@ -141,8 +141,8 @@ func ProcessConfig(config map[string]interface{}) (map[string]interface{}, error
 	if i, ok := config["components"].(map[string]interface{})["helmfile"].(map[string]interface{}); ok {
 		for k, v := range i {
 			componentVars := map[string]interface{}{}
-			if i2, ok2 := v.(map[string]interface{})["vars"].(map[string]interface{}); ok2 {
-				componentVars = i2
+			if i2, ok2 := v.(map[string]interface{})["vars"]; ok2 {
+				componentVars = i2.(map[string]interface{})
 			}
 
 			allComponentVars, err := m.Merge([]map[string]interface{}{globalVars, helmfileVars, componentVars})
