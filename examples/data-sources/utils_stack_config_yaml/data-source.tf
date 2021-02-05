@@ -11,12 +11,12 @@ terraform {
 data "utils_stack_config_yaml" "example" {
   input = [
     "${path.module}/stacks/uw2-dev.yaml",
-    "${path.module}/stacks/uw2-prod.yaml",
-    "${path.module}/stacks/uw2-staging.yaml",
-    "${path.module}/stacks/uw2-uat.yaml"
+    #"${path.module}/stacks/uw2-prod.yaml",
+    #"${path.module}/stacks/uw2-staging.yaml",
+    #"${path.module}/stacks/uw2-uat.yaml"
   ]
 }
 
 output "output" {
-  value = data.utils_stack_config_yaml.example.output
+  value = [for i in data.utils_stack_config_yaml.example.output : yamldecode(i)]
 }

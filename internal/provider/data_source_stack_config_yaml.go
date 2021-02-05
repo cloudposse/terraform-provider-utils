@@ -36,7 +36,7 @@ func dataSourceStackConfigYAML() *schema.Resource {
 func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	input := d.Get("input")
 	paths := input.([]interface{})
-	result := make([]string, len(paths))
+	var result []string
 
 	for _, path := range paths {
 		config, err := s.ProcessYAMLConfigFile(path.(string))
