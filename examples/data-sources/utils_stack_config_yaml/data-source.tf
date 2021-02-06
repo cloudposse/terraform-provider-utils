@@ -25,6 +25,10 @@ output "output" {
   value = local.result
 }
 
+output "uw2_dev_datadog_vars" {
+  value = local.result[0]["components"]["helmfile"]["datadog"]["vars"]
+}
+
 output "uw2_dev_eks_config" {
   value = local.result[0]["components"]["terraform"]["eks"]
 }
