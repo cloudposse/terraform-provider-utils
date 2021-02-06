@@ -13,15 +13,22 @@ func JSONToMap(input string) (map[string]interface{}, error) {
 	return data, nil
 }
 
-// JSONSliceOfInterfaceToSliceOfMaps takes a slice of JSON strings as input and returns a slice of map[string]interface{}
-func JSONSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[string]interface{}, error) {
-	outputMap := make([]map[string]interface{}, 0)
+// JSONSliceOfInterfaceToSliceOfMaps takes a slice of JSON strings as input and returns a slice of map[interface{}]interface{}
+func JSONSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]interface{}, error) {
+	outputMap := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
 		data, err := JSONToMap(current.(string))
 		if err != nil {
 			return nil, err
 		}
-		outputMap = append(outputMap, data)
+
+		map2 := map[interface{}]interface{}{}
+
+		for k, v := range data {
+			map2[k] = v
+		}
+
+		outputMap = append(outputMap, map2)
 	}
 	return outputMap, nil
 }

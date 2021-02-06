@@ -27,7 +27,7 @@ locals {
 }
 
 data "utils_deep_merge_json" "example" {
-  inputs = [
+  input = [
     local.json_data_1,
     local.json_data_2
   ]

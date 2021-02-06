@@ -2,6 +2,8 @@ terraform {
   required_providers {
     utils = {
       source = "cloudposse/utils"
+      # Install the provider on local computer by running `make install` from the root of the repo
+      # version = "9999.99.99"
     }
   }
 }
@@ -12,12 +14,12 @@ locals {
 }
 
 data "utils_deep_merge_yaml" "example" {
-  inputs = [
+  input = [
     local.yaml_data_1,
     local.yaml_data_2
   ]
 }
 
 output "deep_merge_output" {
-  value = data.utils_deep_merge_yaml.example.output
+  value = yamldecode(data.utils_deep_merge_yaml.example.output)
 }

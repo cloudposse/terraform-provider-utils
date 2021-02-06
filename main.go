@@ -7,11 +7,10 @@ import (
 
 	"github.com/cloudposse/terraform-provider-utils/internal/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	
 )
 
 var (
-	version string = "dev"
+	version = "0.2.0"
 )
 
 func main() {
