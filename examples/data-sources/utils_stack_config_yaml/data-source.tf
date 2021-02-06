@@ -1,8 +1,8 @@
 terraform {
   required_providers {
-    # Install the provider on local computer by running `make install` from the root of the repo
     utils = {
-      source  = "cloudposse/utils"
+      source = "cloudposse/utils"
+      # Install the provider on local computer by running `make install` from the root of the repo
       version = "9999.99.99"
     }
   }

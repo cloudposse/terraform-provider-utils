@@ -2,6 +2,8 @@ terraform {
   required_providers {
     utils = {
       source = "cloudposse/utils"
+      # Install the provider on local computer by running `make install` from the root of the repo
+      version = "9999.99.99"
     }
   }
 }
@@ -12,7 +14,7 @@ locals {
 }
 
 data "utils_deep_merge_json" "example" {
-  inputs = [
+  input = [
     local.json_data_1,
     local.json_data_2
   ]

@@ -2,9 +2,9 @@ package convert
 
 import "gopkg.in/yaml.v2"
 
-// YAMLToMap takes a YAML string as input and returns a map[string]interface{}
-func YAMLToMap(input string) (map[string]interface{}, error) {
-	var data map[string]interface{}
+// YAMLToMap takes a YAML string as input and returns a map[interface{}]interface{}
+func YAMLToMap(input string) (map[interface{}]interface{}, error) {
+	var data map[interface{}]interface{}
 	byt := []byte(input)
 
 	if err := yaml.Unmarshal(byt, &data); err != nil {
@@ -24,9 +24,9 @@ func YAMLToMapOfInterfaces(input string) (map[interface{}]interface{}, error) {
 	return data, nil
 }
 
-// YAMLSliceOfInterfaceToSliceOfMaps takes a slice of JSON strings as input and returns a slice of map[string]interface{}
-func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[string]interface{}, error) {
-	outputMap := make([]map[string]interface{}, 0)
+// YAMLSliceOfInterfaceToSliceOfMaps takes a slice of interfaces as input and returns a slice of map[interface{}]interface{}
+func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]interface{}, error) {
+	outputMap := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
 		data, err := YAMLToMap(current.(string))
 		if err != nil {

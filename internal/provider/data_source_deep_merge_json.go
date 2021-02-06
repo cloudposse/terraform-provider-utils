@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
+	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
 )
 
 func dataSourceDeepMergeJSON() *schema.Resource {
@@ -17,7 +18,7 @@ func dataSourceDeepMergeJSON() *schema.Resource {
 		ReadContext: dataSourceDeepMergeJSONRead,
 
 		Schema: map[string]*schema.Schema{
-			"inputs": {
+			"input": {
 				Description: "A list of JSON strings that is deep merged into the `output` attribute.",
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -33,15 +34,20 @@ func dataSourceDeepMergeJSON() *schema.Resource {
 }
 
 func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	inputs := d.Get("inputs")
+	input := d.Get("input")
 
-	data, err := c.JSONSliceOfInterfaceToSliceOfMaps(inputs.([]interface{}))
+	data, err := c.JSONSliceOfInterfaceToSliceOfMaps(input.([]interface{}))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	merged, err := m.Merge(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Convert result to JSON
-	jsonResult, err := json.Marshal(data)
+	jsonResult, err := json.Marshal(merged)
 	if err != nil {
 		return diag.FromErr(err)
 	}

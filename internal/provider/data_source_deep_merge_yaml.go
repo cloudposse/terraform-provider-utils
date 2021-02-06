@@ -3,10 +3,12 @@ package provider
 import (
 	"context"
 
-	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"
+
+	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
+	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
 )
 
 func dataSourceDeepMergeYAML() *schema.Resource {
@@ -16,7 +18,7 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 		ReadContext: dataSourceDeepMergeYAMLRead,
 
 		Schema: map[string]*schema.Schema{
-			"inputs": {
+			"input": {
 				Description: "A list of YAML strings that is deep merged into the `output` attribute.",
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -33,15 +35,20 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 
 func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	inputs := d.Get("inputs")
+	input := d.Get("input")
 
-	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(inputs.([]interface{}))
+	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(input.([]interface{}))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	merged, err := m.Merge(data)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Convert result to YAML
-	yamlResult, err := yaml.Marshal(data)
+	yamlResult, err := yaml.Marshal(merged)
 	if err != nil {
 		return diag.FromErr(err)
 	}
