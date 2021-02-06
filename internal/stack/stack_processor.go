@@ -3,6 +3,7 @@ package stack
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path"
@@ -19,7 +20,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		finalConfig, err := ProcessConfig(config)
+		finalConfig, err := ProcessConfig(p, config)
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +79,7 @@ func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error)
 
 // ProcessConfig takes a raw stack config, deep-merges all variables and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
+func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 	globalVars := map[interface{}]interface{}{}
 	terraformVars := map[interface{}]interface{}{}
 	helmfileVars := map[interface{}]interface{}{}
@@ -108,51 +109,70 @@ func ProcessConfig(config map[interface{}]interface{}) (map[interface{}]interfac
 		backend = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{}); ok {
-		for k, v := range i {
+	if allTerraformComponents, ok := config["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{}); ok {
+		for component, v := range allTerraformComponents {
+			componentMap := v.(map[interface{}]interface{})
+
 			componentVars := map[interface{}]interface{}{}
-			if i2, ok2 := v.(map[interface{}]interface{})["vars"]; ok2 {
-				componentVars = i2.(map[interface{}]interface{})
+			if i, ok2 := componentMap["vars"]; ok2 {
+				componentVars = i.(map[interface{}]interface{})
 			}
 
 			componentBackend := map[interface{}]interface{}{}
-			if i2, ok2 := v.(map[interface{}]interface{})["backend"].(map[interface{}]interface{})[backendType]; ok2 {
-				componentBackend = i2.(map[interface{}]interface{})
+			if i, ok2 := componentMap["backend"]; ok2 {
+				componentBackend = i.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
 			}
 
-			allComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, terraformVars, componentVars})
+			baseComponentVars := map[interface{}]interface{}{}
+			baseComponentBackend := map[interface{}]interface{}{}
+
+			if baseComponentName, ok2 := componentMap["component"]; ok2 {
+				baseComponent := baseComponentName.(string)
+
+				if baseComponentMap, ok3 := allTerraformComponents[baseComponent].(map[interface{}]interface{}); ok3 {
+					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
+					baseComponentBackend = baseComponentMap["backend"].(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
+				} else {
+					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
+						baseComponent + "', " + "but `" + baseComponent + "' is not defined in the stack '" + stack + "'")
+				}
+			}
+
+			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, terraformVars, baseComponentVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			allComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, componentBackend})
+			finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, baseComponentBackend, componentBackend})
 			if err != nil {
 				return nil, err
 			}
 
-			comp := map[interface{}]interface{}{}
-			comp["vars"] = allComponentVars
+			comp := map[string]interface{}{}
+			comp["vars"] = finalComponentVars
 			comp["backend_type"] = backendType
-			comp["backend"] = allComponentBackend
-			terraformComponents[k] = comp
+			comp["backend"] = finalComponentBackend
+			terraformComponents[component] = comp
 		}
 	}
 
-	if i, ok := config["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{}); ok {
-		for k, v := range i {
+	if allHelmfileComponents, ok := config["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{}); ok {
+		for component, v := range allHelmfileComponents {
+			componentMap := v.(map[interface{}]interface{})
+
 			componentVars := map[interface{}]interface{}{}
-			if i2, ok2 := v.(map[interface{}]interface{})["vars"]; ok2 {
+			if i2, ok2 := componentMap["vars"]; ok2 {
 				componentVars = i2.(map[interface{}]interface{})
 			}
 
-			allComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars, componentVars})
+			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			comp := map[interface{}]interface{}{}
-			comp["vars"] = allComponentVars
-			helmfileComponents[k] = comp
+			comp := map[string]interface{}{}
+			comp["vars"] = finalComponentVars
+			helmfileComponents[component] = comp
 		}
 	}
 
@@ -160,7 +180,6 @@ func ProcessConfig(config map[interface{}]interface{}) (map[interface{}]interfac
 	allComponents["helmfile"] = helmfileComponents
 
 	result := map[interface{}]interface{}{
-		"config":     config,
 		"components": allComponents,
 	}
 

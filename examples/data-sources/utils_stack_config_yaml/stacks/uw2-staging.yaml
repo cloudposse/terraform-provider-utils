@@ -42,6 +42,16 @@ components:
       vars:
         cidr_block: "10.118.0.0/18"
 
+    aurora-postgres:
+      vars:
+        instance_type: db.r4.large
+        cluster_size: 2
+
+    aurora-postgres-2:
+      component: aurora-postgres
+      vars:
+        instance_type: db.r4.xlarge
+
   helmfile:
 
     datadog:
