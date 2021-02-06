@@ -50,6 +50,7 @@ components:
     aurora-postgres-2:
       component: aurora-postgres
       vars:
+        cluster_size: 3
         instance_type: db.r4.xlarge
 
   helmfile:

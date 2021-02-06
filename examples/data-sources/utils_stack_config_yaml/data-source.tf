@@ -3,7 +3,7 @@ terraform {
     utils = {
       source = "cloudposse/utils"
       # Install the provider on local computer by running `make install` from the root of the repo
-      version = "9999.99.99"
+      # version = "9999.99.99"
     }
   }
 }
@@ -11,12 +11,40 @@ terraform {
 data "utils_stack_config_yaml" "example" {
   input = [
     "${path.module}/stacks/uw2-dev.yaml",
-    #"${path.module}/stacks/uw2-prod.yaml",
-    #"${path.module}/stacks/uw2-staging.yaml",
-    #"${path.module}/stacks/uw2-uat.yaml"
+    "${path.module}/stacks/uw2-prod.yaml",
+    "${path.module}/stacks/uw2-staging.yaml",
+    "${path.module}/stacks/uw2-uat.yaml"
   ]
 }
 
+locals {
+  result = [for i in data.utils_stack_config_yaml.example.output : yamldecode(i)]
+}
+
 output "output" {
-  value = [for i in data.utils_stack_config_yaml.example.output : yamldecode(i)]
+  value = local.result
+}
+
+output "uw2_dev_eks_config" {
+  value = local.result[0]["components"]["terraform"]["eks"]
+}
+
+output "uw2_prod_vpc_vars" {
+  value = local.result[1]["components"]["terraform"]["vpc"]["vars"]
+}
+
+output "uw2_staging_aurora_postgres_backend" {
+  value = local.result[2]["components"]["terraform"]["aurora-postgres"]["backend"]
+}
+
+output "uw2_staging_aurora_postgres_2_backend" {
+  value = local.result[2]["components"]["terraform"]["aurora-postgres-2"]["backend"]
+}
+
+output "uw2_uat_aurora_postgres_vars" {
+  value = local.result[3]["components"]["terraform"]["aurora-postgres"]["vars"]
+}
+
+output "uw2_uat_aurora_postgres_2_vars" {
+  value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["vars"]
 }
