@@ -52,3 +52,7 @@ output "uw2_uat_aurora_postgres_vars" {
 output "uw2_uat_aurora_postgres_2_vars" {
   value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["vars"]
 }
+
+output "uw2_uat_aurora_postgres_2_component" {
+  value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["component"]
+}
