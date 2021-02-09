@@ -125,16 +125,17 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 
 			baseComponentVars := map[interface{}]interface{}{}
 			baseComponentBackend := map[interface{}]interface{}{}
+			baseComponentName := ""
 
-			if baseComponentName, ok2 := componentMap["component"]; ok2 {
-				baseComponent := baseComponentName.(string)
+			if baseComponent, ok2 := componentMap["component"]; ok2 {
+				baseComponentName = baseComponent.(string)
 
-				if baseComponentMap, ok3 := allTerraformComponents[baseComponent].(map[interface{}]interface{}); ok3 {
+				if baseComponentMap, ok3 := allTerraformComponents[baseComponentName].(map[interface{}]interface{}); ok3 {
 					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
 					baseComponentBackend = baseComponentMap["backend"].(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
 				} else {
 					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
-						baseComponent + "', " + "but `" + baseComponent + "' is not defined in the stack '" + stack + "'")
+						baseComponentName + "', " + "but `" + baseComponentName + "' is not defined in the stack '" + stack + "'")
 				}
 			}
 
@@ -152,6 +153,11 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			comp["vars"] = finalComponentVars
 			comp["backend_type"] = backendType
 			comp["backend"] = finalComponentBackend
+
+			if baseComponentName != "" {
+				comp["component"] = baseComponentName
+			}
+
 			terraformComponents[component] = comp
 		}
 	}
