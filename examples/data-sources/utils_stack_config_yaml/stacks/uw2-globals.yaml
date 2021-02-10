@@ -17,10 +17,16 @@ components:
     vpc:
       vars:
         availability_zones: ["us-west-2b", "us-west-2c", "us-west-2d"]
+      settings:
+        spacelift:
+          workspace_enabled: true
 
     eks:
       vars:
         region_availability_zones: ["us-west-2b", "us-west-2c", "us-west-2d"]
+      settings:
+        spacelift:
+          workspace_enabled: false
 
   helmfile:
     datadog:

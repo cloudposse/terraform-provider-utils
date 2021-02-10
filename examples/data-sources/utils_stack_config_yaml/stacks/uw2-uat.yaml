@@ -21,6 +21,12 @@ components:
         zone_config:
           - subdomain: uat
             zone_name: uw2.example.com
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: false
+          branch: ""
+          triggers: []
 
     eks:
       vars:
@@ -37,21 +43,45 @@ components:
             instance_types: null
             ami_type: "AL2_x86_64"
             tags: null
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: true
+          branch: ""
+          triggers: []
 
     vpc:
       vars:
         cidr_block: "10.120.0.0/18"
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: false
+          branch: ""
+          triggers: []
 
     aurora-postgres:
       vars:
         instance_type: db.r4.large
         cluster_size: 2
+      settings:
+        spacelift:
+          workspace_enabled: false
+          autodeploy: false
+          branch: ""
+          triggers: []
 
     aurora-postgres-2:
       component: aurora-postgres
       vars:
         cluster_size: 3
         instance_type: db.r4.xlarge
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: true
+          branch: ""
+          triggers: []
 
   helmfile:
 
