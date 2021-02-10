@@ -2,8 +2,10 @@ terraform {
   required_providers {
     utils = {
       source = "cloudposse/utils"
-      # Install the provider on local computer by running `make install` from the root of the repo
-      # version = "9999.99.99"
+      # For local development,
+      # install the provider on local computer by running `make install` from the root of the repo,
+      # and uncomment the version below
+      version = "9999.99.99"
     }
   }
 }
@@ -49,8 +51,16 @@ output "uw2_uat_aurora_postgres_vars" {
   value = local.result[3]["components"]["terraform"]["aurora-postgres"]["vars"]
 }
 
+output "uw2_uat_aurora_postgres_settings" {
+  value = local.result[3]["components"]["terraform"]["aurora-postgres"]["settings"]
+}
+
 output "uw2_uat_aurora_postgres_2_vars" {
   value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["vars"]
+}
+
+output "uw2_uat_aurora_postgres_2_settings" {
+  value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["settings"]
 }
 
 output "uw2_uat_aurora_postgres_2_component" {

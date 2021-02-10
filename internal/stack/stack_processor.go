@@ -118,20 +118,27 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				componentVars = i.(map[interface{}]interface{})
 			}
 
+			componentSettings := map[interface{}]interface{}{}
+			if i, ok2 := componentMap["settings"]; ok2 {
+				componentSettings = i.(map[interface{}]interface{})
+			}
+
 			componentBackend := map[interface{}]interface{}{}
 			if i, ok2 := componentMap["backend"]; ok2 {
 				componentBackend = i.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
 			}
 
 			baseComponentVars := map[interface{}]interface{}{}
+			baseComponentSettings := map[interface{}]interface{}{}
 			baseComponentBackend := map[interface{}]interface{}{}
 			baseComponentName := ""
 
-			if baseComponent, ok2 := componentMap["component"]; ok2 {
+			if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
 				baseComponentName = baseComponent.(string)
 
 				if baseComponentMap, ok3 := allTerraformComponents[baseComponentName].(map[interface{}]interface{}); ok3 {
 					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
+					baseComponentSettings = baseComponentMap["settings"].(map[interface{}]interface{})
 					baseComponentBackend = baseComponentMap["backend"].(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
 				} else {
 					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
@@ -144,6 +151,11 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				return nil, err
 			}
 
+			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{baseComponentSettings, componentSettings})
+			if err != nil {
+				return nil, err
+			}
+
 			finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, baseComponentBackend, componentBackend})
 			if err != nil {
 				return nil, err
@@ -151,6 +163,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 
 			comp := map[string]interface{}{}
 			comp["vars"] = finalComponentVars
+			comp["settings"] = finalComponentSettings
 			comp["backend_type"] = backendType
 			comp["backend"] = finalComponentBackend
 

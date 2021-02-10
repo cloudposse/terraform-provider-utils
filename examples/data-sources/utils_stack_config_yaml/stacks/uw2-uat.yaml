@@ -64,12 +64,6 @@ components:
       vars:
         instance_type: db.r4.large
         cluster_size: 2
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-          branch: ""
-          triggers: []
 
     aurora-postgres-2:
       component: aurora-postgres
@@ -80,8 +74,7 @@ components:
         spacelift:
           workspace_enabled: true
           autodeploy: true
-          branch: ""
-          triggers: []
+          branch: "test"
 
   helmfile:
 

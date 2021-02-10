@@ -302,6 +302,15 @@ components:
           workspace_enabled: false
           autodeploy: false
 
+    aurora-postgres-2:
+      settings:
+        spacelift:
+          workspace_enabled: false
+          autodeploy: false
+        terraform_cloud:
+          workspace_enabled: false
+          autodeploy: false
+
     efs:
       backend:
         s3:
