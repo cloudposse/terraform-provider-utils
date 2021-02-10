@@ -75,6 +75,7 @@ components:
           workspace_enabled: true
           autodeploy: true
           branch: "test"
+          triggers: []
 
   helmfile:
 

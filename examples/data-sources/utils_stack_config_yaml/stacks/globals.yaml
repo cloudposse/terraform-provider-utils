@@ -27,175 +27,77 @@ components:
         s3:
           workspace_key_prefix: "tfstate-backend"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     account:
       backend:
         s3:
           workspace_key_prefix: "account"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     account-map:
       backend:
         s3:
           workspace_key_prefix: "account-map"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     account-settings:
       backend:
         s3:
           workspace_key_prefix: "account-settings"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     dns-delegated:
       backend:
         s3:
           workspace_key_prefix: "dns-delegated"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     dns-primary:
       backend:
         s3:
           workspace_key_prefix: "dns-primary"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     eks:
       backend:
         s3:
           workspace_key_prefix: "eks"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     eks-iam:
       backend:
         s3:
           workspace_key_prefix: "eks-iam"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     iam-delegated-roles:
       backend:
         s3:
           workspace_key_prefix: "iam-delegated-roles"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     iam-primary-roles:
       backend:
         s3:
           workspace_key_prefix: "iam-primary-roles"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     spotinst-integration:
       backend:
         s3:
           workspace_key_prefix: "spotinst-integration"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     sso:
       backend:
         s3:
           workspace_key_prefix: "sso"
           role_arn: null
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     config-bucket:
       backend:
         s3:
           workspace_key_prefix: "config-bucket"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     cloudtrail-bucket:
       backend:
         s3:
           workspace_key_prefix: "cloudtrail-bucket"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     cloudtrail:
       vars:
@@ -204,37 +106,16 @@ components:
       backend:
         s3:
           workspace_key_prefix: "cloudtrail"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     transit-gateway:
       backend:
         s3:
           workspace_key_prefix: "transit-gateway"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     vpc-flow-logs-bucket:
       backend:
         s3:
           workspace_key_prefix: "vpc-flow-logs-bucket"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     vpc:
       vars:
@@ -246,103 +127,38 @@ components:
       backend:
         s3:
           workspace_key_prefix: "vpc"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     ecr:
       backend:
         s3:
           workspace_key_prefix: "ecr"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     datadog-integration:
       backend:
         s3:
           workspace_key_prefix: "datadog-integration"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     datadog-monitor:
       backend:
         s3:
           workspace_key_prefix: "datadog-monitor"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     aurora-postgres:
       backend:
         s3:
           workspace_key_prefix: "aurora-postgres"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
-
-    aurora-postgres-2:
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     efs:
       backend:
         s3:
           workspace_key_prefix: "efs"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     mq-broker:
       backend:
         s3:
           workspace_key_prefix: "mq-broker"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false
 
     ses:
       backend:
         s3:
           workspace_key_prefix: "ses"
-      settings:
-        spacelift:
-          workspace_enabled: false
-          autodeploy: false
-        terraform_cloud:
-          workspace_enabled: false
-          autodeploy: false

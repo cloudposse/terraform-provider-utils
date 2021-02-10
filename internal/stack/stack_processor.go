@@ -81,8 +81,11 @@ func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error)
 // and returns the final stack configuration for all Terraform and helmfile components
 func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 	globalVars := map[interface{}]interface{}{}
+	globalSettings := map[interface{}]interface{}{}
 	terraformVars := map[interface{}]interface{}{}
+	terraformSettings := map[interface{}]interface{}{}
 	helmfileVars := map[interface{}]interface{}{}
+	helmfileSettings := map[interface{}]interface{}{}
 	backendType := "s3"
 	backend := map[interface{}]interface{}{}
 	terraformComponents := map[interface{}]interface{}{}
@@ -93,12 +96,24 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		globalVars = i.(map[interface{}]interface{})
 	}
 
+	if i, ok := config["settings"]; ok {
+		globalSettings = i.(map[interface{}]interface{})
+	}
+
 	if i, ok := config["terraform"].(map[interface{}]interface{})["vars"]; ok {
 		terraformVars = i.(map[interface{}]interface{})
 	}
 
+	if i, ok := config["terraform"].(map[interface{}]interface{})["settings"]; ok {
+		terraformSettings = i.(map[interface{}]interface{})
+	}
+
 	if i, ok := config["helmfile"].(map[interface{}]interface{})["vars"]; ok {
 		helmfileVars = i.(map[interface{}]interface{})
+	}
+
+	if i, ok := config["helmfile"].(map[interface{}]interface{})["settings"]; ok {
+		helmfileSettings = i.(map[interface{}]interface{})
 	}
 
 	if i, ok := config["terraform"].(map[interface{}]interface{})["backend_type"]; ok {
@@ -129,16 +144,15 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			}
 
 			baseComponentVars := map[interface{}]interface{}{}
-			baseComponentSettings := map[interface{}]interface{}{}
 			baseComponentBackend := map[interface{}]interface{}{}
 			baseComponentName := ""
 
 			if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
 				baseComponentName = baseComponent.(string)
 
-				if baseComponentMap, ok3 := allTerraformComponents[baseComponentName].(map[interface{}]interface{}); ok3 {
+				if baseComponentSection, baseComponentSectionExist := allTerraformComponents[baseComponentName]; baseComponentSectionExist {
+					baseComponentMap := baseComponentSection.(map[interface{}]interface{})
 					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
-					baseComponentSettings = baseComponentMap["settings"].(map[interface{}]interface{})
 					baseComponentBackend = baseComponentMap["backend"].(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
 				} else {
 					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
@@ -151,7 +165,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				return nil, err
 			}
 
-			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{baseComponentSettings, componentSettings})
+			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, terraformSettings, componentSettings})
 			if err != nil {
 				return nil, err
 			}
@@ -184,13 +198,24 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				componentVars = i2.(map[interface{}]interface{})
 			}
 
+			componentSettings := map[interface{}]interface{}{}
+			if i, ok2 := componentMap["settings"]; ok2 {
+				componentSettings = i.(map[interface{}]interface{})
+			}
+
 			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars, componentVars})
+			if err != nil {
+				return nil, err
+			}
+
+			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, helmfileSettings, componentSettings})
 			if err != nil {
 				return nil, err
 			}
 
 			comp := map[string]interface{}{}
 			comp["vars"] = finalComponentVars
+			comp["settings"] = finalComponentSettings
 			helmfileComponents[component] = comp
 		}
 	}

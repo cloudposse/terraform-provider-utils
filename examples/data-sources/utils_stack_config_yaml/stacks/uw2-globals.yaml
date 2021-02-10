@@ -26,7 +26,7 @@ components:
         region_availability_zones: ["us-west-2b", "us-west-2c", "us-west-2d"]
       settings:
         spacelift:
-          workspace_enabled: false
+          workspace_enabled: true
 
   helmfile:
     datadog:
