@@ -5,7 +5,7 @@ import "github.com/pkg/errors"
 // SliceOfInterfacesToSliceOfStrings takes a slice of interfaces and converts it to a slice of strings
 func SliceOfInterfacesToSliceOfStrings(input []interface{}) ([]string, error) {
 	if input == nil {
-		return nil, errors.New("imput must not be nil")
+		return nil, errors.New("input must not be nil")
 	}
 
 	output := make([]string, 0)

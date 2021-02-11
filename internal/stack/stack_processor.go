@@ -108,20 +108,22 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		terraformSettings = i.(map[interface{}]interface{})
 	}
 
+	if i, ok := config["terraform"].(map[interface{}]interface{})["backend_type"]; ok {
+		backendType = i.(string)
+	}
+
+	if i, ok := config["terraform"].(map[interface{}]interface{})["backend"]; ok {
+		if backendSection, backendSectionExist := i.(map[interface{}]interface{})[backendType]; backendSectionExist {
+			backend = backendSection.(map[interface{}]interface{})
+		}
+	}
+
 	if i, ok := config["helmfile"].(map[interface{}]interface{})["vars"]; ok {
 		helmfileVars = i.(map[interface{}]interface{})
 	}
 
 	if i, ok := config["helmfile"].(map[interface{}]interface{})["settings"]; ok {
 		helmfileSettings = i.(map[interface{}]interface{})
-	}
-
-	if i, ok := config["terraform"].(map[interface{}]interface{})["backend_type"]; ok {
-		backendType = i.(string)
-	}
-
-	if i, ok := config["terraform"].(map[interface{}]interface{})["backend"].(map[interface{}]interface{})[backendType]; ok {
-		backend = i.(map[interface{}]interface{})
 	}
 
 	if allTerraformComponents, ok := config["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{}); ok {
@@ -153,7 +155,10 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				if baseComponentSection, baseComponentSectionExist := allTerraformComponents[baseComponentName]; baseComponentSectionExist {
 					baseComponentMap := baseComponentSection.(map[interface{}]interface{})
 					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
-					baseComponentBackend = baseComponentMap["backend"].(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
+
+					if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
+						baseComponentBackend = baseComponentBackendSection.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
+					}
 				} else {
 					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
 						baseComponentName + "', " + "but `" + baseComponentName + "' is not defined in the stack '" + stack + "'")

@@ -9,7 +9,7 @@ func Merge(inputs []map[interface{}]interface{}) (map[interface{}]interface{}, e
 	merged := map[interface{}]interface{}{}
 
 	for index := range inputs {
-		if err := mergo.Merge(&merged, inputs[index], mergo.WithOverride, mergo.WithOverwriteWithEmptyValue); err != nil {
+		if err := mergo.Merge(&merged, inputs[index], mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
 			return nil, err
 		}
 	}
