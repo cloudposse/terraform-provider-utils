@@ -1,9 +1,11 @@
 package stack
 
 import (
+	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestStackProcessor(t *testing.T) {
@@ -11,7 +13,15 @@ func TestStackProcessor(t *testing.T) {
 		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-test.yaml",
 	}
 
-	result, err := ProcessYAMLConfigFiles(filePaths)
+	yamlResult, err := ProcessYAMLConfigFiles(filePaths)
 	assert.Nil(t, err)
-	t.Log(result)
+	assert.Equal(t, len(yamlResult), 1)
+
+	mapResult, err := c.YAMLToMapOfInterfaces(yamlResult[0])
+	assert.Nil(t, err)
+
+	yamlConfig, err := yaml.Marshal(mapResult)
+	assert.Nil(t, err)
+
+	t.Log(string(yamlConfig))
 }
