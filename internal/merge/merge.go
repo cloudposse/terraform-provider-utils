@@ -4,7 +4,7 @@ import (
 	"github.com/imdario/mergo"
 )
 
-// Merge takes a list of maps as input and returns a single map with the merged contents
+// Merge takes a list of maps of interface as input and returns a single map with the merged contents
 func Merge(inputs []map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 	merged := map[interface{}]interface{}{}
 
