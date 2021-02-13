@@ -2,6 +2,7 @@ package merge
 
 import (
 	"github.com/imdario/mergo"
+	"gopkg.in/yaml.v2"
 )
 
 // Merge takes a list of maps of interface as input and returns a single map with the merged contents
@@ -9,7 +10,22 @@ func Merge(inputs []map[interface{}]interface{}) (map[interface{}]interface{}, e
 	merged := map[interface{}]interface{}{}
 
 	for index := range inputs {
-		if err := mergo.Merge(&merged, inputs[index], mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
+		current := inputs[index]
+
+		// Due to a bug in `mergo.Merge` (it DOES modify the source if it's a complex map and it get a pointer to it, not only the destination),
+		// we don't give it our maps directly; we convert them to YAML and then back to `Go` maps, so `mergo.Merge` does not have
+		// access to the original pointers
+		yamlCurrent, err := yaml.Marshal(current)
+		if err != nil {
+			return nil, err
+		}
+
+		var dataCurrent map[interface{}]interface{}
+		if err = yaml.Unmarshal(yamlCurrent, &dataCurrent); err != nil {
+			return nil, err
+		}
+
+		if err = mergo.Merge(&merged, dataCurrent, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
 			return nil, err
 		}
 	}

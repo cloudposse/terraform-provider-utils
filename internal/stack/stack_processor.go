@@ -187,6 +187,19 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				return nil, err
 			}
 
+			//finalComponentSettings := map[interface{}]interface{}{}
+			//if err := mergo.Merge(&finalComponentSettings, &globalSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
+			//	return nil, err
+			//}
+			//
+			//if err := mergo.Merge(&finalComponentSettings, &terraformSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
+			//	return nil, err
+			//}
+			//
+			//if err := mergo.Merge(&finalComponentSettings, &componentSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
+			//	return nil, err
+			//}
+
 			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, terraformSettings, componentSettings})
 			if err != nil {
 				return nil, err
