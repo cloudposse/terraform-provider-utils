@@ -128,6 +128,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 
 	if allTerraformComponents, ok := config["components"].(map[interface{}]interface{})["terraform"]; ok {
 		allTerraformComponentsMap := allTerraformComponents.(map[interface{}]interface{})
+
 		for component, v := range allTerraformComponentsMap {
 			componentMap := v.(map[interface{}]interface{})
 
@@ -197,6 +198,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 
 	if allHelmfileComponents, ok := config["components"].(map[interface{}]interface{})["helmfile"]; ok {
 		allHelmfileComponentsMap := allHelmfileComponents.(map[interface{}]interface{})
+
 		for component, v := range allHelmfileComponentsMap {
 			componentMap := v.(map[interface{}]interface{})
 
