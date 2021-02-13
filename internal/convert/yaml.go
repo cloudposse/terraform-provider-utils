@@ -26,13 +26,13 @@ func YAMLToMapOfInterfaces(input string) (map[interface{}]interface{}, error) {
 
 // YAMLSliceOfInterfaceToSliceOfMaps takes a slice of interfaces as input and returns a slice of map[interface{}]interface{}
 func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]interface{}, error) {
-	outputMap := make([]map[interface{}]interface{}, 0)
+	output := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
 		data, err := YAMLToMap(current.(string))
 		if err != nil {
 			return nil, err
 		}
-		outputMap = append(outputMap, data)
+		output = append(output, data)
 	}
-	return outputMap, nil
+	return output, nil
 }
