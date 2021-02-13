@@ -91,6 +91,21 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 	terraformComponents := map[string]interface{}{}
 	helmfileComponents := map[string]interface{}{}
 	allComponents := map[string]interface{}{}
+	terraformSection := map[interface{}]interface{}{}
+	helmfileSection := map[interface{}]interface{}{}
+	componentsSection := map[interface{}]interface{}{}
+
+	if i, ok := config["terraform"]; ok {
+		terraformSection = i.(map[interface{}]interface{})
+	}
+
+	if i, ok := config["helmfile"]; ok {
+		helmfileSection = i.(map[interface{}]interface{})
+	}
+
+	if i, ok := config["components"]; ok {
+		componentsSection = i.(map[interface{}]interface{})
+	}
 
 	if i, ok := config["vars"]; ok {
 		globalVars = i.(map[interface{}]interface{})
@@ -100,33 +115,33 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		globalSettings = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[interface{}]interface{})["vars"]; ok {
+	if i, ok := terraformSection["vars"]; ok {
 		terraformVars = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[interface{}]interface{})["settings"]; ok {
+	if i, ok := terraformSection["settings"]; ok {
 		terraformSettings = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["terraform"].(map[interface{}]interface{})["backend_type"]; ok {
+	if i, ok := terraformSection["backend_type"]; ok {
 		backendType = i.(string)
 	}
 
-	if i, ok := config["terraform"].(map[interface{}]interface{})["backend"]; ok {
+	if i, ok := terraformSection["backend"]; ok {
 		if backendSection, backendSectionExist := i.(map[interface{}]interface{})[backendType]; backendSectionExist {
 			backend = backendSection.(map[interface{}]interface{})
 		}
 	}
 
-	if i, ok := config["helmfile"].(map[interface{}]interface{})["vars"]; ok {
+	if i, ok := helmfileSection["vars"]; ok {
 		helmfileVars = i.(map[interface{}]interface{})
 	}
 
-	if i, ok := config["helmfile"].(map[interface{}]interface{})["settings"]; ok {
+	if i, ok := helmfileSection["settings"]; ok {
 		helmfileSettings = i.(map[interface{}]interface{})
 	}
 
-	if allTerraformComponents, ok := config["components"].(map[interface{}]interface{})["terraform"]; ok {
+	if allTerraformComponents, ok := componentsSection["terraform"]; ok {
 		allTerraformComponentsMap := allTerraformComponents.(map[interface{}]interface{})
 
 		for component, v := range allTerraformComponentsMap {
@@ -196,7 +211,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		}
 	}
 
-	if allHelmfileComponents, ok := config["components"].(map[interface{}]interface{})["helmfile"]; ok {
+	if allHelmfileComponents, ok := componentsSection["helmfile"]; ok {
 		allHelmfileComponentsMap := allHelmfileComponents.(map[interface{}]interface{})
 
 		for component, v := range allHelmfileComponentsMap {
