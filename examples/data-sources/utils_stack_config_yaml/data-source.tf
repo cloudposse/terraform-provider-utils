@@ -35,8 +35,16 @@ output "uw2_dev_eks_config" {
   value = local.result[0]["components"]["terraform"]["eks"]
 }
 
-output "uw2_uat_eks_vars" {
-  value = local.result[3]["components"]["terraform"]["eks"]["vars"]
+output "uw2_dev_eks_env" {
+  value = local.result[0]["components"]["terraform"]["eks"]["env"]
+}
+
+output "uw2_dev_aurora_postgres_env" {
+  value = local.result[0]["components"]["terraform"]["aurora-postgres"]["env"]
+}
+
+output "uw2_dev_aurora_postgres_2_env" {
+  value = local.result[0]["components"]["terraform"]["aurora-postgres-2"]["env"]
 }
 
 output "uw2_prod_vpc_vars" {
@@ -49,6 +57,10 @@ output "uw2_staging_aurora_postgres_backend" {
 
 output "uw2_staging_aurora_postgres_2_backend" {
   value = local.result[2]["components"]["terraform"]["aurora-postgres-2"]["backend"]
+}
+
+output "uw2_uat_eks_vars" {
+  value = local.result[3]["components"]["terraform"]["eks"]["vars"]
 }
 
 output "uw2_uat_aurora_postgres_vars" {
