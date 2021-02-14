@@ -13,7 +13,7 @@ func Merge(inputs []map[interface{}]interface{}) (map[interface{}]interface{}, e
 		current := inputs[index]
 
 		// Due to a bug in `mergo.Merge`
-		// (in the `for` loop, it DOES modify the source of the previous loop iteration if it's a complex map and it get a pointer to it,
+		// (in the `for` loop, it DOES modify the source of the previous loop iteration if it's a complex map and `mergo` get a pointer to it,
 		// not only the destination of the current loop iteration),
 		// we don't give it our maps directly; we convert them to YAML strings and then back to `Go` maps,
 		// so `mergo` does not have access to the original pointers
