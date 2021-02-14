@@ -1,6 +1,6 @@
 ## 0.3.0
 
-- Workaround for a bug in `mergo.Merge()`. When merging slice of maps in a `for` loop, 
+- Workaround for a deep-merge bug in `mergo.Merge()`. When deep-merging slice of maps in a `for` loop, 
   `mergo` modifies the source of the previous loop iteration if it's a complex map and `mergo` gets a pointer to it, 
   not only the destination of the current loop iteration.
 
