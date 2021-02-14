@@ -5,7 +5,7 @@ terraform {
       # For local development,
       # install the provider on local computer by running `make install` from the root of the repo,
       # and uncomment the version below
-      version = "9999.99.99"
+      # version = "9999.99.99"
     }
   }
 }
@@ -33,6 +33,10 @@ output "uw2_dev_datadog_vars" {
 
 output "uw2_dev_eks_config" {
   value = local.result[0]["components"]["terraform"]["eks"]
+}
+
+output "uw2_uat_eks_vars" {
+  value = local.result[3]["components"]["terraform"]["eks"]["vars"]
 }
 
 output "uw2_prod_vpc_vars" {
@@ -65,4 +69,8 @@ output "uw2_uat_aurora_postgres_2_settings" {
 
 output "uw2_uat_aurora_postgres_2_component" {
   value = local.result[3]["components"]["terraform"]["aurora-postgres-2"]["component"]
+}
+
+output "uw2_uat_eks_settings" {
+  value = local.result[3]["components"]["terraform"]["eks"]["settings"]
 }

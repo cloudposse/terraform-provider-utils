@@ -119,8 +119,18 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		terraformVars = i.(map[interface{}]interface{})
 	}
 
+	globalAndTerraformVars, err := m.Merge([]map[interface{}]interface{}{globalVars, terraformVars})
+	if err != nil {
+		return nil, err
+	}
+
 	if i, ok := terraformSection["settings"]; ok {
 		terraformSettings = i.(map[interface{}]interface{})
+	}
+
+	globalAndTerraformSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, terraformSettings})
+	if err != nil {
+		return nil, err
 	}
 
 	if i, ok := terraformSection["backend_type"]; ok {
@@ -137,8 +147,18 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 		helmfileVars = i.(map[interface{}]interface{})
 	}
 
+	globalAndHelmfileVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars})
+	if err != nil {
+		return nil, err
+	}
+
 	if i, ok := helmfileSection["settings"]; ok {
 		helmfileSettings = i.(map[interface{}]interface{})
+	}
+
+	globalAndHelmfileSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, helmfileSettings})
+	if err != nil {
+		return nil, err
 	}
 
 	if allTerraformComponents, ok := componentsSection["terraform"]; ok {
@@ -163,6 +183,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			}
 
 			baseComponentVars := map[interface{}]interface{}{}
+			baseComponentSettings := map[interface{}]interface{}{}
 			baseComponentBackend := map[interface{}]interface{}{}
 			baseComponentName := ""
 
@@ -171,7 +192,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 
 				if baseComponentSection, baseComponentSectionExist := allTerraformComponentsMap[baseComponentName]; baseComponentSectionExist {
 					baseComponentMap := baseComponentSection.(map[interface{}]interface{})
-					baseComponentVars = baseComponentMap["vars"].(map[interface{}]interface{})
+
+					if baseComponentVarsSection, baseComponentVarsSectionExist := baseComponentMap["vars"]; baseComponentVarsSectionExist {
+						baseComponentVars = baseComponentVarsSection.(map[interface{}]interface{})
+					}
+
+					if baseComponentSettingsSection, baseComponentSettingsSectionExist := baseComponentMap["settings"]; baseComponentSettingsSectionExist {
+						baseComponentSettings = baseComponentSettingsSection.(map[interface{}]interface{})
+					}
 
 					if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
 						baseComponentBackend = baseComponentBackendSection.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
@@ -182,25 +210,12 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				}
 			}
 
-			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, terraformVars, baseComponentVars, componentVars})
+			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformVars, baseComponentVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			//finalComponentSettings := map[interface{}]interface{}{}
-			//if err := mergo.Merge(&finalComponentSettings, &globalSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
-			//	return nil, err
-			//}
-			//
-			//if err := mergo.Merge(&finalComponentSettings, &terraformSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
-			//	return nil, err
-			//}
-			//
-			//if err := mergo.Merge(&finalComponentSettings, &componentSettings, mergo.WithOverride, mergo.WithOverwriteWithEmptyValue, mergo.WithTypeCheck); err != nil {
-			//	return nil, err
-			//}
-
-			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, terraformSettings, componentSettings})
+			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformSettings, baseComponentSettings, componentSettings})
 			if err != nil {
 				return nil, err
 			}
@@ -240,12 +255,12 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 				componentSettings = i.(map[interface{}]interface{})
 			}
 
-			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalVars, helmfileVars, componentVars})
+			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileVars, componentVars})
 			if err != nil {
 				return nil, err
 			}
 
-			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalSettings, helmfileSettings, componentSettings})
+			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileSettings, componentSettings})
 			if err != nil {
 				return nil, err
 			}

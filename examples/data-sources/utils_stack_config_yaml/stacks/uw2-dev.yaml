@@ -47,7 +47,7 @@ components:
         spacelift:
           workspace_enabled: true
           autodeploy: true
-          branch: ""
+          branch: "test"
           triggers: []
 
     vpc:
@@ -73,7 +73,7 @@ components:
         spacelift:
           workspace_enabled: true
           autodeploy: true
-          branch: ""
+          branch: "dev"
           triggers: []
 
   helmfile:
