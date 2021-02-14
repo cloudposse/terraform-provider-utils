@@ -2,8 +2,8 @@ package convert
 
 import "encoding/json"
 
-// JSONToMap takes a JSON string as input and returns a map[string]interface{}
-func JSONToMap(input string) (map[string]interface{}, error) {
+// JSONToMapOfInterfaces takes a JSON string as input and returns a map[string]interface{}
+func JSONToMapOfInterfaces(input string) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	byt := []byte(input)
 
@@ -17,7 +17,7 @@ func JSONToMap(input string) (map[string]interface{}, error) {
 func JSONSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]interface{}, error) {
 	outputMap := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
-		data, err := JSONToMap(current.(string))
+		data, err := JSONToMapOfInterfaces(current.(string))
 		if err != nil {
 			return nil, err
 		}

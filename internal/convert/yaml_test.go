@@ -6,16 +6,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestYAMLToMap(t *testing.T) {
+func TestYAMLToMapOfInterfaces(t *testing.T) {
 	input := `---
 hello: world`
-	result, err := YAMLToMap(input)
+	result, err := YAMLToMapOfInterfaces(input)
 	assert.Nil(t, err)
 	assert.Equal(t, result["hello"], "world")
 }
 
-func TestYAMLToMapRedPath(t *testing.T) {
+func TestYAMLToMapOfInterfacesRedPath(t *testing.T) {
 	input := "Not YAML"
-	_, err := YAMLToMap(input)
+	_, err := YAMLToMapOfInterfaces(input)
 	assert.NotNil(t, err)
 }

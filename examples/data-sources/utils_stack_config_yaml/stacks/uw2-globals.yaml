@@ -7,6 +7,15 @@ vars:
 
 terraform:
   vars: {}
+  settings:
+    version: 0
+    spacelift:
+      workspace_enabled: false
+      autodeploy: false
+  env:
+    ENV_TEST_1: test1
+    ENV_TEST_2: test2
+    ENV_TEST_3: test3
 
 helmfile:
   vars:

@@ -21,6 +21,12 @@ components:
         zone_config:
           - subdomain: dev
             zone_name: uw2.example.com
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: false
+          branch: ""
+          triggers: []
 
     eks:
       vars:
@@ -37,20 +43,51 @@ components:
             instance_types: null
             ami_type: "AL2_x86_64"
             tags: null
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: true
+          branch: "test"
+          triggers: []
+      env:
+        ENV_TEST_1: test1_override
+        ENV_TEST_2: test2_override
+        ENV_TEST_4: test4
 
     vpc:
       vars:
         cidr_block: "10.114.0.0/18"
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: true
+          branch: ""
+          triggers: []
 
     aurora-postgres:
       vars:
         instance_type: db.r4.large
         cluster_size: 1
+      env:
+        ENV_TEST_4: test4
+        ENV_TEST_5: test5
+        ENV_TEST_6: test6
+        ENV_TEST_7: test7
 
     aurora-postgres-2:
       component: aurora-postgres
       vars:
         instance_type: db.r4.xlarge
+      settings:
+        spacelift:
+          workspace_enabled: true
+          autodeploy: true
+          branch: "dev"
+          triggers: []
+      env:
+        ENV_TEST_1: test1_override2
+        ENV_TEST_2: test2_override2
+        ENV_TEST_8: test8
 
   helmfile:
 
@@ -61,3 +98,7 @@ components:
           - "env:uw2-dev"
           - "region:us-west-2"
           - "stage:dev"
+      env:
+        ENV_DD_TEST_1: dd1
+        ENV_DD_TEST_2: dd2
+        ENV_DD_TEST_3: dd3
