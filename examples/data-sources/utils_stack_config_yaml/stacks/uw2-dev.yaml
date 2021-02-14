@@ -49,6 +49,10 @@ components:
           autodeploy: true
           branch: "test"
           triggers: []
+      env:
+        ENV_TEST_1: test1_override
+        ENV_TEST_2: test2_override
+        ENV_TEST_4: test4
 
     vpc:
       vars:
@@ -64,6 +68,11 @@ components:
       vars:
         instance_type: db.r4.large
         cluster_size: 1
+      env:
+        ENV_TEST_4: test4
+        ENV_TEST_5: test5
+        ENV_TEST_6: test6
+        ENV_TEST_7: test7
 
     aurora-postgres-2:
       component: aurora-postgres
@@ -75,6 +84,10 @@ components:
           autodeploy: true
           branch: "dev"
           triggers: []
+      env:
+        ENV_TEST_1: test1_override2
+        ENV_TEST_2: test2_override2
+        ENV_TEST_8: test8
 
   helmfile:
 
