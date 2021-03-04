@@ -58,7 +58,7 @@ func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	d.SetId("static")
+	d.SetId(c.MakeId(yamlResult))
 
 	return nil
 }
