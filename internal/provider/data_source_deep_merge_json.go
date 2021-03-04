@@ -63,7 +63,7 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	d.SetId("static")
+	d.SetId(c.MakeId(jsonResult))
 
 	return nil
 }

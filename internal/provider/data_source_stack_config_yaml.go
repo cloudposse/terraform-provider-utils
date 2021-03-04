@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"strings"
+
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 
 	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
@@ -51,7 +53,8 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	d.SetId("static")
+	id := c.MakeId([]byte(strings.Join(result, "")))
+	d.SetId(id)
 
 	return nil
 }
