@@ -426,6 +426,7 @@ func componentDependencies(filePath string, componentType string, component stri
 						if _, componentConfigExists := componentsTypeSection[component]; componentConfigExists {
 							f := strings.Replace(p, dir+"/", "", 1)
 							dependencies = append(dependencies, f)
+							// If the stack is not a depepndency of the component, check the base component
 						} else if baseComponent != "" {
 							if _, baseComponentConfigExists := componentsTypeSection[baseComponent]; baseComponentConfigExists {
 								f := strings.Replace(p, dir+"/", "", 1)
