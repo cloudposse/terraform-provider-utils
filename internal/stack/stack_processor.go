@@ -385,14 +385,15 @@ func componentDependencies(filePath string, componentType string, component stri
 
 	err := filepath.Walk(dir,
 		func(p string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// The current stack is a dependency of the current component
 			if p == filePath {
 				f := strings.Replace(p, dir+"/", "", 1)
 				dependencies = append(dependencies, f)
 				return nil
-			}
-
-			if err != nil {
-				return err
 			}
 
 			isDirectory, err := u.IsDirectory(p)
