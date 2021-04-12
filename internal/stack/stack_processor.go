@@ -66,7 +66,6 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 		for _, i := range imports {
 			imp := i.(string)
-
 			p := path.Join(dir, imp+".yaml")
 
 			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsList)
@@ -294,6 +293,13 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			comp["backend_type"] = backendType
 			comp["backend"] = finalComponentBackend
 
+			componentDependencies, err := componentDependencies(stack, component.(string))
+			if err != nil {
+				return nil, err
+			}
+
+			comp["dependencies"] = componentDependencies
+
 			if baseComponentName != "" {
 				comp["component"] = baseComponentName
 			}
@@ -343,6 +349,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			comp["vars"] = finalComponentVars
 			comp["settings"] = finalComponentSettings
 			comp["env"] = finalComponentEnv
+
+			componentDependencies, err := componentDependencies(stack, component.(string))
+			if err != nil {
+				return nil, err
+			}
+
+			comp["dependencies"] = componentDependencies
+
 			helmfileComponents[component.(string)] = comp
 		}
 	}
@@ -355,4 +369,8 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 	}
 
 	return result, nil
+}
+
+func componentDependencies(stack string, component string) ([]string, error) {
+	return []string{}, nil
 }
