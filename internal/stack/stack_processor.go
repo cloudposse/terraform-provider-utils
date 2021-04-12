@@ -298,17 +298,17 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 				comp["backend_type"] = backendType
 				comp["backend"] = finalComponentBackend
 
+				if baseComponentName != "" {
+					comp["component"] = baseComponentName
+				}
+
 				if processDependencies == true {
-					componentDependencies, err := componentDependencies(stack, "terraform", component.(string))
+					componentDependencies, err := componentDependencies(stack, "terraform", component.(string), baseComponentName)
 					if err != nil {
 						return nil, err
 					}
 
 					comp["dependencies"] = componentDependencies
-				}
-
-				if baseComponentName != "" {
-					comp["component"] = baseComponentName
 				}
 
 				terraformComponents[component.(string)] = comp
@@ -360,7 +360,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 				comp["env"] = finalComponentEnv
 
 				if processDependencies == true {
-					componentDependencies, err := componentDependencies(stack, "helmfile", component.(string))
+					componentDependencies, err := componentDependencies(stack, "helmfile", component.(string), "")
 					if err != nil {
 						return nil, err
 					}
@@ -383,7 +383,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 	return result, nil
 }
 
-func componentDependencies(filePath string, componentType string, component string) ([]string, error) {
+func componentDependencies(filePath string, componentType string, component string, baseComponent string) ([]string, error) {
 	var dependencies []string
 	dir := path.Dir(filePath)
 
@@ -416,7 +416,7 @@ func componentDependencies(filePath string, componentType string, component stri
 					return err
 				}
 
-				// Find if the component config is present in the stack
+				// Find if the component config or the base component config are present in the stack
 				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
 					componentsSection := componentsConfig.(map[string]interface{})
 
@@ -426,6 +426,11 @@ func componentDependencies(filePath string, componentType string, component stri
 						if _, componentConfigExists := componentsTypeSection[component]; componentConfigExists {
 							f := strings.Replace(p, dir+"/", "", 1)
 							dependencies = append(dependencies, f)
+						} else if baseComponent != "" {
+							if _, baseComponentConfigExists := componentsTypeSection[baseComponent]; baseComponentConfigExists {
+								f := strings.Replace(p, dir+"/", "", 1)
+								dependencies = append(dependencies, f)
+							}
 						}
 					}
 				}
