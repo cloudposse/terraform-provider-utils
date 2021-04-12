@@ -15,7 +15,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
-		config, err := ProcessYAMLConfigFile(p)
+		config, importsList, err := ProcessYAMLConfigFile(p, make([]string, 0))
 		if err != nil {
 			return nil, err
 		}
@@ -24,6 +24,8 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		finalConfig["imports"] = importsList
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
@@ -39,29 +41,35 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
-func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error) {
+func ProcessYAMLConfigFile(filePath string, importsList []string) (map[interface{}]interface{}, []string, error) {
 	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
 	stackYamlConfig, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	stackMapConfig, err := c.YAMLToMapOfInterfaces(string(stackYamlConfig))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Find and process all imports
-	if imports, ok := stackMapConfig["import"]; ok {
-		for _, i := range imports.([]interface{}) {
-			p := path.Join(dir, i.(string)+".yaml")
+	if importsSection, ok := stackMapConfig["import"]; ok {
+		imports := importsSection.([]interface{})
 
-			yamlConfig, err := ProcessYAMLConfigFile(p)
+		for _, i := range imports {
+			imp := i.(string)
+			importsList = append(importsList, imp)
+
+			p := path.Join(dir, imp+".yaml")
+
+			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsList)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
+
 			configs = append(configs, yamlConfig)
 		}
 	}
@@ -71,10 +79,10 @@ func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error)
 	// Deep-merge the config file and the imports
 	result, err := m.Merge(configs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return result, nil
+	return result, importsList, nil
 }
 
 // ProcessConfig takes a raw stack config, deep-merges all variables and backends,
