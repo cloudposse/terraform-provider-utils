@@ -35,8 +35,9 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		sort.Strings(*importsList)
-		finalConfig["imports"] = *importsList
+		unique := u.UniqueStrings(*importsList)
+		sort.Strings(unique)
+		finalConfig["imports"] = unique
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
