@@ -385,6 +385,12 @@ func componentDependencies(filePath string, componentType string, component stri
 
 	err := filepath.Walk(dir,
 		func(p string, info os.FileInfo, err error) error {
+			if p == filePath {
+				f := strings.Replace(p, dir+"/", "", 1)
+				dependencies = append(dependencies, f)
+				return nil
+			}
+
 			if err != nil {
 				return err
 			}
