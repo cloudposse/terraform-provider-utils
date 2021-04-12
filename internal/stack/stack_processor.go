@@ -15,7 +15,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
-		config, importsList, err := ProcessYAMLConfigFile(p, make([]string, 0))
+		config, importsList, err := ProcessYAMLConfigFile(p, &[]string{})
 		if err != nil {
 			return nil, err
 		}
@@ -25,7 +25,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		finalConfig["imports"] = importsList
+		finalConfig["imports"] = *importsList
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
@@ -41,7 +41,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
-func ProcessYAMLConfigFile(filePath string, importsList []string) (map[interface{}]interface{}, []string, error) {
+func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interface{}]interface{}, *[]string, error) {
 	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
@@ -61,7 +61,11 @@ func ProcessYAMLConfigFile(filePath string, importsList []string) (map[interface
 
 		for _, i := range imports {
 			imp := i.(string)
-			importsList = append(importsList, imp)
+			*importsList = append(*importsList, imp)
+		}
+
+		for _, i := range imports {
+			imp := i.(string)
 
 			p := path.Join(dir, imp+".yaml")
 

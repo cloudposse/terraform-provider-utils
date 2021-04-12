@@ -22,6 +22,7 @@ func TestStackProcessor(t *testing.T) {
 
 	terraformComponents := mapResult["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
 	helmfileComponents := mapResult["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
+	imports := mapResult["imports"].([]interface{})
 
 	auroraPostgres2Component := terraformComponents["aurora-postgres-2"].(map[interface{}]interface{})
 	assert.Equal(t, auroraPostgres2Component["component"], "aurora-postgres")
@@ -59,6 +60,11 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, datadogHelmfileComponent["vars"].(map[interface{}]interface{})["installed"], true)
 	assert.Equal(t, datadogHelmfileComponent["vars"].(map[interface{}]interface{})["stage"], "dev")
 	assert.Equal(t, datadogHelmfileComponent["vars"].(map[interface{}]interface{})["processAgent"].(map[interface{}]interface{})["enabled"], true)
+
+	assert.Equal(t, len(imports), 3)
+	assert.Equal(t, imports[0], "uw2-globals")
+	assert.Equal(t, imports[1], "eks/eks-defaults")
+	assert.Equal(t, imports[2], "globals")
 
 	yamlConfig, err := yaml.Marshal(mapResult)
 	assert.Nil(t, err)
