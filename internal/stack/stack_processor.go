@@ -446,13 +446,13 @@ func createComponentStackMap(filePath string) (map[string]map[string][]string, e
 
 				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
 					componentsSection := componentsConfig.(map[string]interface{})
-					stackFile := strings.Replace(p, dir+"/", "", 1)
+					stackName := strings.Replace(p, dir+"/", "", 1)
 
 					if terraformConfig, terraformConfigExists := componentsSection["terraform"]; terraformConfigExists {
 						terraformSection := terraformConfig.(map[string]interface{})
 
 						for k := range terraformSection {
-							stackComponentMap["terraform"][stackFile] = append(stackComponentMap["terraform"][stackFile], k)
+							stackComponentMap["terraform"][stackName] = append(stackComponentMap["terraform"][stackName], k)
 						}
 					}
 
@@ -460,7 +460,7 @@ func createComponentStackMap(filePath string) (map[string]map[string][]string, e
 						helmfileSection := helmfileConfig.(map[string]interface{})
 
 						for k := range helmfileSection {
-							stackComponentMap["helmfile"][stackFile] = append(stackComponentMap["helmfile"][stackFile], k)
+							stackComponentMap["helmfile"][stackName] = append(stackComponentMap["helmfile"][stackName], k)
 						}
 					}
 				}
