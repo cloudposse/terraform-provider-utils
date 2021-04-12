@@ -3,10 +3,14 @@ package stack
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
+	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
@@ -20,7 +24,7 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		finalConfig, err := ProcessConfig(p, config)
+		finalConfig, err := ProcessConfig(p, config, true)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +94,7 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 // ProcessConfig takes a raw stack config, deep-merges all variables and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
+func ProcessConfig(stack string, config map[interface{}]interface{}, processDependencies bool) (map[interface{}]interface{}, error) {
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
 	globalEnvSection := map[interface{}]interface{}{}
@@ -293,12 +297,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			comp["backend_type"] = backendType
 			comp["backend"] = finalComponentBackend
 
-			componentDependencies, err := componentDependencies(stack, component.(string))
-			if err != nil {
-				return nil, err
-			}
+			if processDependencies == true {
+				componentDependencies, err := componentDependencies(stack, "terraform", component.(string))
+				if err != nil {
+					return nil, err
+				}
 
-			comp["dependencies"] = componentDependencies
+				comp["dependencies"] = componentDependencies
+			}
 
 			if baseComponentName != "" {
 				comp["component"] = baseComponentName
@@ -350,12 +356,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 			comp["settings"] = finalComponentSettings
 			comp["env"] = finalComponentEnv
 
-			componentDependencies, err := componentDependencies(stack, component.(string))
-			if err != nil {
-				return nil, err
-			}
+			if processDependencies == true {
+				componentDependencies, err := componentDependencies(stack, "helmfile", component.(string))
+				if err != nil {
+					return nil, err
+				}
 
-			comp["dependencies"] = componentDependencies
+				comp["dependencies"] = componentDependencies
+			}
 
 			helmfileComponents[component.(string)] = comp
 		}
@@ -371,6 +379,53 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 	return result, nil
 }
 
-func componentDependencies(stack string, component string) ([]string, error) {
-	return []string{}, nil
+func componentDependencies(filePath string, componentType string, component string) ([]string, error) {
+	var dependencies []string
+	dir := path.Dir(filePath)
+
+	err := filepath.Walk(dir,
+		func(p string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			isDirectory, err := u.IsDirectory(p)
+			if err != nil {
+				return err
+			}
+
+			if !isDirectory {
+				config, _, err := ProcessYAMLConfigFile(p, &[]string{})
+				if err != nil {
+					return err
+				}
+
+				finalConfig, err := ProcessConfig(p, config, false)
+				if err != nil {
+					return err
+				}
+
+				// Find if the component config is present in the stack
+				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
+					componentsSection := componentsConfig.(map[string]interface{})
+
+					if componentTypeConfig, componentTypeConfigExists := componentsSection[componentType]; componentTypeConfigExists {
+						componentsTypeSection := componentTypeConfig.(map[string]interface{})
+
+						if _, componentConfigExists := componentsTypeSection[component]; componentConfigExists {
+							f := strings.Replace(p, dir+"/", "", 1)
+							dependencies = append(dependencies, f)
+						}
+					}
+				}
+			}
+
+			return nil
+		})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return dependencies, nil
 }
