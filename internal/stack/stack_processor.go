@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -24,11 +25,17 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		finalConfig, err := ProcessConfig(p, config, true, "")
+		componentStackDependencyMap, err := createComponentDependencyMap(p)
 		if err != nil {
 			return nil, err
 		}
 
+		finalConfig, err := ProcessConfig(p, config, true, "", componentStackDependencyMap)
+		if err != nil {
+			return nil, err
+		}
+
+		sort.Strings(*importsList)
 		finalConfig["imports"] = *importsList
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
@@ -94,7 +101,7 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 // ProcessConfig takes a raw stack config, deep-merges all variables and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(stack string, config map[interface{}]interface{}, processDependencies bool, componentTypeFilter string) (map[interface{}]interface{}, error) {
+func ProcessConfig(stack string, config map[interface{}]interface{}, processDependencies bool, componentTypeFilter string, componentStackDependencyMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
 	globalEnvSection := map[interface{}]interface{}{}
@@ -303,7 +310,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 				}
 
 				if processDependencies == true {
-					componentDependencies, err := componentDependencies(stack, "terraform", component.(string), baseComponentName)
+					componentDependencies, err := findComponentDependencies("terraform", component.(string), baseComponentName, componentStackDependencyMap)
 					if err != nil {
 						return nil, err
 					}
@@ -360,7 +367,7 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 				comp["env"] = finalComponentEnv
 
 				if processDependencies == true {
-					componentDependencies, err := componentDependencies(stack, "helmfile", component.(string), "")
+					componentDependencies, err := findComponentDependencies("helmfile", component.(string), "", componentStackDependencyMap)
 					if err != nil {
 						return nil, err
 					}
@@ -383,21 +390,41 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processDepe
 	return result, nil
 }
 
-func componentDependencies(filePath string, componentType string, component string, baseComponent string) ([]string, error) {
-	var dependencies []string
+func findComponentDependencies(componentType string, component string, baseComponent string, componentStackDependencyMap map[string]map[string][]string) ([]string, error) {
+	dependencies := []string{}
+
+	if componentTypeConfig, componentTypeConfigExists := componentStackDependencyMap[componentType]; componentTypeConfigExists {
+		if dep, componentConfigExists := componentTypeConfig[component]; componentConfigExists {
+			dependencies = append(dependencies, dep...)
+		}
+
+		if baseComponent != "" {
+			if dep, baseComponentConfigExists := componentTypeConfig[baseComponent]; baseComponentConfigExists {
+				dependencies = append(dependencies, dep...)
+			}
+		}
+	}
+
+	unique := u.UniqueStrings(dependencies)
+	sort.Strings(unique)
+	return unique, nil
+}
+
+func createComponentDependencyMap(filePath string) (map[string]map[string][]string, error) {
+	stackComponentDependencies := map[string]map[string][]string{}
+	stackComponentDependencies["terraform"] = map[string][]string{}
+	stackComponentDependencies["helmfile"] = map[string][]string{}
+
+	componentStackDependencies := map[string]map[string][]string{}
+	componentStackDependencies["terraform"] = map[string][]string{}
+	componentStackDependencies["helmfile"] = map[string][]string{}
+
 	dir := path.Dir(filePath)
 
 	err := filepath.Walk(dir,
 		func(p string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
-			}
-
-			// The current stack is a dependency of the current component
-			if p == filePath {
-				f := strings.Replace(p, dir+"/", "", 1)
-				dependencies = append(dependencies, f)
-				return nil
 			}
 
 			isDirectory, err := u.IsDirectory(p)
@@ -411,27 +438,28 @@ func componentDependencies(filePath string, componentType string, component stri
 					return err
 				}
 
-				finalConfig, err := ProcessConfig(p, config, false, componentType)
+				finalConfig, err := ProcessConfig(p, config, false, "", nil)
 				if err != nil {
 					return err
 				}
 
-				// Find if the component config or the base component config are present in the stack
 				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
 					componentsSection := componentsConfig.(map[string]interface{})
+					stackFile := strings.Replace(p, dir+"/", "", 1)
 
-					if componentTypeConfig, componentTypeConfigExists := componentsSection[componentType]; componentTypeConfigExists {
-						componentsTypeSection := componentTypeConfig.(map[string]interface{})
+					if terraformConfig, terraformConfigExists := componentsSection["terraform"]; terraformConfigExists {
+						terraformSection := terraformConfig.(map[string]interface{})
 
-						if _, componentConfigExists := componentsTypeSection[component]; componentConfigExists {
-							f := strings.Replace(p, dir+"/", "", 1)
-							dependencies = append(dependencies, f)
-							// If the stack is not a depepndency of the component, check the base component
-						} else if baseComponent != "" {
-							if _, baseComponentConfigExists := componentsTypeSection[baseComponent]; baseComponentConfigExists {
-								f := strings.Replace(p, dir+"/", "", 1)
-								dependencies = append(dependencies, f)
-							}
+						for k := range terraformSection {
+							stackComponentDependencies["terraform"][stackFile] = append(stackComponentDependencies["terraform"][stackFile], k)
+						}
+					}
+
+					if helmfileConfig, helmfileConfigExists := componentsSection["helmfile"]; helmfileConfigExists {
+						helmfileSection := helmfileConfig.(map[string]interface{})
+
+						for k := range helmfileSection {
+							stackComponentDependencies["helmfile"][stackFile] = append(stackComponentDependencies["helmfile"][stackFile], k)
 						}
 					}
 				}
@@ -444,5 +472,17 @@ func componentDependencies(filePath string, componentType string, component stri
 		return nil, err
 	}
 
-	return dependencies, nil
+	for stack, components := range stackComponentDependencies["terraform"] {
+		for _, component := range components {
+			componentStackDependencies["terraform"][component] = append(componentStackDependencies["terraform"][component], stack)
+		}
+	}
+
+	for stack, components := range stackComponentDependencies["helmfile"] {
+		for _, component := range components {
+			componentStackDependencies["helmfile"][component] = append(componentStackDependencies["helmfile"][component], stack)
+		}
+	}
+
+	return componentStackDependencies, nil
 }
