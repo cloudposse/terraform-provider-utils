@@ -3,10 +3,15 @@ package stack
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
+	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"path"
+	"path/filepath"
+	"sort"
+	"strings"
 )
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
@@ -15,15 +20,24 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
-		config, err := ProcessYAMLConfigFile(p)
+		config, importsList, err := ProcessYAMLConfigFile(p, &[]string{})
 		if err != nil {
 			return nil, err
 		}
 
-		finalConfig, err := ProcessConfig(p, config)
+		componentStackMap, err := createComponentStackMap(p)
 		if err != nil {
 			return nil, err
 		}
+
+		finalConfig, err := ProcessConfig(p, config, true, "", componentStackMap)
+		if err != nil {
+			return nil, err
+		}
+
+		unique := u.UniqueStrings(*importsList)
+		sort.Strings(unique)
+		finalConfig["imports"] = unique
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
@@ -39,29 +53,38 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
-func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error) {
+func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interface{}]interface{}, *[]string, error) {
 	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
 	stackYamlConfig, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	stackMapConfig, err := c.YAMLToMapOfInterfaces(string(stackYamlConfig))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Find and process all imports
-	if imports, ok := stackMapConfig["import"]; ok {
-		for _, i := range imports.([]interface{}) {
-			p := path.Join(dir, i.(string)+".yaml")
+	if importsSection, ok := stackMapConfig["import"]; ok {
+		imports := importsSection.([]interface{})
 
-			yamlConfig, err := ProcessYAMLConfigFile(p)
+		for _, i := range imports {
+			imp := i.(string)
+			*importsList = append(*importsList, imp)
+		}
+
+		for _, i := range imports {
+			imp := i.(string)
+			p := path.Join(dir, imp+".yaml")
+
+			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsList)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
+
 			configs = append(configs, yamlConfig)
 		}
 	}
@@ -71,15 +94,15 @@ func ProcessYAMLConfigFile(filePath string) (map[interface{}]interface{}, error)
 	// Deep-merge the config file and the imports
 	result, err := m.Merge(configs)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return result, nil
+	return result, importsList, nil
 }
 
-// ProcessConfig takes a raw stack config, deep-merges all variables and backends,
+// ProcessConfig takes a raw stack config, deep-merges all variables, settings, environments and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interface{}]interface{}, error) {
+func ProcessConfig(stack string, config map[interface{}]interface{}, processStacks bool, componentTypeFilter string, componentStackMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
 	globalEnvSection := map[interface{}]interface{}{}
@@ -194,144 +217,167 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 	}
 
 	// Process all Terraform components
-	if allTerraformComponents, ok := globalComponentsSection["terraform"]; ok {
-		allTerraformComponentsMap := allTerraformComponents.(map[interface{}]interface{})
+	if componentTypeFilter == "" || componentTypeFilter == "terraform" {
+		if allTerraformComponents, ok := globalComponentsSection["terraform"]; ok {
+			allTerraformComponentsMap := allTerraformComponents.(map[interface{}]interface{})
 
-		for component, v := range allTerraformComponentsMap {
-			componentMap := v.(map[interface{}]interface{})
+			for component, v := range allTerraformComponentsMap {
+				componentMap := v.(map[interface{}]interface{})
 
-			componentVars := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["vars"]; ok2 {
-				componentVars = i.(map[interface{}]interface{})
-			}
-
-			componentSettings := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["settings"]; ok2 {
-				componentSettings = i.(map[interface{}]interface{})
-			}
-
-			componentEnv := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["env"]; ok2 {
-				componentEnv = i.(map[interface{}]interface{})
-			}
-
-			componentBackend := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["backend"]; ok2 {
-				componentBackend = i.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
-			}
-
-			baseComponentVars := map[interface{}]interface{}{}
-			baseComponentSettings := map[interface{}]interface{}{}
-			baseComponentEnv := map[interface{}]interface{}{}
-			baseComponentBackend := map[interface{}]interface{}{}
-			baseComponentName := ""
-
-			if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
-				baseComponentName = baseComponent.(string)
-
-				if baseComponentSection, baseComponentSectionExist := allTerraformComponentsMap[baseComponentName]; baseComponentSectionExist {
-					baseComponentMap := baseComponentSection.(map[interface{}]interface{})
-
-					if baseComponentVarsSection, baseComponentVarsSectionExist := baseComponentMap["vars"]; baseComponentVarsSectionExist {
-						baseComponentVars = baseComponentVarsSection.(map[interface{}]interface{})
-					}
-
-					if baseComponentSettingsSection, baseComponentSettingsSectionExist := baseComponentMap["settings"]; baseComponentSettingsSectionExist {
-						baseComponentSettings = baseComponentSettingsSection.(map[interface{}]interface{})
-					}
-
-					if baseComponentEnvSection, baseComponentEnvSectionExist := baseComponentMap["env"]; baseComponentEnvSectionExist {
-						baseComponentEnv = baseComponentEnvSection.(map[interface{}]interface{})
-					}
-
-					if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
-						if backendTypeSection, backendTypeSectionExist := baseComponentBackendSection.(map[interface{}]interface{})[backendType]; backendTypeSectionExist {
-							baseComponentBackend = backendTypeSection.(map[interface{}]interface{})
-						}
-					}
-				} else {
-					return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
-						baseComponentName + "', " + "but `" + baseComponentName + "' is not defined in the stack '" + stack + "'")
+				componentVars := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["vars"]; ok2 {
+					componentVars = i.(map[interface{}]interface{})
 				}
+
+				componentSettings := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["settings"]; ok2 {
+					componentSettings = i.(map[interface{}]interface{})
+				}
+
+				componentEnv := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["env"]; ok2 {
+					componentEnv = i.(map[interface{}]interface{})
+				}
+
+				componentBackend := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["backend"]; ok2 {
+					componentBackend = i.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
+				}
+
+				baseComponentVars := map[interface{}]interface{}{}
+				baseComponentSettings := map[interface{}]interface{}{}
+				baseComponentEnv := map[interface{}]interface{}{}
+				baseComponentBackend := map[interface{}]interface{}{}
+				baseComponentName := ""
+
+				if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
+					baseComponentName = baseComponent.(string)
+
+					if baseComponentSection, baseComponentSectionExist := allTerraformComponentsMap[baseComponentName]; baseComponentSectionExist {
+						baseComponentMap := baseComponentSection.(map[interface{}]interface{})
+
+						if baseComponentVarsSection, baseComponentVarsSectionExist := baseComponentMap["vars"]; baseComponentVarsSectionExist {
+							baseComponentVars = baseComponentVarsSection.(map[interface{}]interface{})
+						}
+
+						if baseComponentSettingsSection, baseComponentSettingsSectionExist := baseComponentMap["settings"]; baseComponentSettingsSectionExist {
+							baseComponentSettings = baseComponentSettingsSection.(map[interface{}]interface{})
+						}
+
+						if baseComponentEnvSection, baseComponentEnvSectionExist := baseComponentMap["env"]; baseComponentEnvSectionExist {
+							baseComponentEnv = baseComponentEnvSection.(map[interface{}]interface{})
+						}
+
+						if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
+							if backendTypeSection, backendTypeSectionExist := baseComponentBackendSection.(map[interface{}]interface{})[backendType]; backendTypeSectionExist {
+								baseComponentBackend = backendTypeSection.(map[interface{}]interface{})
+							}
+						}
+					} else {
+						return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
+							baseComponentName + "', " + "but `" + baseComponentName + "' is not defined in the stack '" + stack + "'")
+					}
+				}
+
+				finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformVars, baseComponentVars, componentVars})
+				if err != nil {
+					return nil, err
+				}
+
+				finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformSettings, baseComponentSettings, componentSettings})
+				if err != nil {
+					return nil, err
+				}
+
+				finalComponentEnv, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformEnv, baseComponentEnv, componentEnv})
+				if err != nil {
+					return nil, err
+				}
+
+				finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, baseComponentBackend, componentBackend})
+				if err != nil {
+					return nil, err
+				}
+
+				comp := map[string]interface{}{}
+				comp["vars"] = finalComponentVars
+				comp["settings"] = finalComponentSettings
+				comp["env"] = finalComponentEnv
+				comp["backend_type"] = backendType
+				comp["backend"] = finalComponentBackend
+
+				if baseComponentName != "" {
+					comp["component"] = baseComponentName
+				}
+
+				if processStacks == true {
+					componentStacks, err := findComponentStacks("terraform", component.(string), baseComponentName, componentStackMap)
+					if err != nil {
+						return nil, err
+					}
+
+					comp["stacks"] = componentStacks
+				}
+
+				terraformComponents[component.(string)] = comp
 			}
-
-			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformVars, baseComponentVars, componentVars})
-			if err != nil {
-				return nil, err
-			}
-
-			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformSettings, baseComponentSettings, componentSettings})
-			if err != nil {
-				return nil, err
-			}
-
-			finalComponentEnv, err := m.Merge([]map[interface{}]interface{}{globalAndTerraformEnv, baseComponentEnv, componentEnv})
-			if err != nil {
-				return nil, err
-			}
-
-			finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, baseComponentBackend, componentBackend})
-			if err != nil {
-				return nil, err
-			}
-
-			comp := map[string]interface{}{}
-			comp["vars"] = finalComponentVars
-			comp["settings"] = finalComponentSettings
-			comp["env"] = finalComponentEnv
-			comp["backend_type"] = backendType
-			comp["backend"] = finalComponentBackend
-
-			if baseComponentName != "" {
-				comp["component"] = baseComponentName
-			}
-
-			terraformComponents[component.(string)] = comp
 		}
 	}
 
 	// Process all helmfile components
-	if allHelmfileComponents, ok := globalComponentsSection["helmfile"]; ok {
-		allHelmfileComponentsMap := allHelmfileComponents.(map[interface{}]interface{})
+	if componentTypeFilter == "" || componentTypeFilter == "helmfile" {
+		if allHelmfileComponents, ok := globalComponentsSection["helmfile"]; ok {
+			allHelmfileComponentsMap := allHelmfileComponents.(map[interface{}]interface{})
 
-		for component, v := range allHelmfileComponentsMap {
-			componentMap := v.(map[interface{}]interface{})
+			for component, v := range allHelmfileComponentsMap {
+				componentMap := v.(map[interface{}]interface{})
 
-			componentVars := map[interface{}]interface{}{}
-			if i2, ok2 := componentMap["vars"]; ok2 {
-				componentVars = i2.(map[interface{}]interface{})
+				componentVars := map[interface{}]interface{}{}
+				if i2, ok2 := componentMap["vars"]; ok2 {
+					componentVars = i2.(map[interface{}]interface{})
+				}
+
+				componentSettings := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["settings"]; ok2 {
+					componentSettings = i.(map[interface{}]interface{})
+				}
+
+				componentEnv := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["env"]; ok2 {
+					componentEnv = i.(map[interface{}]interface{})
+				}
+
+				finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileVars, componentVars})
+				if err != nil {
+					return nil, err
+				}
+
+				finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileSettings, componentSettings})
+				if err != nil {
+					return nil, err
+				}
+
+				finalComponentEnv, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileEnv, componentEnv})
+				if err != nil {
+					return nil, err
+				}
+
+				comp := map[string]interface{}{}
+				comp["vars"] = finalComponentVars
+				comp["settings"] = finalComponentSettings
+				comp["env"] = finalComponentEnv
+
+				if processStacks == true {
+					componentStacks, err := findComponentStacks("helmfile", component.(string), "", componentStackMap)
+					if err != nil {
+						return nil, err
+					}
+
+					comp["stacks"] = componentStacks
+				}
+
+				helmfileComponents[component.(string)] = comp
 			}
-
-			componentSettings := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["settings"]; ok2 {
-				componentSettings = i.(map[interface{}]interface{})
-			}
-
-			componentEnv := map[interface{}]interface{}{}
-			if i, ok2 := componentMap["env"]; ok2 {
-				componentEnv = i.(map[interface{}]interface{})
-			}
-
-			finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileVars, componentVars})
-			if err != nil {
-				return nil, err
-			}
-
-			finalComponentSettings, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileSettings, componentSettings})
-			if err != nil {
-				return nil, err
-			}
-
-			finalComponentEnv, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileEnv, componentEnv})
-			if err != nil {
-				return nil, err
-			}
-
-			comp := map[string]interface{}{}
-			comp["vars"] = finalComponentVars
-			comp["settings"] = finalComponentSettings
-			comp["env"] = finalComponentEnv
-			helmfileComponents[component.(string)] = comp
 		}
 	}
 
@@ -343,4 +389,101 @@ func ProcessConfig(stack string, config map[interface{}]interface{}) (map[interf
 	}
 
 	return result, nil
+}
+
+func findComponentStacks(componentType string, component string, baseComponent string, componentStackMap map[string]map[string][]string) ([]string, error) {
+	var stacks []string
+
+	if componentStackConfig, componentStackConfigExists := componentStackMap[componentType]; componentStackConfigExists {
+		if componentStacks, componentStacksExist := componentStackConfig[component]; componentStacksExist {
+			stacks = append(stacks, componentStacks...)
+		}
+
+		if baseComponent != "" {
+			if baseComponentStacks, baseComponentStacksExist := componentStackConfig[baseComponent]; baseComponentStacksExist {
+				stacks = append(stacks, baseComponentStacks...)
+			}
+		}
+	}
+
+	unique := u.UniqueStrings(stacks)
+	sort.Strings(unique)
+	return unique, nil
+}
+
+func createComponentStackMap(filePath string) (map[string]map[string][]string, error) {
+	stackComponentMap := map[string]map[string][]string{}
+	stackComponentMap["terraform"] = map[string][]string{}
+	stackComponentMap["helmfile"] = map[string][]string{}
+
+	componentStackMap := map[string]map[string][]string{}
+	componentStackMap["terraform"] = map[string][]string{}
+	componentStackMap["helmfile"] = map[string][]string{}
+
+	dir := path.Dir(filePath)
+
+	err := filepath.Walk(dir,
+		func(p string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			isDirectory, err := u.IsDirectory(p)
+			if err != nil {
+				return err
+			}
+
+			if !isDirectory {
+				config, _, err := ProcessYAMLConfigFile(p, &[]string{})
+				if err != nil {
+					return err
+				}
+
+				finalConfig, err := ProcessConfig(p, config, false, "", nil)
+				if err != nil {
+					return err
+				}
+
+				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
+					componentsSection := componentsConfig.(map[string]interface{})
+					stackName := strings.Replace(p, dir+"/", "", 1)
+
+					if terraformConfig, terraformConfigExists := componentsSection["terraform"]; terraformConfigExists {
+						terraformSection := terraformConfig.(map[string]interface{})
+
+						for k := range terraformSection {
+							stackComponentMap["terraform"][stackName] = append(stackComponentMap["terraform"][stackName], k)
+						}
+					}
+
+					if helmfileConfig, helmfileConfigExists := componentsSection["helmfile"]; helmfileConfigExists {
+						helmfileSection := helmfileConfig.(map[string]interface{})
+
+						for k := range helmfileSection {
+							stackComponentMap["helmfile"][stackName] = append(stackComponentMap["helmfile"][stackName], k)
+						}
+					}
+				}
+			}
+
+			return nil
+		})
+
+	if err != nil {
+		return nil, err
+	}
+
+	for stack, components := range stackComponentMap["terraform"] {
+		for _, component := range components {
+			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, ".yaml", "", 1))
+		}
+	}
+
+	for stack, components := range stackComponentMap["helmfile"] {
+		for _, component := range components {
+			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, ".yaml", "", 1))
+		}
+	}
+
+	return componentStackMap, nil
 }
