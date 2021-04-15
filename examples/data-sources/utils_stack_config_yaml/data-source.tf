@@ -17,6 +17,8 @@ data "utils_stack_config_yaml" "example" {
     "${path.module}/stacks/uw2-staging.yaml",
     "${path.module}/stacks/uw2-uat.yaml"
   ]
+
+  process_stack_deps = true
 }
 
 locals {

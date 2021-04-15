@@ -13,7 +13,9 @@ func TestStackProcessor(t *testing.T) {
 		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-dev.yaml",
 	}
 
-	yamlResult, err := ProcessYAMLConfigFiles(filePaths)
+	processStackDeps := true
+
+	var yamlResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps)
 	assert.Nil(t, err)
 	assert.Equal(t, len(yamlResult), 1)
 
@@ -37,12 +39,15 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "test7", auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_7"].(string))
 	assert.Equal(t, "test8", auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_8"].(string))
 	assert.Nil(t, auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_9"])
-	assert.Equal(t, "globals", auroraPostgres2Component["stacks"].([]interface{})[0])
-	assert.Equal(t, "uw2-dev", auroraPostgres2Component["stacks"].([]interface{})[1])
-	assert.Equal(t, "uw2-globals", auroraPostgres2Component["stacks"].([]interface{})[2])
-	assert.Equal(t, "uw2-prod", auroraPostgres2Component["stacks"].([]interface{})[3])
-	assert.Equal(t, "uw2-staging", auroraPostgres2Component["stacks"].([]interface{})[4])
-	assert.Equal(t, "uw2-uat", auroraPostgres2Component["stacks"].([]interface{})[5])
+
+	if processStackDeps {
+		assert.Equal(t, "globals", auroraPostgres2Component["stacks"].([]interface{})[0])
+		assert.Equal(t, "uw2-dev", auroraPostgres2Component["stacks"].([]interface{})[1])
+		assert.Equal(t, "uw2-globals", auroraPostgres2Component["stacks"].([]interface{})[2])
+		assert.Equal(t, "uw2-prod", auroraPostgres2Component["stacks"].([]interface{})[3])
+		assert.Equal(t, "uw2-staging", auroraPostgres2Component["stacks"].([]interface{})[4])
+		assert.Equal(t, "uw2-uat", auroraPostgres2Component["stacks"].([]interface{})[5])
+	}
 
 	eksComponent := terraformComponents["eks"].(map[interface{}]interface{})
 	assert.Equal(t, true, eksComponent["settings"].(map[interface{}]interface{})["spacelift"].(map[interface{}]interface{})["workspace_enabled"])

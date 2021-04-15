@@ -16,7 +16,7 @@ import (
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
-func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
+func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
@@ -25,12 +25,15 @@ func ProcessYAMLConfigFiles(filePaths []string) ([]string, error) {
 			return nil, err
 		}
 
-		componentStackMap, err := createComponentStackMap(p)
-		if err != nil {
-			return nil, err
+		componentStackMap := map[string]map[string][]string{}
+		if processStackDeps {
+			componentStackMap, err = createComponentStackMap(p)
+			if err != nil {
+				return nil, err
+			}
 		}
 
-		finalConfig, err := ProcessConfig(p, config, true, "", componentStackMap)
+		finalConfig, err := ProcessConfig(p, config, processStackDeps, "", componentStackMap)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +105,12 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 // ProcessConfig takes a raw stack config, deep-merges all variables, settings, environments and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
-func ProcessConfig(stack string, config map[interface{}]interface{}, processStacks bool, componentTypeFilter string, componentStackMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
+func ProcessConfig(stack string,
+	config map[interface{}]interface{},
+	processStackDeps bool,
+	componentTypeFilter string,
+	componentStackMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
+
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
 	globalEnvSection := map[interface{}]interface{}{}
@@ -310,13 +318,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processStac
 					comp["component"] = baseComponentName
 				}
 
-				if processStacks == true {
+				if processStackDeps == true {
 					componentStacks, err := findComponentStacks("terraform", component.(string), baseComponentName, componentStackMap)
 					if err != nil {
 						return nil, err
 					}
-
 					comp["stacks"] = componentStacks
+				} else {
+					comp["stacks"] = []string{}
 				}
 
 				terraformComponents[component.(string)] = comp
@@ -367,13 +376,14 @@ func ProcessConfig(stack string, config map[interface{}]interface{}, processStac
 				comp["settings"] = finalComponentSettings
 				comp["env"] = finalComponentEnv
 
-				if processStacks == true {
+				if processStackDeps == true {
 					componentStacks, err := findComponentStacks("helmfile", component.(string), "", componentStackMap)
 					if err != nil {
 						return nil, err
 					}
-
 					comp["stacks"] = componentStacks
+				} else {
+					comp["stacks"] = []string{}
 				}
 
 				helmfileComponents[component.(string)] = comp
