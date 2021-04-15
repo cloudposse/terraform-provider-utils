@@ -433,7 +433,9 @@ func createComponentStackMap(filePath string) (map[string]map[string][]string, e
 				return err
 			}
 
-			if !isDirectory {
+			isYaml := u.IsYaml(p)
+
+			if !isDirectory && isYaml {
 				config, _, err := ProcessYAMLConfigFile(p, &[]string{})
 				if err != nil {
 					return err
