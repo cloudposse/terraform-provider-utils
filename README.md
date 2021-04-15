@@ -27,7 +27,7 @@
 
 -->
 
-Terraform provider to add additional missing functionality to Terraform
+Terraform provider for various utilities (deep merging, stack configuration management), and to add additional missing functionality to Terraform
 
 
 ---
