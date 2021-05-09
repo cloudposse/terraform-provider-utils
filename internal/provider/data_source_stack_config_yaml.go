@@ -31,6 +31,12 @@ func dataSourceStackConfigYAML() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"process_component_deps": {
+				Description: "A boolean flag to enable/disable processing config dependencies for the components.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"output": {
 				Description: "A list of stack configurations.",
 				Type:        schema.TypeList,
@@ -44,13 +50,14 @@ func dataSourceStackConfigYAML() *schema.Resource {
 func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
+	processComponentDeps := d.Get("process_component_deps")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	result, err := s.ProcessYAMLConfigFiles(paths, processStackDeps.(bool))
+	result, err := s.ProcessYAMLConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -14,8 +14,9 @@ func TestStackProcessor(t *testing.T) {
 	}
 
 	processStackDeps := true
+	processComponentDeps := true
 
-	var yamlResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps)
+	var yamlResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
 	assert.Equal(t, len(yamlResult), 1)
 

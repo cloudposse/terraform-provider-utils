@@ -63,7 +63,13 @@ func createComponentStackMap(filePath string) (map[string]map[string][]string, e
 					return err
 				}
 
-				finalConfig, err := ProcessConfig(p, config, false, "", nil)
+				finalConfig, err := ProcessConfig(p,
+					config,
+					false,
+					false,
+					"",
+					nil,
+					nil)
 				if err != nil {
 					return err
 				}

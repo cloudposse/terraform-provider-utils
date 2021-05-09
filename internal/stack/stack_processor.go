@@ -13,7 +13,7 @@ import (
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
-func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string, error) {
+func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
@@ -21,6 +21,9 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string
 		if err != nil {
 			return nil, err
 		}
+
+		uniqueImports := u.UniqueStrings(*importsList)
+		sort.Strings(uniqueImports)
 
 		componentStackMap := map[string]map[string][]string{}
 		if processStackDeps {
@@ -30,14 +33,12 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string
 			}
 		}
 
-		finalConfig, err := ProcessConfig(p, config, processStackDeps, "", componentStackMap)
+		finalConfig, err := ProcessConfig(p, config, processStackDeps, processComponentDeps, "", componentStackMap, uniqueImports)
 		if err != nil {
 			return nil, err
 		}
 
-		unique := u.UniqueStrings(*importsList)
-		sort.Strings(unique)
-		finalConfig["imports"] = unique
+		finalConfig["imports"] = uniqueImports
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
@@ -105,8 +106,10 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 func ProcessConfig(stack string,
 	config map[interface{}]interface{},
 	processStackDeps bool,
+	processComponentDeps bool,
 	componentTypeFilter string,
-	componentStackMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
+	componentStackMap map[string]map[string][]string,
+	imports []string) (map[interface{}]interface{}, error) {
 
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
