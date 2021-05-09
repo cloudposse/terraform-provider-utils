@@ -1,6 +1,6 @@
 import:
 - uw2-globals
-- eks/eks-defaults
+- catalog/eks-defaults
 
 vars:
   stage: prod

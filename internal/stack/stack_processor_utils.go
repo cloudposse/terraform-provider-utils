@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// findComponentStacks finds all infrastructure stack config files where the component or the base component is defined
 func findComponentStacks(componentType string,
 	component string,
 	baseComponent string,
@@ -33,6 +34,12 @@ func findComponentStacks(componentType string,
 	return unique, nil
 }
 
+// findComponentDependencies finds all imports where the component or the base component is defined
+// Components depends on the import config file if any of the following conditions is true:
+// 1. The import config file has the global `vars` section and it's not empty
+// 2. The import config file has the component type section, which has a `vars` section and it's not empty
+// 3. The import config file has the component section
+// 4. The import config file has the base component section
 func findComponentDependencies(
 	componentType string,
 	component string,
@@ -41,23 +48,57 @@ func findComponentDependencies(
 
 	var deps []string
 
-	//for imp, importConfig := range importsConfig {
-	//	var depends = false
-	//
-	//	if componentStackConfig, componentStackConfigExists := importConfig[componentType]; componentStackConfigExists {
-	//		if componentStacks, componentStacksExist := componentStackConfig[component]; componentStacksExist {
-	//			depends = true
-	//		} else if baseComponent != "" {
-	//			if baseComponentStacks, baseComponentStacksExist := componentStackConfig[baseComponent]; baseComponentStacksExist {
-	//				depends = true
-	//			}
-	//		}
-	//	}
-	//
-	//	if depends == true {
-	//		deps = append(deps, imp)
-	//	}
-	//}
+	for imp, importConfig := range importsConfig {
+		if i, ok := importConfig["vars"]; ok {
+			globalVarsSection := i.(map[interface{}]interface{})
+
+			if len(globalVarsSection) > 0 {
+				deps = append(deps, imp)
+				continue
+			}
+		}
+
+		if i, ok := importConfig[componentType]; ok {
+			componentTypeSection := i.(map[interface{}]interface{})
+
+			if i2, ok2 := componentTypeSection["vars"]; ok2 {
+				componentTypeVarsSection := i2.(map[interface{}]interface{})
+
+				if len(componentTypeVarsSection) > 0 {
+					deps = append(deps, imp)
+					continue
+				}
+			}
+		}
+
+		if i, ok := importConfig["components"]; ok {
+			componentsSection := i.(map[interface{}]interface{})
+
+			if i2, ok2 := componentsSection[componentType]; ok2 {
+				componentTypeSection := i2.(map[interface{}]interface{})
+
+				if i3, ok3 := componentTypeSection[component]; ok3 {
+					componentSection := i3.(map[interface{}]interface{})
+
+					if len(componentSection) > 0 {
+						deps = append(deps, imp)
+						continue
+					}
+				}
+
+				if baseComponent != "" {
+					if i3, ok3 := componentTypeSection[baseComponent]; ok3 {
+						baseComponentSection := i3.(map[interface{}]interface{})
+
+						if len(baseComponentSection) > 0 {
+							deps = append(deps, imp)
+							continue
+						}
+					}
+				}
+			}
+		}
+	}
 
 	unique := u.UniqueStrings(deps)
 	sort.Strings(unique)
