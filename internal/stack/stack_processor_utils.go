@@ -38,8 +38,8 @@ func findComponentStacks(componentType string,
 // Component depends on the imported config file if any of the following conditions is true:
 // 1. The imported config file has the global `vars` section and it's not empty
 // 2. The imported config file has the component type section, which has a `vars` section which is not empty
-// 3. The imported config file has the component section
-// 4. The imported config file has the base component section
+// 3. The imported config file has the "components" section, which has the component type section, which has the component section
+// 4. The imported config file has the "components" section, which has the component type section, which has the base component section
 func findComponentDependencies(
 	componentType string,
 	component string,
