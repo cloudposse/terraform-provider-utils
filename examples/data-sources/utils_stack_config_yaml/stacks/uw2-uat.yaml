@@ -99,6 +99,11 @@ components:
         ENV_TEST_2: test2_override2
         ENV_TEST_8: test8
 
+    documents-bucket:
+      component: s3-bucket
+      vars:
+        name: "documents"
+
   helmfile:
 
     datadog:
