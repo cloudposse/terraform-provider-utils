@@ -73,10 +73,11 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "dev", datadogHelmfileComponent["vars"].(map[interface{}]interface{})["stage"])
 	assert.Equal(t, true, datadogHelmfileComponent["vars"].(map[interface{}]interface{})["processAgent"].(map[interface{}]interface{})["enabled"])
 
-	assert.Equal(t, 3, len(imports))
+	assert.Equal(t, 4, len(imports))
 	assert.Equal(t, "catalog/eks-defaults", imports[0])
-	assert.Equal(t, "globals", imports[1])
-	assert.Equal(t, "uw2-globals", imports[2])
+	assert.Equal(t, "catalog/s3-defaults", imports[1])
+	assert.Equal(t, "globals", imports[2])
+	assert.Equal(t, "uw2-globals", imports[3])
 
 	yamlConfig, err := yaml.Marshal(mapResult)
 	assert.Nil(t, err)
