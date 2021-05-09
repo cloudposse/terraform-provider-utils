@@ -33,6 +33,37 @@ func findComponentStacks(componentType string,
 	return unique, nil
 }
 
+func findComponentDependencies(
+	componentType string,
+	component string,
+	baseComponent string,
+	importsConfig map[string]map[interface{}]interface{}) ([]string, error) {
+
+	var deps []string
+
+	//for imp, importConfig := range importsConfig {
+	//	var depends = false
+	//
+	//	if componentStackConfig, componentStackConfigExists := importConfig[componentType]; componentStackConfigExists {
+	//		if componentStacks, componentStacksExist := componentStackConfig[component]; componentStacksExist {
+	//			depends = true
+	//		} else if baseComponent != "" {
+	//			if baseComponentStacks, baseComponentStacksExist := componentStackConfig[baseComponent]; baseComponentStacksExist {
+	//				depends = true
+	//			}
+	//		}
+	//	}
+	//
+	//	if depends == true {
+	//		deps = append(deps, imp)
+	//	}
+	//}
+
+	unique := u.UniqueStrings(deps)
+	sort.Strings(unique)
+	return unique, nil
+}
+
 func createComponentStackMap(filePath string) (map[string]map[string][]string, error) {
 	stackComponentMap := map[string]map[string][]string{}
 	stackComponentMap["terraform"] = map[string][]string{}
@@ -58,7 +89,7 @@ func createComponentStackMap(filePath string) (map[string]map[string][]string, e
 			isYaml := u.IsYaml(p)
 
 			if !isDirectory && isYaml {
-				config, _, err := ProcessYAMLConfigFile(p, &[]string{})
+				config, _, err := ProcessYAMLConfigFile(p, map[string]map[interface{}]interface{}{})
 				if err != nil {
 					return err
 				}

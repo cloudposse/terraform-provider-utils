@@ -17,12 +17,17 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 	var result []string
 
 	for _, p := range filePaths {
-		config, importsList, err := ProcessYAMLConfigFile(p, &[]string{})
+		config, importsConfig, err := ProcessYAMLConfigFile(p, map[string]map[interface{}]interface{}{})
 		if err != nil {
 			return nil, err
 		}
 
-		uniqueImports := u.UniqueStrings(*importsList)
+		var imports []string
+		for k := range importsConfig {
+			imports = append(imports, k)
+		}
+
+		uniqueImports := u.UniqueStrings(imports)
 		sort.Strings(uniqueImports)
 
 		componentStackMap := map[string]map[string][]string{}
@@ -33,7 +38,7 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 			}
 		}
 
-		finalConfig, err := ProcessConfig(p, config, processStackDeps, processComponentDeps, "", componentStackMap, uniqueImports)
+		finalConfig, err := ProcessConfig(p, config, processStackDeps, processComponentDeps, "", componentStackMap, importsConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +59,10 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
-func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interface{}]interface{}, *[]string, error) {
+func ProcessYAMLConfigFile(
+	filePath string,
+	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, map[string]map[interface{}]interface{}, error) {
+
 	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
@@ -74,19 +82,15 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 		for _, i := range imports {
 			imp := i.(string)
-			*importsList = append(*importsList, imp)
-		}
-
-		for _, i := range imports {
-			imp := i.(string)
 			p := path.Join(dir, imp+".yaml")
 
-			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsList)
+			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
 			if err != nil {
 				return nil, nil, err
 			}
 
 			configs = append(configs, yamlConfig)
+			importsConfig[imp] = yamlConfig
 		}
 	}
 
@@ -98,7 +102,7 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 		return nil, nil, err
 	}
 
-	return result, importsList, nil
+	return result, importsConfig, nil
 }
 
 // ProcessConfig takes a raw stack config, deep-merges all variables, settings, environments and backends,
@@ -109,7 +113,7 @@ func ProcessConfig(stack string,
 	processComponentDeps bool,
 	componentTypeFilter string,
 	componentStackMap map[string]map[string][]string,
-	imports []string) (map[interface{}]interface{}, error) {
+	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
@@ -328,6 +332,16 @@ func ProcessConfig(stack string,
 					comp["stacks"] = []string{}
 				}
 
+				if processComponentDeps == true {
+					componentDeps, err := findComponentDependencies("terraform", component.(string), baseComponentName, importsConfig)
+					if err != nil {
+						return nil, err
+					}
+					comp["deps"] = componentDeps
+				} else {
+					comp["deps"] = []string{}
+				}
+
 				terraformComponents[component.(string)] = comp
 			}
 		}
@@ -384,6 +398,16 @@ func ProcessConfig(stack string,
 					comp["stacks"] = componentStacks
 				} else {
 					comp["stacks"] = []string{}
+				}
+
+				if processComponentDeps == true {
+					componentDeps, err := findComponentDependencies("helmfile", component.(string), "", importsConfig)
+					if err != nil {
+						return nil, err
+					}
+					comp["deps"] = componentDeps
+				} else {
+					comp["deps"] = []string{}
 				}
 
 				helmfileComponents[component.(string)] = comp
