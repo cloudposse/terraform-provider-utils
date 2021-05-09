@@ -27,7 +27,9 @@ func TestStackProcessor(t *testing.T) {
 	helmfileComponents := mapResult["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
 	imports := mapResult["imports"].([]interface{})
 
+	auroraPostgresComponent := terraformComponents["aurora-postgres"].(map[interface{}]interface{})
 	auroraPostgres2Component := terraformComponents["aurora-postgres-2"].(map[interface{}]interface{})
+
 	assert.Equal(t, auroraPostgres2Component["component"], "aurora-postgres")
 	assert.Equal(t, auroraPostgres2Component["settings"].(map[interface{}]interface{})["spacelift"].(map[interface{}]interface{})["branch"], "dev")
 	assert.Equal(t, "db.r4.xlarge", auroraPostgres2Component["vars"].(map[interface{}]interface{})["instance_type"])
@@ -42,12 +44,23 @@ func TestStackProcessor(t *testing.T) {
 	assert.Nil(t, auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_9"])
 
 	if processStackDeps {
-		assert.Equal(t, "globals", auroraPostgres2Component["stacks"].([]interface{})[0])
-		assert.Equal(t, "uw2-dev", auroraPostgres2Component["stacks"].([]interface{})[1])
-		assert.Equal(t, "uw2-globals", auroraPostgres2Component["stacks"].([]interface{})[2])
-		assert.Equal(t, "uw2-prod", auroraPostgres2Component["stacks"].([]interface{})[3])
-		assert.Equal(t, "uw2-staging", auroraPostgres2Component["stacks"].([]interface{})[4])
-		assert.Equal(t, "uw2-uat", auroraPostgres2Component["stacks"].([]interface{})[5])
+		assert.Equal(t, "catalog/rds-defaults", auroraPostgres2Component["stacks"].([]interface{})[0])
+		assert.Equal(t, "globals", auroraPostgres2Component["stacks"].([]interface{})[1])
+		assert.Equal(t, "uw2-dev", auroraPostgres2Component["stacks"].([]interface{})[2])
+		assert.Equal(t, "uw2-globals", auroraPostgres2Component["stacks"].([]interface{})[3])
+		assert.Equal(t, "uw2-prod", auroraPostgres2Component["stacks"].([]interface{})[4])
+		assert.Equal(t, "uw2-staging", auroraPostgres2Component["stacks"].([]interface{})[5])
+		assert.Equal(t, "uw2-uat", auroraPostgres2Component["stacks"].([]interface{})[6])
+	}
+
+	if processComponentDeps {
+		assert.Equal(t, "catalog/rds-defaults", auroraPostgresComponent["deps"].([]interface{})[0])
+		assert.Equal(t, "globals", auroraPostgresComponent["deps"].([]interface{})[1])
+		assert.Equal(t, "uw2-globals", auroraPostgresComponent["deps"].([]interface{})[2])
+
+		assert.Equal(t, "catalog/rds-defaults", auroraPostgres2Component["deps"].([]interface{})[0])
+		assert.Equal(t, "globals", auroraPostgres2Component["deps"].([]interface{})[1])
+		assert.Equal(t, "uw2-globals", auroraPostgres2Component["deps"].([]interface{})[2])
 	}
 
 	eksComponent := terraformComponents["eks"].(map[interface{}]interface{})
@@ -73,11 +86,12 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "dev", datadogHelmfileComponent["vars"].(map[interface{}]interface{})["stage"])
 	assert.Equal(t, true, datadogHelmfileComponent["vars"].(map[interface{}]interface{})["processAgent"].(map[interface{}]interface{})["enabled"])
 
-	assert.Equal(t, 4, len(imports))
+	assert.Equal(t, 5, len(imports))
 	assert.Equal(t, "catalog/eks-defaults", imports[0])
-	assert.Equal(t, "catalog/s3-defaults", imports[1])
-	assert.Equal(t, "globals", imports[2])
-	assert.Equal(t, "uw2-globals", imports[3])
+	assert.Equal(t, "catalog/rds-defaults", imports[1])
+	assert.Equal(t, "catalog/s3-defaults", imports[2])
+	assert.Equal(t, "globals", imports[3])
+	assert.Equal(t, "uw2-globals", imports[4])
 
 	yamlConfig, err := yaml.Marshal(mapResult)
 	assert.Nil(t, err)

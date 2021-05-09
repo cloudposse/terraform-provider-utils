@@ -2,6 +2,7 @@ import:
 - uw2-globals
 - catalog/eks-defaults
 - catalog/s3-defaults
+- catalog/rds-defaults
 
 vars:
   stage: uat

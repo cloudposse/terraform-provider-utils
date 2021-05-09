@@ -2,6 +2,7 @@ import:
 - uw2-globals
 - catalog/eks-defaults
 - catalog/s3-defaults
+- catalog/rds-defaults
 
 vars:
   stage: dev
@@ -64,16 +65,6 @@ components:
           autodeploy: true
           branch: ""
           triggers: []
-
-    aurora-postgres:
-      vars:
-        instance_type: db.r4.large
-        cluster_size: 1
-      env:
-        ENV_TEST_4: test4
-        ENV_TEST_5: test5
-        ENV_TEST_6: test6
-        ENV_TEST_7: test7
 
     aurora-postgres-2:
       component: aurora-postgres
