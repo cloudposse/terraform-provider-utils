@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Get PR from merged commit to master
-      - uses: actions-ecosystem/action-get-merged-pull-request@v1
+      - uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
         id: get-merged-pull-request
         with:
           github_token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
