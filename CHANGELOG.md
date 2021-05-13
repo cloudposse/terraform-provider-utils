@@ -28,7 +28,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 - Added `process_stack_deps` input var to the stack_config data source (configurable, `false` by default). Not all provider invocations need to
   process all stack dependencies for the components (e.g. Spacelift module needs it, remote-state does not). Makes invocations without processing
-  stack dependencies 2-3 times faster
+  stack dependencies 2-3 times faster.
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
