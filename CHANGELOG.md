@@ -8,7 +8,7 @@
     - `imports` - a list of all imports (all levels) for the stack
     - `stacks` - a list of all stacks in the infrastructure where the component is defined
 
-- Both `imports` and `stacks` are not 100% suitable to correctly determine the YAML config files that a component depends on
+- Both `imports` and `stacks` are not 100% suitable to correctly determine the YAML config files that a component depends on:
     - `imports` is too broad. The provider returns all direct and indirect imports for the stack, even those that don't define any variables for the
       component. This will trigger the component's stack in Spacelift even if the unrelated imports are modified resulting unrelated stack runs in
       Spacelift
