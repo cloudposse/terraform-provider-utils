@@ -1,4 +1,4 @@
-## 0.5.0
+## 0.7.0
 
 - Calculate component dependencies from stack imports
 - Added `deps` output for each component
@@ -15,6 +15,12 @@
     - `stacks` is too broad and too narrow at the same time. On the one hand, it detects all stacks in the infrastructure where the component is
       defined, but we don't need to trigger a particular stack in Spacelift if some other top-level YAML stack configs are modified. On the other
       hand, it misses the cases where a YAML stack config file specifies global variables, which are applied to the component as well
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
+## 0.6.0
+
+- Updates github release action to use 1.16
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
