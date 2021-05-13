@@ -1,6 +1,8 @@
 import:
 - uw2-globals
-- eks/eks-defaults
+- catalog/eks-defaults
+- catalog/s3-defaults
+- catalog/rds-defaults
 
 vars:
   stage: uat
@@ -97,6 +99,11 @@ components:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2
         ENV_TEST_8: test8
+
+    documents-bucket:
+      component: s3-bucket
+      vars:
+        name: "documents"
 
   helmfile:
 

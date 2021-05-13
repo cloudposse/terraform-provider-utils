@@ -7,23 +7,28 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
 	"path"
-	"path/filepath"
 	"sort"
-	"strings"
 )
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
-func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string, error) {
+func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, error) {
 	var result []string
 
 	for _, p := range filePaths {
-		config, importsList, err := ProcessYAMLConfigFile(p, &[]string{})
+		config, importsConfig, err := ProcessYAMLConfigFile(p, map[string]map[interface{}]interface{}{})
 		if err != nil {
 			return nil, err
 		}
+
+		var imports []string
+		for k := range importsConfig {
+			imports = append(imports, k)
+		}
+
+		uniqueImports := u.UniqueStrings(imports)
+		sort.Strings(uniqueImports)
 
 		componentStackMap := map[string]map[string][]string{}
 		if processStackDeps {
@@ -33,14 +38,12 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string
 			}
 		}
 
-		finalConfig, err := ProcessConfig(p, config, processStackDeps, "", componentStackMap)
+		finalConfig, err := ProcessConfig(p, config, processStackDeps, processComponentDeps, "", componentStackMap, importsConfig)
 		if err != nil {
 			return nil, err
 		}
 
-		unique := u.UniqueStrings(*importsList)
-		sort.Strings(unique)
-		finalConfig["imports"] = unique
+		finalConfig["imports"] = uniqueImports
 
 		yamlConfig, err := yaml.Marshal(finalConfig)
 		if err != nil {
@@ -56,7 +59,10 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool) ([]string
 // ProcessYAMLConfigFile takes a path to a YAML config file,
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
-func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interface{}]interface{}, *[]string, error) {
+func ProcessYAMLConfigFile(
+	filePath string,
+	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, map[string]map[interface{}]interface{}, error) {
+
 	var configs []map[interface{}]interface{}
 	dir := path.Dir(filePath)
 
@@ -76,19 +82,15 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 
 		for _, i := range imports {
 			imp := i.(string)
-			*importsList = append(*importsList, imp)
-		}
-
-		for _, i := range imports {
-			imp := i.(string)
 			p := path.Join(dir, imp+".yaml")
 
-			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsList)
+			yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
 			if err != nil {
 				return nil, nil, err
 			}
 
 			configs = append(configs, yamlConfig)
+			importsConfig[imp] = yamlConfig
 		}
 	}
 
@@ -100,7 +102,7 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 		return nil, nil, err
 	}
 
-	return result, importsList, nil
+	return result, importsConfig, nil
 }
 
 // ProcessConfig takes a raw stack config, deep-merges all variables, settings, environments and backends,
@@ -108,8 +110,10 @@ func ProcessYAMLConfigFile(filePath string, importsList *[]string) (map[interfac
 func ProcessConfig(stack string,
 	config map[interface{}]interface{},
 	processStackDeps bool,
+	processComponentDeps bool,
 	componentTypeFilter string,
-	componentStackMap map[string]map[string][]string) (map[interface{}]interface{}, error) {
+	componentStackMap map[string]map[string][]string,
+	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
@@ -328,6 +332,16 @@ func ProcessConfig(stack string,
 					comp["stacks"] = []string{}
 				}
 
+				if processComponentDeps == true {
+					componentDeps, err := findComponentDependencies("terraform", component.(string), baseComponentName, importsConfig)
+					if err != nil {
+						return nil, err
+					}
+					comp["deps"] = componentDeps
+				} else {
+					comp["deps"] = []string{}
+				}
+
 				terraformComponents[component.(string)] = comp
 			}
 		}
@@ -386,6 +400,16 @@ func ProcessConfig(stack string,
 					comp["stacks"] = []string{}
 				}
 
+				if processComponentDeps == true {
+					componentDeps, err := findComponentDependencies("helmfile", component.(string), "", importsConfig)
+					if err != nil {
+						return nil, err
+					}
+					comp["deps"] = componentDeps
+				} else {
+					comp["deps"] = []string{}
+				}
+
 				helmfileComponents[component.(string)] = comp
 			}
 		}
@@ -399,103 +423,4 @@ func ProcessConfig(stack string,
 	}
 
 	return result, nil
-}
-
-func findComponentStacks(componentType string, component string, baseComponent string, componentStackMap map[string]map[string][]string) ([]string, error) {
-	var stacks []string
-
-	if componentStackConfig, componentStackConfigExists := componentStackMap[componentType]; componentStackConfigExists {
-		if componentStacks, componentStacksExist := componentStackConfig[component]; componentStacksExist {
-			stacks = append(stacks, componentStacks...)
-		}
-
-		if baseComponent != "" {
-			if baseComponentStacks, baseComponentStacksExist := componentStackConfig[baseComponent]; baseComponentStacksExist {
-				stacks = append(stacks, baseComponentStacks...)
-			}
-		}
-	}
-
-	unique := u.UniqueStrings(stacks)
-	sort.Strings(unique)
-	return unique, nil
-}
-
-func createComponentStackMap(filePath string) (map[string]map[string][]string, error) {
-	stackComponentMap := map[string]map[string][]string{}
-	stackComponentMap["terraform"] = map[string][]string{}
-	stackComponentMap["helmfile"] = map[string][]string{}
-
-	componentStackMap := map[string]map[string][]string{}
-	componentStackMap["terraform"] = map[string][]string{}
-	componentStackMap["helmfile"] = map[string][]string{}
-
-	dir := path.Dir(filePath)
-
-	err := filepath.Walk(dir,
-		func(p string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			isDirectory, err := u.IsDirectory(p)
-			if err != nil {
-				return err
-			}
-
-			isYaml := u.IsYaml(p)
-
-			if !isDirectory && isYaml {
-				config, _, err := ProcessYAMLConfigFile(p, &[]string{})
-				if err != nil {
-					return err
-				}
-
-				finalConfig, err := ProcessConfig(p, config, false, "", nil)
-				if err != nil {
-					return err
-				}
-
-				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
-					componentsSection := componentsConfig.(map[string]interface{})
-					stackName := strings.Replace(p, dir+"/", "", 1)
-
-					if terraformConfig, terraformConfigExists := componentsSection["terraform"]; terraformConfigExists {
-						terraformSection := terraformConfig.(map[string]interface{})
-
-						for k := range terraformSection {
-							stackComponentMap["terraform"][stackName] = append(stackComponentMap["terraform"][stackName], k)
-						}
-					}
-
-					if helmfileConfig, helmfileConfigExists := componentsSection["helmfile"]; helmfileConfigExists {
-						helmfileSection := helmfileConfig.(map[string]interface{})
-
-						for k := range helmfileSection {
-							stackComponentMap["helmfile"][stackName] = append(stackComponentMap["helmfile"][stackName], k)
-						}
-					}
-				}
-			}
-
-			return nil
-		})
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stack, components := range stackComponentMap["terraform"] {
-		for _, component := range components {
-			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, ".yaml", "", 1))
-		}
-	}
-
-	for stack, components := range stackComponentMap["helmfile"] {
-		for _, component := range components {
-			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, ".yaml", "", 1))
-		}
-	}
-
-	return componentStackMap, nil
 }
