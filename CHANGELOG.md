@@ -20,7 +20,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 ## 0.6.0
 
-- Updates github release action to use 1.16
+- Updates github release action to use `go` version 1.16
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
