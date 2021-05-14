@@ -11,6 +11,9 @@ import (
 func TestStackProcessor(t *testing.T) {
 	filePaths := []string{
 		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-dev.yaml",
+		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-prod.yaml",
+		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-staging.yaml",
+		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-uat.yaml",
 	}
 
 	processStackDeps := true
@@ -18,20 +21,20 @@ func TestStackProcessor(t *testing.T) {
 
 	var yamlResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
-	assert.Equal(t, len(yamlResult), 1)
+	assert.Equal(t, 4, len(yamlResult))
 
-	mapResult, err := c.YAMLToMapOfInterfaces(yamlResult[0])
+	mapResult1, err := c.YAMLToMapOfInterfaces(yamlResult[0])
 	assert.Nil(t, err)
 
-	terraformComponents := mapResult["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
-	helmfileComponents := mapResult["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
-	imports := mapResult["imports"].([]interface{})
+	terraformComponents := mapResult1["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
+	helmfileComponents := mapResult1["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
+	imports := mapResult1["imports"].([]interface{})
 
 	auroraPostgresComponent := terraformComponents["aurora-postgres"].(map[interface{}]interface{})
 	auroraPostgres2Component := terraformComponents["aurora-postgres-2"].(map[interface{}]interface{})
 
-	assert.Equal(t, auroraPostgres2Component["component"], "aurora-postgres")
-	assert.Equal(t, auroraPostgres2Component["settings"].(map[interface{}]interface{})["spacelift"].(map[interface{}]interface{})["branch"], "dev")
+	assert.Equal(t, "aurora-postgres", auroraPostgres2Component["component"])
+	assert.Equal(t, "dev", auroraPostgres2Component["settings"].(map[interface{}]interface{})["spacelift"].(map[interface{}]interface{})["branch"])
 	assert.Equal(t, "db.r4.xlarge", auroraPostgres2Component["vars"].(map[interface{}]interface{})["instance_type"])
 	assert.Equal(t, "test1_override2", auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_1"].(string))
 	assert.Equal(t, "test2_override2", auroraPostgres2Component["env"].(map[interface{}]interface{})["ENV_TEST_2"].(string))
@@ -56,11 +59,13 @@ func TestStackProcessor(t *testing.T) {
 	if processComponentDeps {
 		assert.Equal(t, "catalog/rds-defaults", auroraPostgresComponent["deps"].([]interface{})[0])
 		assert.Equal(t, "globals", auroraPostgresComponent["deps"].([]interface{})[1])
-		assert.Equal(t, "uw2-globals", auroraPostgresComponent["deps"].([]interface{})[2])
+		assert.Equal(t, "uw2-dev", auroraPostgresComponent["deps"].([]interface{})[2])
+		assert.Equal(t, "uw2-globals", auroraPostgresComponent["deps"].([]interface{})[3])
 
 		assert.Equal(t, "catalog/rds-defaults", auroraPostgres2Component["deps"].([]interface{})[0])
 		assert.Equal(t, "globals", auroraPostgres2Component["deps"].([]interface{})[1])
-		assert.Equal(t, "uw2-globals", auroraPostgres2Component["deps"].([]interface{})[2])
+		assert.Equal(t, "uw2-dev", auroraPostgres2Component["deps"].([]interface{})[2])
+		assert.Equal(t, "uw2-globals", auroraPostgres2Component["deps"].([]interface{})[3])
 	}
 
 	eksComponent := terraformComponents["eks"].(map[interface{}]interface{})
@@ -93,7 +98,7 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "globals", imports[3])
 	assert.Equal(t, "uw2-globals", imports[4])
 
-	yamlConfig, err := yaml.Marshal(mapResult)
+	yamlConfig, err := yaml.Marshal(mapResult1)
 	assert.Nil(t, err)
 	t.Log(string(yamlConfig))
 }

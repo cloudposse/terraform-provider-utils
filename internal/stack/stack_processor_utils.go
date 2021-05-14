@@ -10,7 +10,8 @@ import (
 )
 
 // findComponentStacks finds all infrastructure stack config files where the component or the base component is defined
-func findComponentStacks(componentType string,
+func findComponentStacks(
+	componentType string,
 	component string,
 	baseComponent string,
 	componentStackMap map[string]map[string][]string) ([]string, error) {
@@ -41,6 +42,7 @@ func findComponentStacks(componentType string,
 // 3. The imported config file has the "components" section, which has the component type section, which has the component section
 // 4. The imported config file has the "components" section, which has the component type section, which has the base component section
 func findComponentDependencies(
+	stack string,
 	componentType string,
 	component string,
 	baseComponent string,
@@ -100,6 +102,7 @@ func findComponentDependencies(
 		}
 	}
 
+	deps = append(deps, stack)
 	unique := u.UniqueStrings(deps)
 	sort.Strings(unique)
 	return unique, nil
