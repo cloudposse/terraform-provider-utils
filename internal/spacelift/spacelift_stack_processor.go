@@ -1,8 +1,9 @@
-package stack
+package spacelift
 
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
+	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
 	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -44,7 +45,7 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 
 			componentStackMap := map[string]map[string][]string{}
 			if processStackDeps {
-				componentStackMap, err = CreateComponentStackMap(p)
+				componentStackMap, err = s.CreateComponentStackMap(p)
 				if err != nil {
 					errorResult = err
 					return
@@ -372,7 +373,7 @@ func ProcessConfig(
 				}
 
 				if processStackDeps == true {
-					componentStacks, err := FindComponentStacks("terraform", component.(string), baseComponentName, componentStackMap)
+					componentStacks, err := s.FindComponentStacks("terraform", component.(string), baseComponentName, componentStackMap)
 					if err != nil {
 						return nil, err
 					}
@@ -382,7 +383,7 @@ func ProcessConfig(
 				}
 
 				if processComponentDeps == true {
-					componentDeps, err := FindComponentDependencies(stackName, "terraform", component.(string), baseComponentName, importsConfig)
+					componentDeps, err := s.FindComponentDependencies(stackName, "terraform", component.(string), baseComponentName, importsConfig)
 					if err != nil {
 						return nil, err
 					}
@@ -440,7 +441,7 @@ func ProcessConfig(
 				comp["env"] = finalComponentEnv
 
 				if processStackDeps == true {
-					componentStacks, err := FindComponentStacks("helmfile", component.(string), "", componentStackMap)
+					componentStacks, err := s.FindComponentStacks("helmfile", component.(string), "", componentStackMap)
 					if err != nil {
 						return nil, err
 					}
@@ -450,7 +451,7 @@ func ProcessConfig(
 				}
 
 				if processComponentDeps == true {
-					componentDeps, err := FindComponentDependencies(stackName, "helmfile", component.(string), "", importsConfig)
+					componentDeps, err := s.FindComponentDependencies(stackName, "helmfile", component.(string), "", importsConfig)
 					if err != nil {
 						return nil, err
 					}
