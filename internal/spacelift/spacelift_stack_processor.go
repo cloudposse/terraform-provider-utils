@@ -52,15 +52,38 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 						componentEnv = i.(map[interface{}]interface{})
 					}
 
+					componentDeps := []string{}
+					if i, ok2 := componentMap["deps"]; ok2 {
+						componentDeps = i.([]string)
+					}
+
+					componentStacks := []string{}
+					if i, ok2 := componentMap["stacks"]; ok2 {
+						componentStacks = i.([]string)
+					}
+
 					spaceliftConfig := map[string]interface{}{}
+					spaceliftConfig["stack"] = stackName
 					spaceliftConfig["imports"] = imports
 					spaceliftConfig["vars"] = componentVars
 					spaceliftConfig["settings"] = componentSettings
 					spaceliftConfig["env"] = componentEnv
+					spaceliftConfig["deps"] = componentDeps
+					spaceliftConfig["stacks"] = componentStacks
+
+					spaceliftWorkspaceEnabled := false
+					if i, ok2 := componentSettings["spacelift"]; ok2 {
+						spaceliftSettings := i.(map[interface{}]interface{})
+
+						if i3, ok3 := spaceliftSettings["workspace_enabled"]; ok3 {
+							spaceliftWorkspaceEnabled = i3.(bool)
+						}
+					}
+					spaceliftConfig["enabled"] = spaceliftWorkspaceEnabled
+
 					res[spaceliftStackName] = spaceliftConfig
 				}
 			}
-
 		}
 	}
 
