@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"strings"
+	"gopkg.in/yaml.v2"
 
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 
@@ -57,7 +57,12 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	result, _, err := s.ProcessSpaceliftConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	result, err := s.ProcessSpaceliftConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	yamlConfig, err := yaml.Marshal(result)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -67,7 +72,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	id := c.MakeId([]byte(strings.Join(result, "")))
+	id := c.MakeId(yamlConfig)
 	d.SetId(id)
 
 	return nil
