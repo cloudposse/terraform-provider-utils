@@ -63,6 +63,7 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 					}
 
 					spaceliftConfig := map[string]interface{}{}
+					spaceliftConfig["component"] = component
 					spaceliftConfig["stack"] = stackName
 					spaceliftConfig["imports"] = imports
 					spaceliftConfig["vars"] = componentVars
@@ -80,6 +81,24 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 						}
 					}
 					spaceliftConfig["enabled"] = spaceliftWorkspaceEnabled
+
+					baseComponentName := ""
+					if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
+						baseComponentName = baseComponent.(string)
+					}
+					spaceliftConfig["base_component"] = baseComponentName
+
+					backendTypeName := ""
+					if backendType, backendTypeExist := componentMap["backend_type"]; backendTypeExist {
+						backendTypeName = backendType.(string)
+					}
+					spaceliftConfig["backend_type"] = backendTypeName
+
+					componentBackend := map[interface{}]interface{}{}
+					if i, ok2 := componentMap["backend"]; ok2 {
+						componentBackend = i.(map[interface{}]interface{})
+					}
+					spaceliftConfig["backend"] = componentBackend
 
 					res[spaceliftStackName] = spaceliftConfig
 				}
