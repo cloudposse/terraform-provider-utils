@@ -2,7 +2,7 @@ package spacelift
 
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-	"sort"
+	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,12 +25,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	assert.Equal(t, 4, len(listResult))
 	assert.Equal(t, 4, len(mapResult))
 
-	mapResultKeys := []string{}
-	for k := range mapResult {
-		mapResultKeys = append(mapResultKeys, k)
-	}
-	sort.Strings(mapResultKeys)
-
+	mapResultKeys := u.StringKeysFromMap(mapResult)
 	assert.Equal(t, "uw2-dev", mapResultKeys[0])
 	assert.Equal(t, "uw2-prod", mapResultKeys[1])
 	assert.Equal(t, "uw2-staging", mapResultKeys[2])
