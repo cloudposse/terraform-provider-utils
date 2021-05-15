@@ -6,7 +6,7 @@ import (
 
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 
-	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
+	s "github.com/cloudposse/terraform-provider-utils/internal/spacelift"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -57,7 +57,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	result, _, err := s.ProcessYAMLConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	result, _, err := s.ProcessSpaceliftConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
 	if err != nil {
 		return diag.FromErr(err)
 	}

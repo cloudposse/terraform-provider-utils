@@ -20,7 +20,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var listResult, mapResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
+	var listResult, mapResult, err = ProcessSpaceliftConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(listResult))
 	assert.Equal(t, 4, len(mapResult))
