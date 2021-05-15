@@ -15,9 +15,10 @@ import (
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
-func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, error) {
+func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, map[string]interface{}, error) {
 	count := len(filePaths)
-	result := make([]string, count)
+	listResult := make([]string, count)
+	mapResult := map[string]interface{}{}
 	var errorResult error
 	var wg sync.WaitGroup
 	wg.Add(count)
@@ -64,19 +65,22 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 				return
 			}
 
+			stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(p), ".yaml"), ".yml")
+
 			mu.Lock()
 			defer mu.Unlock()
 
-			result[i] = string(yamlConfig)
+			listResult[i] = string(yamlConfig)
+			mapResult[stackName] = finalConfig
 		}(i, filePath)
 	}
 
 	wg.Wait()
 
 	if errorResult != nil {
-		return nil, errorResult
+		return nil, nil, errorResult
 	}
-	return result, nil
+	return listResult, mapResult, nil
 }
 
 // ProcessYAMLConfigFile takes a path to a YAML config file,

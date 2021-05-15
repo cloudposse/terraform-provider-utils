@@ -2,6 +2,7 @@ package stack
 
 import (
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,16 +20,28 @@ func TestStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var yamlResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
+	var listResult, mapResult, err = ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
-	assert.Equal(t, 4, len(yamlResult))
+	assert.Equal(t, 4, len(listResult))
+	assert.Equal(t, 4, len(mapResult))
 
-	mapResult1, err := c.YAMLToMapOfInterfaces(yamlResult[0])
+	mapResultKeys := []string{}
+	for k := range mapResult {
+		mapResultKeys = append(mapResultKeys, k)
+	}
+
+	sort.Strings(mapResultKeys)
+	assert.Equal(t, "uw2-dev", mapResultKeys[0])
+	assert.Equal(t, "uw2-prod", mapResultKeys[1])
+	assert.Equal(t, "uw2-staging", mapResultKeys[2])
+	assert.Equal(t, "uw2-uat", mapResultKeys[3])
+
+	mapConfig1, err := c.YAMLToMapOfInterfaces(listResult[0])
 	assert.Nil(t, err)
 
-	terraformComponents := mapResult1["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
-	helmfileComponents := mapResult1["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
-	imports := mapResult1["imports"].([]interface{})
+	terraformComponents := mapConfig1["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
+	helmfileComponents := mapConfig1["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
+	imports := mapConfig1["imports"].([]interface{})
 
 	auroraPostgresComponent := terraformComponents["aurora-postgres"].(map[interface{}]interface{})
 	auroraPostgres2Component := terraformComponents["aurora-postgres-2"].(map[interface{}]interface{})
@@ -98,7 +111,7 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "globals", imports[3])
 	assert.Equal(t, "uw2-globals", imports[4])
 
-	yamlConfig, err := yaml.Marshal(mapResult1)
+	yamlConfig, err := yaml.Marshal(mapConfig1)
 	assert.Nil(t, err)
 	t.Log(string(yamlConfig))
 }
