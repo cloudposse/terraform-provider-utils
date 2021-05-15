@@ -29,8 +29,8 @@ func TestStackProcessor(t *testing.T) {
 	for k := range mapResult {
 		mapResultKeys = append(mapResultKeys, k)
 	}
-
 	sort.Strings(mapResultKeys)
+
 	assert.Equal(t, "uw2-dev", mapResultKeys[0])
 	assert.Equal(t, "uw2-prod", mapResultKeys[1])
 	assert.Equal(t, "uw2-staging", mapResultKeys[2])
@@ -41,7 +41,11 @@ func TestStackProcessor(t *testing.T) {
 
 	terraformComponents := mapConfig1["components"].(map[interface{}]interface{})["terraform"].(map[interface{}]interface{})
 	helmfileComponents := mapConfig1["components"].(map[interface{}]interface{})["helmfile"].(map[interface{}]interface{})
+
 	imports := mapConfig1["imports"].([]interface{})
+
+	mapConfig2 := mapResult["uw2-dev"]
+	assert.Equal(t, len(imports), len(mapConfig2.(map[interface{}]interface{})["imports"].([]string)))
 
 	auroraPostgresComponent := terraformComponents["aurora-postgres"].(map[interface{}]interface{})
 	auroraPostgres2Component := terraformComponents["aurora-postgres-2"].(map[interface{}]interface{})
