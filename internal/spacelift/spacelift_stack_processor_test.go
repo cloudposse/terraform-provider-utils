@@ -1,7 +1,6 @@
 package spacelift
 
 import (
-	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"gopkg.in/yaml.v2"
 	"testing"
 
@@ -19,17 +18,10 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var mapResult, err = ProcessSpaceliftConfigFiles(filePaths, processStackDeps, processComponentDeps)
+	var spaceliftStacks, err = CreateSpaceliftStacks(filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
-	assert.Equal(t, 4, len(mapResult))
 
-	mapResultKeys := u.StringKeysFromMap(mapResult)
-	assert.Equal(t, "uw2-dev", mapResultKeys[0])
-	assert.Equal(t, "uw2-prod", mapResultKeys[1])
-	assert.Equal(t, "uw2-staging", mapResultKeys[2])
-	assert.Equal(t, "uw2-uat", mapResultKeys[3])
-
-	yamlConfig, err := yaml.Marshal(mapResult)
+	yamlSpaceliftStacks, err := yaml.Marshal(spaceliftStacks)
 	assert.Nil(t, err)
-	t.Log(string(yamlConfig))
+	t.Log(string(yamlSpaceliftStacks))
 }

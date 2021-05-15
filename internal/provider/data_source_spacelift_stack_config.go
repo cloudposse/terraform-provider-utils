@@ -57,17 +57,17 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	result, err := s.ProcessSpaceliftConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	spaceliftStacks, err := s.CreateSpaceliftStacks(paths, processStackDeps.(bool), processComponentDeps.(bool))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	yamlConfig, err := yaml.Marshal(result)
+	yamlConfig, err := yaml.Marshal(spaceliftStacks)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("output", result)
+	err = d.Set("output", spaceliftStacks)
 	if err != nil {
 		return diag.FromErr(err)
 	}
