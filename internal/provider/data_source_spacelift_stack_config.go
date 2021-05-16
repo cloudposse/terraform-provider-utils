@@ -37,6 +37,11 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"stack_config_path_template": {
+				Description: "Stack config path template.",
+				Type:        schema.TypeString,
+				Required:    true,
+			},
 			"output": {
 				Description: "A map of Spacelift stack configurations.",
 				Type:        schema.TypeString,
@@ -50,13 +55,14 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
+	stackConfigPathTemplate := d.Get("stack_config_path_template")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	spaceliftStacks, err := s.CreateSpaceliftStacks(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	spaceliftStacks, err := s.CreateSpaceliftStacks(paths, processStackDeps.(bool), processComponentDeps.(bool), stackConfigPathTemplate.(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}

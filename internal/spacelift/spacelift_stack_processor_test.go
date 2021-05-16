@@ -17,8 +17,9 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 
 	processStackDeps := true
 	processComponentDeps := true
+	stackConfigPathTemplate := "stacks/%s.yaml"
 
-	var spaceliftStacks, err = CreateSpaceliftStacks(filePaths, processStackDeps, processComponentDeps)
+	var spaceliftStacks, err = CreateSpaceliftStacks(filePaths, processStackDeps, processComponentDeps, stackConfigPathTemplate)
 	assert.Nil(t, err)
 
 	yamlSpaceliftStacks, err := yaml.Marshal(spaceliftStacks)

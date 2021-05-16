@@ -16,9 +16,10 @@ locals {
 }
 
 data "utils_spacelift_stack_config" "example" {
-  input                  = local.stack_config_files
-  process_stack_deps     = false
-  process_component_deps = true
+  input                      = local.stack_config_files
+  process_stack_deps         = false
+  process_component_deps     = true
+  stack_config_path_template = "stacks/%s.yaml"
 }
 
 locals {

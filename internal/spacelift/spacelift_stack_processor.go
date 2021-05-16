@@ -7,16 +7,16 @@ import (
 
 // CreateSpaceliftStacks takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a map of Spacelift stack configs
-func CreateSpaceliftStacks(filePaths []string, processStackDeps bool, processComponentDeps bool) (map[string]interface{}, error) {
+func CreateSpaceliftStacks(filePaths []string, processStackDeps bool, processComponentDeps bool, stackConfigPathTemplate string) (map[string]interface{}, error) {
 	var _, mapResult, err = s.ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	if err != nil {
 		return nil, err
 	}
-	return TransformStackConfigToSpaceliftStacks(mapResult)
+	return TransformStackConfigToSpaceliftStacks(mapResult, stackConfigPathTemplate)
 }
 
 // TransformStackConfigToSpaceliftStacks takes a a map of stack configs and transforms it to a map of Spacelift stacks
-func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[string]interface{}, error) {
+func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackConfigPathTemplate string) (map[string]interface{}, error) {
 	res := map[string]interface{}{}
 
 	for stackName, stackConfig := range stacks {
@@ -111,6 +111,18 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 						workspace = fmt.Sprintf("%s-%s", stackName, component)
 					}
 					spaceliftConfig["workspace"] = workspace
+
+					labels := []string{}
+					for _, v := range imports {
+						labels = append(labels, fmt.Sprintf("import:"+stackConfigPathTemplate, v))
+					}
+					for _, v := range componentStacks {
+						labels = append(labels, fmt.Sprintf("stack:"+stackConfigPathTemplate, v))
+					}
+					for _, v := range componentDeps {
+						labels = append(labels, fmt.Sprintf("deps:"+stackConfigPathTemplate, v))
+					}
+					spaceliftConfig["labels"] = labels
 
 					spaceliftStackName := fmt.Sprintf("%s-%s", stackName, component)
 					res[spaceliftStackName] = spaceliftConfig
