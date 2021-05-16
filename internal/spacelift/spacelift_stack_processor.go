@@ -36,14 +36,30 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 				for component, v := range terraformComponentsMap {
 					componentMap := v.(map[string]interface{})
 
-					componentVars := map[interface{}]interface{}{}
-					if i, ok2 := componentMap["vars"]; ok2 {
-						componentVars = i.(map[interface{}]interface{})
-					}
-
 					componentSettings := map[interface{}]interface{}{}
 					if i, ok2 := componentMap["settings"]; ok2 {
 						componentSettings = i.(map[interface{}]interface{})
+					}
+
+					spaceliftWorkspaceEnabled := false
+					if i, ok2 := componentSettings["spacelift"]; ok2 {
+						spaceliftSettings := i.(map[interface{}]interface{})
+
+						if i3, ok3 := spaceliftSettings["workspace_enabled"]; ok3 {
+							spaceliftWorkspaceEnabled = i3.(bool)
+						}
+					}
+
+					if spaceliftWorkspaceEnabled == false {
+						continue
+					}
+
+					spaceliftConfig := map[string]interface{}{}
+					spaceliftConfig["enabled"] = spaceliftWorkspaceEnabled
+
+					componentVars := map[interface{}]interface{}{}
+					if i, ok2 := componentMap["vars"]; ok2 {
+						componentVars = i.(map[interface{}]interface{})
 					}
 
 					componentEnv := map[interface{}]interface{}{}
@@ -61,7 +77,6 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 						componentStacks = i.([]string)
 					}
 
-					spaceliftConfig := map[string]interface{}{}
 					spaceliftConfig["component"] = component
 					spaceliftConfig["stack"] = stackName
 					spaceliftConfig["imports"] = imports
@@ -70,16 +85,6 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 					spaceliftConfig["env"] = componentEnv
 					spaceliftConfig["deps"] = componentDeps
 					spaceliftConfig["stacks"] = componentStacks
-
-					spaceliftWorkspaceEnabled := false
-					if i, ok2 := componentSettings["spacelift"]; ok2 {
-						spaceliftSettings := i.(map[interface{}]interface{})
-
-						if i3, ok3 := spaceliftSettings["workspace_enabled"]; ok3 {
-							spaceliftWorkspaceEnabled = i3.(bool)
-						}
-					}
-					spaceliftConfig["enabled"] = spaceliftWorkspaceEnabled
 
 					baseComponentName := ""
 					if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
