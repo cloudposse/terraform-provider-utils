@@ -3,6 +3,7 @@ package spacelift
 import (
 	"fmt"
 	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
+	"strings"
 )
 
 // CreateSpaceliftStacks takes a list of paths to YAML config files, processes and deep-merges all imports,
@@ -50,6 +51,7 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackC
 						}
 					}
 
+					// If Spacelift workspace is disabled, don't include it
 					if spaceliftWorkspaceEnabled == false {
 						continue
 					}
@@ -92,6 +94,7 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackC
 					}
 					spaceliftConfig["base_component"] = baseComponentName
 
+					// backend
 					backendTypeName := ""
 					if backendType, backendTypeExist := componentMap["backend_type"]; backendTypeExist {
 						backendTypeName = backendType.(string)
@@ -104,6 +107,7 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackC
 					}
 					spaceliftConfig["backend"] = componentBackend
 
+					// workspace
 					var workspace string
 					if backendTypeName == "s3" && baseComponentName == "" {
 						workspace = stackName
@@ -112,6 +116,7 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackC
 					}
 					spaceliftConfig["workspace"] = workspace
 
+					// labels
 					labels := []string{}
 					for _, v := range imports {
 						labels = append(labels, fmt.Sprintf("import:"+stackConfigPathTemplate, v))
@@ -122,8 +127,18 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackC
 					for _, v := range componentDeps {
 						labels = append(labels, fmt.Sprintf("deps:"+stackConfigPathTemplate, v))
 					}
+					labels = append(labels, fmt.Sprintf("folder:component/%s", component))
+					stackNameParts := strings.SplitN(stackName, "-", 2)
+					stackNamePartsLen := len(stackNameParts)
+					if stackNamePartsLen > 0 {
+						labels = append(labels, fmt.Sprintf("folder:%s", stackNameParts[0]))
+					}
+					if stackNamePartsLen == 2 {
+						labels = append(labels, fmt.Sprintf("folder:%s/%s", stackNameParts[0], stackNameParts[1]))
+					}
 					spaceliftConfig["labels"] = labels
 
+					// Add Spacelift stack config to the final map
 					spaceliftStackName := fmt.Sprintf("%s-%s", stackName, component)
 					res[spaceliftStackName] = spaceliftConfig
 				}
