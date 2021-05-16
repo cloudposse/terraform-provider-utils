@@ -34,7 +34,6 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 				terraformComponentsMap := terraformComponents.(map[string]interface{})
 
 				for component, v := range terraformComponentsMap {
-					spaceliftStackName := fmt.Sprintf("%s-%s", stackName, component)
 					componentMap := v.(map[string]interface{})
 
 					componentVars := map[interface{}]interface{}{}
@@ -100,6 +99,15 @@ func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}) (map[s
 					}
 					spaceliftConfig["backend"] = componentBackend
 
+					var workspace string
+					if backendTypeName == "s3" && baseComponentName == "" {
+						workspace = stackName
+					} else {
+						workspace = fmt.Sprintf("%s-%s", stackName, component)
+					}
+					spaceliftConfig["workspace"] = workspace
+
+					spaceliftStackName := fmt.Sprintf("%s-%s", stackName, component)
 					res[spaceliftStackName] = spaceliftConfig
 				}
 			}
