@@ -39,8 +39,7 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 			},
 			"output": {
 				Description: "A map of Spacelift stack configurations.",
-				Type:        schema.TypeList,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeString,
 				Computed:    true,
 			},
 		},
@@ -67,7 +66,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("output", spaceliftStacks)
+	err = d.Set("output", string(yamlConfig))
 	if err != nil {
 		return diag.FromErr(err)
 	}
