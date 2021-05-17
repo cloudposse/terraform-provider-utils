@@ -9,8 +9,9 @@ import (
 	"strings"
 )
 
-// findComponentStacks finds all infrastructure stack config files where the component or the base component is defined
-func findComponentStacks(componentType string,
+// FindComponentStacks finds all infrastructure stack config files where the component or the base component is defined
+func FindComponentStacks(
+	componentType string,
 	component string,
 	baseComponent string,
 	componentStackMap map[string]map[string][]string) ([]string, error) {
@@ -34,13 +35,14 @@ func findComponentStacks(componentType string,
 	return unique, nil
 }
 
-// findComponentDependencies finds all imports where the component or the base component is defined
+// FindComponentDependencies finds all imports where the component or the base component is defined
 // Component depends on the imported config file if any of the following conditions is true:
 // 1. The imported config file has the global `vars` section and it's not empty
 // 2. The imported config file has the component type section, which has a `vars` section which is not empty
 // 3. The imported config file has the "components" section, which has the component type section, which has the component section
 // 4. The imported config file has the "components" section, which has the component type section, which has the base component section
-func findComponentDependencies(
+func FindComponentDependencies(
+	stack string,
 	componentType string,
 	component string,
 	baseComponent string,
@@ -100,12 +102,14 @@ func findComponentDependencies(
 		}
 	}
 
+	deps = append(deps, stack)
 	unique := u.UniqueStrings(deps)
 	sort.Strings(unique)
 	return unique, nil
 }
 
-func createComponentStackMap(filePath string) (map[string]map[string][]string, error) {
+// CreateComponentStackMap accepts a config file and creates a map of component-stack dependencies
+func CreateComponentStackMap(filePath string) (map[string]map[string][]string, error) {
 	stackComponentMap := map[string]map[string][]string{}
 	stackComponentMap["terraform"] = map[string][]string{}
 	stackComponentMap["helmfile"] = map[string][]string{}

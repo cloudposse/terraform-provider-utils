@@ -1,3 +1,12 @@
+## 0.8.0
+
+- Convert infrastructure YAML stack configs into Spacelift stack configs
+- Added `utils_spacelift_stack_config` data source
+- Added `examples/data-sources/utils_spacelift_stack_config` example
+- Use `goroutines` and `WaitGroup` to process a list of infrastructure YAML stack configs concurrently to speed up processing
+
+BACKWARDS INCOMPATIBILITIES / NOTES:
+
 ## 0.7.0
 
 - Calculate component dependencies from stack imports
@@ -10,8 +19,8 @@
 
 - Both `imports` and `stacks` are not 100% suitable to correctly determine the YAML config files that a component depends on:
     - `imports` is too broad. The provider returns all direct and indirect imports for the stack, even those that don't define any variables for the
-      component. This will trigger the component's stack in Spacelift even if the unrelated imports are modified, resulting in unnecessary stack runs in
-      Spacelift
+      component. This will trigger the component's stack in Spacelift even if the unrelated imports are modified, resulting in unnecessary stack runs
+      in Spacelift
     - `stacks` is too broad and too narrow at the same time. On the one hand, it detects all stacks in the infrastructure where the component is
       defined, but we don't need to trigger a particular stack in Spacelift if some other top-level YAML stack configs are modified. On the other
       hand, it misses the cases where a YAML stack config file specifies global variables, which are applied to the component as well
@@ -20,7 +29,7 @@ BACKWARDS INCOMPATIBILITIES / NOTES:
 
 ## 0.6.0
 
-- Updates github release action to use `go` version 1.16
+- Updates GitHub release action to use `go` version 1.16
 
 BACKWARDS INCOMPATIBILITIES / NOTES:
 
