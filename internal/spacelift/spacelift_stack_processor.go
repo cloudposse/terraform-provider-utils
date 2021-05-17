@@ -8,24 +8,35 @@ import (
 
 // CreateSpaceliftStacks takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a map of Spacelift stack configs
-func CreateSpaceliftStacks(filePaths []string, processStackDeps bool, processComponentDeps bool, stackConfigPathTemplate string) (map[string]interface{}, error) {
+func CreateSpaceliftStacks(
+	filePaths []string,
+	processStackDeps bool,
+	processComponentDeps bool,
+	processImports bool,
+	stackConfigPathTemplate string) (map[string]interface{}, error) {
 	var _, mapResult, err = s.ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
 	if err != nil {
 		return nil, err
 	}
-	return TransformStackConfigToSpaceliftStacks(mapResult, stackConfigPathTemplate)
+	return TransformStackConfigToSpaceliftStacks(mapResult, stackConfigPathTemplate, processImports)
 }
 
 // TransformStackConfigToSpaceliftStacks takes a a map of stack configs and transforms it to a map of Spacelift stacks
-func TransformStackConfigToSpaceliftStacks(stacks map[string]interface{}, stackConfigPathTemplate string) (map[string]interface{}, error) {
+func TransformStackConfigToSpaceliftStacks(
+	stacks map[string]interface{},
+	stackConfigPathTemplate string,
+	processImports bool) (map[string]interface{}, error) {
+
 	res := map[string]interface{}{}
 
 	for stackName, stackConfig := range stacks {
 		config := stackConfig.(map[interface{}]interface{})
 		imports := []string{}
 
-		if i, ok := config["imports"]; ok {
-			imports = i.([]string)
+		if processImports == true {
+			if i, ok := config["imports"]; ok {
+				imports = i.([]string)
+			}
 		}
 
 		if i, ok := config["components"]; ok {

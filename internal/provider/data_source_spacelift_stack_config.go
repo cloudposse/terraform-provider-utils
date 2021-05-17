@@ -37,6 +37,12 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"process_imports": {
+				Description: "A boolean flag to enable/disable processing stack imports.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"stack_config_path_template": {
 				Description: "Stack config path template.",
 				Type:        schema.TypeString,
@@ -55,6 +61,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
+	processImports := d.Get("process_imports")
 	stackConfigPathTemplate := d.Get("stack_config_path_template")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
@@ -62,7 +69,13 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	spaceliftStacks, err := s.CreateSpaceliftStacks(paths, processStackDeps.(bool), processComponentDeps.(bool), stackConfigPathTemplate.(string))
+	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		paths,
+		processStackDeps.(bool),
+		processComponentDeps.(bool),
+		processImports.(bool),
+		stackConfigPathTemplate.(string))
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
