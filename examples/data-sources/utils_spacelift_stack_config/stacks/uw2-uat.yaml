@@ -95,6 +95,8 @@ components:
           autodeploy: true
           branch: "test4"
           triggers: ["7", "8", "9"]
+          labels:
+            - "deps:config/secrets/uat-internal-secrets.yml"
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2

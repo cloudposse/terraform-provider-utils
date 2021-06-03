@@ -86,6 +86,8 @@ components:
           autodeploy: true
           branch: ""
           triggers: []
+          labels:
+            - "deps:config/secrets/prod-internal-secrets.yml"
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2

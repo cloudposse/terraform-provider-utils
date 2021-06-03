@@ -76,6 +76,8 @@ components:
           autodeploy: true
           branch: "dev"
           triggers: []
+          labels:
+            - "deps:config/secrets/dev-internal-secrets.yml"
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2
