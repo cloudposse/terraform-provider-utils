@@ -9,10 +9,10 @@ import (
 
 func TestSpaceliftStackProcessor(t *testing.T) {
 	filePaths := []string{
-		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-dev.yaml",
-		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-prod.yaml",
-		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-staging.yaml",
-		"../../examples/data-sources/utils_stack_config_yaml/stacks/uw2-uat.yaml",
+		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-dev.yaml",
+		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-prod.yaml",
+		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-staging.yaml",
+		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-uat.yaml",
 	}
 
 	processStackDeps := true

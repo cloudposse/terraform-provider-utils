@@ -53,18 +53,25 @@ func TransformStackConfigToSpaceliftStacks(
 						componentSettings = i.(map[interface{}]interface{})
 					}
 
+					spaceliftSettings := map[interface{}]interface{}{}
 					spaceliftWorkspaceEnabled := false
+
 					if i, ok2 := componentSettings["spacelift"]; ok2 {
-						spaceliftSettings := i.(map[interface{}]interface{})
+						spaceliftSettings = i.(map[interface{}]interface{})
 
 						if i3, ok3 := spaceliftSettings["workspace_enabled"]; ok3 {
 							spaceliftWorkspaceEnabled = i3.(bool)
 						}
 					}
 
-					// If Spacelift workspace is disabled, don't include it
+					// If Spacelift workspace is disabled, don't include it, continue to the next component
 					if spaceliftWorkspaceEnabled == false {
 						continue
+					}
+
+					spaceliftExplicitLabels := []interface{}{}
+					if i, ok2 := spaceliftSettings["labels"]; ok2 {
+						spaceliftExplicitLabels = i.([]interface{})
 					}
 
 					spaceliftConfig := map[string]interface{}{}
@@ -137,6 +144,9 @@ func TransformStackConfigToSpaceliftStacks(
 					}
 					for _, v := range componentDeps {
 						labels = append(labels, fmt.Sprintf("deps:"+stackConfigPathTemplate, v))
+					}
+					for _, v := range spaceliftExplicitLabels {
+						labels = append(labels, v.(string))
 					}
 					labels = append(labels, fmt.Sprintf("folder:component/%s", component))
 					// Split on the first `-` and get the two parts: environment and stage
