@@ -97,9 +97,11 @@ components:
           triggers: ["7", "8", "9"]
           labels:
             - "deps:config/secrets/uat-internal-secrets.yml"
-          depends_on:
+          depends_on_component:
             - vpc
             - dns-delegated
+          depends_on_stack:
+            - gbl-uat-dns-primary
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2

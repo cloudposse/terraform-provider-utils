@@ -74,9 +74,14 @@ func TransformStackConfigToSpaceliftStacks(
 						spaceliftExplicitLabels = i.([]interface{})
 					}
 
-					spaceliftDependsOn := []interface{}{}
-					if i, ok2 := spaceliftSettings["depends_on"]; ok2 {
-						spaceliftDependsOn = i.([]interface{})
+					spaceliftDependsOnComponent := []interface{}{}
+					if i, ok2 := spaceliftSettings["depends_on_component"]; ok2 {
+						spaceliftDependsOnComponent = i.([]interface{})
+					}
+
+					spaceliftDependsOnStack := []interface{}{}
+					if i, ok2 := spaceliftSettings["depends_on_stack"]; ok2 {
+						spaceliftDependsOnStack = i.([]interface{})
 					}
 
 					spaceliftConfig := map[string]interface{}{}
@@ -153,8 +158,11 @@ func TransformStackConfigToSpaceliftStacks(
 					for _, v := range spaceliftExplicitLabels {
 						labels = append(labels, v.(string))
 					}
-					for _, v := range spaceliftDependsOn {
+					for _, v := range spaceliftDependsOnComponent {
 						labels = append(labels, fmt.Sprintf("depends-on:%s-%s", stackName, v))
+					}
+					for _, v := range spaceliftDependsOnStack {
+						labels = append(labels, fmt.Sprintf("depends-on:%s", v))
 					}
 					labels = append(labels, fmt.Sprintf("folder:component/%s", component))
 					// Split on the first `-` and get the two parts: environment and stage
