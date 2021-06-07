@@ -51,6 +51,8 @@ components:
           autodeploy: true
           branch: "test"
           triggers: []
+          depends-on:
+            - vpc
       env:
         ENV_TEST_1: test1_override
         ENV_TEST_2: test2_override
@@ -78,6 +80,9 @@ components:
           triggers: []
           labels:
             - "deps:config/secrets/dev-internal-secrets.yml"
+          depends-on:
+            - vpc
+            - dns-delegated
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2
