@@ -88,7 +88,7 @@ components:
           triggers: []
           labels:
             - "deps:config/secrets/prod-internal-secrets.yml"
-          depends-on:
+          depends_on:
             - vpc
             - dns-delegated
       env:

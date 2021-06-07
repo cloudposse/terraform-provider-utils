@@ -75,7 +75,7 @@ func TransformStackConfigToSpaceliftStacks(
 					}
 
 					spaceliftDependsOn := []interface{}{}
-					if i, ok2 := spaceliftSettings["depends-on"]; ok2 {
+					if i, ok2 := spaceliftSettings["depends_on"]; ok2 {
 						spaceliftDependsOn = i.([]interface{})
 					}
 

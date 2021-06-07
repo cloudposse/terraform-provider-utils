@@ -97,7 +97,7 @@ components:
           triggers: ["7", "8", "9"]
           labels:
             - "deps:config/secrets/uat-internal-secrets.yml"
-          depends-on:
+          depends_on:
             - vpc
             - dns-delegated
       env:
