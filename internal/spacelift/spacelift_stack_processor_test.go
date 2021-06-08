@@ -13,6 +13,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-prod.yaml",
 		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-staging.yaml",
 		"../../examples/data-sources/utils_spacelift_stack_config/stacks/uw2-uat.yaml",
+		"../../examples/data-sources/utils_spacelift_stack_config/stacks/gbl-dns.yaml",
 	}
 
 	processStackDeps := true

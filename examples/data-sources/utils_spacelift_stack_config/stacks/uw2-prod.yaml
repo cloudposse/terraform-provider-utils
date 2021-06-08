@@ -1,8 +1,8 @@
 import:
-- uw2-globals
-- catalog/eks-defaults
-- catalog/s3-defaults
-- catalog/rds-defaults
+  - uw2-globals
+  - catalog/eks-defaults
+  - catalog/s3-defaults
+  - catalog/rds-defaults
 
 vars:
   stage: prod
@@ -88,11 +88,10 @@ components:
           triggers: []
           labels:
             - "deps:config/secrets/prod-internal-secrets.yml"
-          depends_on_component:
+          depends_on:
             - vpc
             - dns-delegated
-          depends_on_stack:
-            - gbl-prod-dns-primary
+            - gbl-dns-dns-primary
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2
