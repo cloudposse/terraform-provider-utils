@@ -1,8 +1,8 @@
 import:
-- uw2-globals
-- catalog/eks-defaults
-- catalog/s3-defaults
-- catalog/rds-defaults
+  - uw2-globals
+  - catalog/eks-defaults
+  - catalog/s3-defaults
+  - catalog/rds-defaults
 
 vars:
   stage: dev
@@ -51,6 +51,8 @@ components:
           autodeploy: true
           branch: "test"
           triggers: []
+          depends_on:
+            - vpc
       env:
         ENV_TEST_1: test1_override
         ENV_TEST_2: test2_override
@@ -78,6 +80,10 @@ components:
           triggers: []
           labels:
             - "deps:config/secrets/dev-internal-secrets.yml"
+          depends_on:
+            - vpc
+            - dns-delegated
+            - gbl-dns-dns-primary
       env:
         ENV_TEST_1: test1_override2
         ENV_TEST_2: test2_override2
