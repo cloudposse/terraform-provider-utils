@@ -13,6 +13,11 @@ import (
 	"sync"
 )
 
+var (
+	// Mutex to serialize updates of the result map of ProcessYAMLConfigFile function
+	processYAMLConfigFileLock = &sync.Mutex{}
+)
+
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
 func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, map[string]interface{}, error) {
@@ -22,7 +27,6 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 	var errorResult error
 	var wg sync.WaitGroup
 	wg.Add(count)
-	mu := &sync.Mutex{}
 
 	for i, filePath := range filePaths {
 		go func(i int, p string) {
@@ -67,8 +71,8 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 
 			stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(p), ".yaml"), ".yml")
 
-			mu.Lock()
-			defer mu.Unlock()
+			processYAMLConfigFileLock.Lock()
+			defer processYAMLConfigFileLock.Unlock()
 
 			listResult[i] = string(yamlConfig)
 			mapResult[stackName] = finalConfig
@@ -111,7 +115,7 @@ func ProcessYAMLConfigFile(
 		var errorResult error
 		var wg sync.WaitGroup
 		wg.Add(count)
-		mu := &sync.Mutex{}
+		lock := &sync.Mutex{}
 
 		for _, im := range imports {
 			imp := im.(string)
@@ -126,8 +130,8 @@ func ProcessYAMLConfigFile(
 					return
 				}
 
-				mu.Lock()
-				defer mu.Unlock()
+				lock.Lock()
+				defer lock.Unlock()
 				configs = append(configs, yamlConfig)
 				importsConfig[imp] = yamlConfig
 			}(p)
