@@ -14,6 +14,9 @@ import (
 )
 
 var (
+	// Mutex to serialize updates of the result map of ProcessYAMLConfigFiles function
+	processYAMLConfigFilesLock = &sync.Mutex{}
+
 	// Mutex to serialize updates of the result map of ProcessYAMLConfigFile function
 	processYAMLConfigFileLock = &sync.Mutex{}
 )
@@ -71,8 +74,8 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 
 			stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(p), ".yaml"), ".yml")
 
-			processYAMLConfigFileLock.Lock()
-			defer processYAMLConfigFileLock.Unlock()
+			processYAMLConfigFilesLock.Lock()
+			defer processYAMLConfigFilesLock.Unlock()
 
 			listResult[i] = string(yamlConfig)
 			mapResult[stackName] = finalConfig
@@ -115,7 +118,6 @@ func ProcessYAMLConfigFile(
 		var errorResult error
 		var wg sync.WaitGroup
 		wg.Add(count)
-		lock := &sync.Mutex{}
 
 		for _, im := range imports {
 			imp := im.(string)
@@ -130,8 +132,8 @@ func ProcessYAMLConfigFile(
 					return
 				}
 
-				lock.Lock()
-				defer lock.Unlock()
+				processYAMLConfigFileLock.Lock()
+				defer processYAMLConfigFileLock.Unlock()
 				configs = append(configs, yamlConfig)
 				importsConfig[imp] = yamlConfig
 			}(p)
@@ -140,7 +142,7 @@ func ProcessYAMLConfigFile(
 		wg.Wait()
 
 		if errorResult != nil {
-			return nil, nil, err
+			return nil, nil, errorResult
 		}
 	}
 
