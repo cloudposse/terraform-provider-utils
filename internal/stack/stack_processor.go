@@ -125,13 +125,13 @@ func ProcessYAMLConfigFile(
 		for _, im := range imports {
 			imp := im.(string)
 
-			// If an import file is specified without extension, add `.yaml` as default
-			var impWithExt string
+			// If the import file is specified without extension, add `.yaml` as default
+			impWithExt := imp
 			ext := filepath.Ext(imp)
 			if ext == "" {
 				ext = ".yaml"
+				impWithExt = imp + ext
 			}
-			impWithExt = imp + ext
 
 			// Find all matches in the glob
 			impWithExtPath := path.Join(dir, impWithExt)
