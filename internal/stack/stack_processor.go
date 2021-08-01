@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -121,7 +122,16 @@ func ProcessYAMLConfigFile(
 
 		for _, im := range imports {
 			imp := im.(string)
-			p := path.Join(dir, imp+".yaml")
+			var impWithExt string
+			ext := filepath.Ext(imp)
+
+			if ext == "" {
+				impWithExt = imp + ".yaml"
+			} else {
+				impWithExt = imp
+			}
+
+			p := path.Join(dir, impWithExt)
 
 			go func(p string) {
 				defer wg.Done()
