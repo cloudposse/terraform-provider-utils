@@ -122,31 +122,44 @@ func ProcessYAMLConfigFile(
 
 		for _, im := range imports {
 			imp := im.(string)
+
+			// If an import file is specified without extension, add `.yaml` as default
 			var impWithExt string
 			ext := filepath.Ext(imp)
-
 			if ext == "" {
 				impWithExt = imp + ".yaml"
 			} else {
 				impWithExt = imp
 			}
 
-			p := path.Join(dir, impWithExt)
+			// Find all matches in the blob
+			impWithExtPath := path.Join(dir, impWithExt)
+			matches, err := filepath.Glob(impWithExtPath)
+			if err != nil {
+				return nil, nil, err
+			}
 
-			go func(p string) {
-				defer wg.Done()
+			// If we import a blob with more than 1 file, add the difference to the WaitGroup
+			if len(matches) > 1 {
+				wg.Add(len(matches) - 1)
+			}
 
-				yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
-				if err != nil {
-					errorResult = err
-					return
-				}
+			for _, importFile := range matches {
+				go func(p string) {
+					defer wg.Done()
 
-				processYAMLConfigFileLock.Lock()
-				defer processYAMLConfigFileLock.Unlock()
-				configs = append(configs, yamlConfig)
-				importsConfig[imp] = yamlConfig
-			}(p)
+					yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
+					if err != nil {
+						errorResult = err
+						return
+					}
+
+					processYAMLConfigFileLock.Lock()
+					defer processYAMLConfigFileLock.Unlock()
+					configs = append(configs, yamlConfig)
+					importsConfig[p] = yamlConfig
+				}(importFile)
+			}
 		}
 
 		wg.Wait()

@@ -1,0 +1,6 @@
+components:
+  terraform:
+
+    service-2:
+      vars:
+        name: service-2
