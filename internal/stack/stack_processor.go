@@ -36,7 +36,8 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 		go func(i int, p string) {
 			defer wg.Done()
 
-			config, importsConfig, err := ProcessYAMLConfigFile(p, map[string]map[interface{}]interface{}{})
+			basePath := path.Dir(p)
+			config, importsConfig, err := ProcessYAMLConfigFile(basePath, p, map[string]map[interface{}]interface{}{})
 			if err != nil {
 				errorResult = err
 				return
@@ -95,6 +96,7 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
 func ProcessYAMLConfigFile(
+	basePath string,
 	filePath string,
 	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, map[string]map[interface{}]interface{}, error) {
 
@@ -127,19 +129,18 @@ func ProcessYAMLConfigFile(
 			var impWithExt string
 			ext := filepath.Ext(imp)
 			if ext == "" {
-				impWithExt = imp + ".yaml"
-			} else {
-				impWithExt = imp
+				ext = ".yaml"
 			}
+			impWithExt = imp + ext
 
-			// Find all matches in the blob
+			// Find all matches in the glob
 			impWithExtPath := path.Join(dir, impWithExt)
 			matches, err := filepath.Glob(impWithExtPath)
 			if err != nil {
 				return nil, nil, err
 			}
 
-			// If we import a blob with more than 1 file, add the difference to the WaitGroup
+			// If we import a glob with more than 1 file, add the difference to the WaitGroup
 			if len(matches) > 1 {
 				wg.Add(len(matches) - 1)
 			}
@@ -148,7 +149,7 @@ func ProcessYAMLConfigFile(
 				go func(p string) {
 					defer wg.Done()
 
-					yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
+					yamlConfig, _, err := ProcessYAMLConfigFile(basePath, p, importsConfig)
 					if err != nil {
 						errorResult = err
 						return
@@ -157,7 +158,9 @@ func ProcessYAMLConfigFile(
 					processYAMLConfigFileLock.Lock()
 					defer processYAMLConfigFileLock.Unlock()
 					configs = append(configs, yamlConfig)
-					importsConfig[p] = yamlConfig
+					importRelativePathWithExt := strings.Replace(p, basePath+"/", "", 1)
+					importRelativePathWithoutExt := strings.Replace(importRelativePathWithExt, ext, "", 1)
+					importsConfig[importRelativePathWithoutExt] = yamlConfig
 				}(importFile)
 			}
 		}
