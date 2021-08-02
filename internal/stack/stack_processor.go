@@ -8,12 +8,16 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 )
 
 var (
+	// Mutex to serialize updates of the result map of ProcessYAMLConfigFiles function
+	processYAMLConfigFilesLock = &sync.Mutex{}
+
 	// Mutex to serialize updates of the result map of ProcessYAMLConfigFile function
 	processYAMLConfigFileLock = &sync.Mutex{}
 )
@@ -32,7 +36,8 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 		go func(i int, p string) {
 			defer wg.Done()
 
-			config, importsConfig, err := ProcessYAMLConfigFile(p, map[string]map[interface{}]interface{}{})
+			basePath := path.Dir(p)
+			config, importsConfig, err := ProcessYAMLConfigFile(basePath, p, map[string]map[interface{}]interface{}{})
 			if err != nil {
 				errorResult = err
 				return
@@ -71,8 +76,8 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 
 			stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(p), ".yaml"), ".yml")
 
-			processYAMLConfigFileLock.Lock()
-			defer processYAMLConfigFileLock.Unlock()
+			processYAMLConfigFilesLock.Lock()
+			defer processYAMLConfigFilesLock.Unlock()
 
 			listResult[i] = string(yamlConfig)
 			mapResult[stackName] = finalConfig
@@ -91,6 +96,7 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 // recursively processes and deep-merges all imports,
 // and returns stack config as map[interface{}]interface{}
 func ProcessYAMLConfigFile(
+	basePath string,
 	filePath string,
 	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, map[string]map[interface{}]interface{}, error) {
 
@@ -115,32 +121,54 @@ func ProcessYAMLConfigFile(
 		var errorResult error
 		var wg sync.WaitGroup
 		wg.Add(count)
-		lock := &sync.Mutex{}
 
 		for _, im := range imports {
 			imp := im.(string)
-			p := path.Join(dir, imp+".yaml")
 
-			go func(p string) {
-				defer wg.Done()
+			// If the import file is specified without extension, add `.yaml` as default
+			impWithExt := imp
+			ext := filepath.Ext(imp)
+			if ext == "" {
+				ext = ".yaml"
+				impWithExt = imp + ext
+			}
 
-				yamlConfig, _, err := ProcessYAMLConfigFile(p, importsConfig)
-				if err != nil {
-					errorResult = err
-					return
-				}
+			// Find all matches in the glob
+			impWithExtPath := path.Join(dir, impWithExt)
+			matches, err := filepath.Glob(impWithExtPath)
+			if err != nil {
+				return nil, nil, err
+			}
 
-				lock.Lock()
-				defer lock.Unlock()
-				configs = append(configs, yamlConfig)
-				importsConfig[imp] = yamlConfig
-			}(p)
+			// If we import a glob with more than 1 file, add the difference to the WaitGroup
+			if len(matches) > 1 {
+				wg.Add(len(matches) - 1)
+			}
+
+			for _, importFile := range matches {
+				go func(p string) {
+					defer wg.Done()
+
+					yamlConfig, _, err := ProcessYAMLConfigFile(basePath, p, importsConfig)
+					if err != nil {
+						errorResult = err
+						return
+					}
+
+					processYAMLConfigFileLock.Lock()
+					defer processYAMLConfigFileLock.Unlock()
+					configs = append(configs, yamlConfig)
+					importRelativePathWithExt := strings.Replace(p, basePath+"/", "", 1)
+					importRelativePathWithoutExt := strings.Replace(importRelativePathWithExt, ext, "", 1)
+					importsConfig[importRelativePathWithoutExt] = yamlConfig
+				}(importFile)
+			}
 		}
 
 		wg.Wait()
 
 		if errorResult != nil {
-			return nil, nil, err
+			return nil, nil, errorResult
 		}
 	}
 
