@@ -1,6 +1,8 @@
 package convert
 
-import "gopkg.in/yaml.v2"
+import (
+	"gopkg.in/yaml.v2"
+)
 
 // YAMLToMapOfInterfaces takes a YAML string as input and returns a map[interface{}]interface{}
 func YAMLToMapOfInterfaces(input string) (map[interface{}]interface{}, error) {
@@ -17,11 +19,17 @@ func YAMLToMapOfInterfaces(input string) (map[interface{}]interface{}, error) {
 func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]interface{}, error) {
 	output := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
-		data, err := YAMLToMapOfInterfaces(current.(string))
-		if err != nil {
-			return nil, err
+		// Apply YAMLToMap only if string is passed
+		switch c := current.(type) {
+			case string:
+				data, err := YAMLToMapOfInterfaces(c)
+				if err != nil {
+					return nil, err
+				}
+				output = append(output, data)
+			default:
+				continue
 		}
-		output = append(output, data)
 	}
 	return output, nil
 }
