@@ -1,5 +1,5 @@
 import:
-   - services/*.yaml
+   - catalog/services/*.yaml
 
 components:
   terraform:
