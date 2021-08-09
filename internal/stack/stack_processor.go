@@ -148,35 +148,35 @@ func ProcessYAMLConfigFile(
 				return nil, nil, err
 			}
 
-			if matches != nil {
-				// If we import a glob with more than 1 file, add the difference to the WaitGroup
-				if len(matches) > 1 {
-					wg.Add(len(matches) - 1)
-				}
-
-				for _, importFile := range matches {
-					go func(p string) {
-						defer wg.Done()
-
-						yamlConfig, _, err := ProcessYAMLConfigFile(basePath, p, importsConfig)
-						if err != nil {
-							errorResult = err
-							return
-						}
-
-						processYAMLConfigFileLock.Lock()
-						defer processYAMLConfigFileLock.Unlock()
-						configs = append(configs, yamlConfig)
-						importRelativePathWithExt := strings.Replace(p, basePath+"/", "", 1)
-						importRelativePathWithoutExt := strings.Replace(importRelativePathWithExt, ext, "", 1)
-						importsConfig[importRelativePathWithoutExt] = yamlConfig
-					}(importFile)
-				}
-			} else {
+			if matches == nil {
 				errorMessage := fmt.Sprintf("Invalid import in config file %s. No matches found for import: '%s'",
 					filePath,
 					strings.Replace(impWithExt, basePath+"/", "", 1))
 				return nil, nil, errors.New(errorMessage)
+			}
+
+			// If we import a glob with more than 1 file, add the difference to the WaitGroup
+			if len(matches) > 1 {
+				wg.Add(len(matches) - 1)
+			}
+
+			for _, importFile := range matches {
+				go func(p string) {
+					defer wg.Done()
+
+					yamlConfig, _, err := ProcessYAMLConfigFile(basePath, p, importsConfig)
+					if err != nil {
+						errorResult = err
+						return
+					}
+
+					processYAMLConfigFileLock.Lock()
+					defer processYAMLConfigFileLock.Unlock()
+					configs = append(configs, yamlConfig)
+					importRelativePathWithExt := strings.Replace(p, basePath+"/", "", 1)
+					importRelativePathWithoutExt := strings.Replace(importRelativePathWithExt, ext, "", 1)
+					importsConfig[importRelativePathWithoutExt] = yamlConfig
+				}(importFile)
 			}
 		}
 
