@@ -1,5 +1,5 @@
 import:
-  - eks-app-defaults
+  - catalog/eks-app-defaults
 
 components:
   terraform:

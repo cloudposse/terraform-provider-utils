@@ -1,6 +1,7 @@
 package stack
 
 import (
+	"fmt"
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
 	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
@@ -101,7 +102,6 @@ func ProcessYAMLConfigFile(
 	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, map[string]map[interface{}]interface{}, error) {
 
 	var configs []map[interface{}]interface{}
-	dir := path.Dir(filePath)
 
 	stackYamlConfig, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -125,7 +125,7 @@ func ProcessYAMLConfigFile(
 		for _, im := range imports {
 			imp := im.(string)
 
-			// If the import file is specified without extension, add `.yaml` as default
+			// If the import file is specified without extension, use `.yaml` as default
 			impWithExt := imp
 			ext := filepath.Ext(imp)
 			if ext == "" {
@@ -133,11 +133,26 @@ func ProcessYAMLConfigFile(
 				impWithExt = imp + ext
 			}
 
+			impWithExtPath := path.Join(basePath, impWithExt)
+
+			if impWithExtPath == filePath {
+				errorMessage := fmt.Sprintf("Invalid import in config file %s. The file imports itself in import: '%s'",
+					filePath,
+					strings.Replace(impWithExt, basePath+"/", "", 1))
+				return nil, nil, errors.New(errorMessage)
+			}
+
 			// Find all matches in the glob
-			impWithExtPath := path.Join(dir, impWithExt)
 			matches, err := filepath.Glob(impWithExtPath)
 			if err != nil {
 				return nil, nil, err
+			}
+
+			if matches == nil {
+				errorMessage := fmt.Sprintf("Invalid import in config file %s. No matches found for import: '%s'",
+					filePath,
+					strings.Replace(impWithExt, basePath+"/", "", 1))
+				return nil, nil, errors.New(errorMessage)
 			}
 
 			// If we import a glob with more than 1 file, add the difference to the WaitGroup
