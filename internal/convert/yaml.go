@@ -20,15 +20,12 @@ func YAMLSliceOfInterfaceToSliceOfMaps(input []interface{}) ([]map[interface{}]i
 	output := make([]map[interface{}]interface{}, 0)
 	for _, current := range input {
 		// Apply YAMLToMap only if string is passed
-		switch c := current.(type) {
-			case string:
-				data, err := YAMLToMapOfInterfaces(c)
-				if err != nil {
-					return nil, err
-				}
-				output = append(output, data)
-			default:
-				continue
+		if currentYaml, ok := current.(string); ok {
+			data, err := YAMLToMapOfInterfaces(currentYaml)
+			if err != nil {
+				return nil, err
+			}
+			output = append(output, data)
 		}
 	}
 	return output, nil
