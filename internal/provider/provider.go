@@ -22,6 +22,7 @@ func New(version string) func() *schema.Provider {
 				"utils_deep_merge_yaml":        dataSourceDeepMergeYAML(),
 				"utils_stack_config_yaml":      dataSourceStackConfigYAML(),
 				"utils_spacelift_stack_config": dataSourceSpaceliftStackConfig(),
+                "utils_template_file":          dataSourceFile(),
 			},
 		}
 
