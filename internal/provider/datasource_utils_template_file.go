@@ -153,8 +153,8 @@ func execute(s string, vars map[string]interface{}) (string, error) {
 	// between Terraform itself and this provider.
 	// (Over time users will hopefully transition over to Terraform's built-in
 	// templatefile function instead and we can phase this provider out.)
-	// scope := &tflang.ScopeId{
-	// 	BaseDir: ".",
+	// scope := &tflang.Scope{
+	//	BaseDir: ".",
 	// }
 	// ctx.Functions = scope.Functions()
 
