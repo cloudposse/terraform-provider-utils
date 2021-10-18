@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	// Set descriptions to support markdown syntax, this will be used in document generation
+	// Set descriptions to support Markdown syntax, this will be used in document generation
 	// and the language server.
 	schema.DescriptionKind = schema.StringMarkdown
 }

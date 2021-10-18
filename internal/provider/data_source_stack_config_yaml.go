@@ -4,9 +4,8 @@ import (
 	"context"
 	"strings"
 
-	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-
-	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
+	c "github.com/cloudposse/atmos/pkg/convert"
+	s "github.com/cloudposse/atmos/pkg/stack"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -57,7 +56,12 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	result, _, err := s.ProcessYAMLConfigFiles(paths, processStackDeps.(bool), processComponentDeps.(bool))
+	result, _, err := s.ProcessYAMLConfigFiles(
+		"",
+		paths,
+		processStackDeps.(bool),
+		processComponentDeps.(bool))
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
