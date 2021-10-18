@@ -2,13 +2,11 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
 	c "github.com/cloudposse/atmos/pkg/convert"
 	m "github.com/cloudposse/atmos/pkg/merge"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	jsoniter "github.com/json-iterator/go"
 )
 
 func dataSourceDeepMergeJSON() *schema.Resource {
@@ -53,6 +51,7 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	// Convert result to JSON
+	var json = jsoniter.ConfigDefault
 	jsonResult, err := json.Marshal(map2)
 	if err != nil {
 		return diag.FromErr(err)
