@@ -24,6 +24,12 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
 			},
+			"base_path": {
+				Description: "Stack config base path.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
 			"process_stack_deps": {
 				Description: "A boolean flag to enable/disable processing all stack dependencies for the components.",
 				Type:        schema.TypeBool,
@@ -62,6 +68,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	processComponentDeps := d.Get("process_component_deps")
 	processImports := d.Get("process_imports")
 	stackConfigPathTemplate := d.Get("stack_config_path_template")
+	basePath := d.Get("base_path")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
@@ -69,7 +76,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	spaceliftStacks, err := s.CreateSpaceliftStacks(
-		"",
+		basePath.(string),
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool),
