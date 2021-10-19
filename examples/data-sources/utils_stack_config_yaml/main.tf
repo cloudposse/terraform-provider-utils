@@ -10,7 +10,7 @@ locals {
     "${local.base_path}/tenant2/ue2/staging.yaml",
   ]
 
-  result = yamldecode(data.utils_stack_config_yaml.example.output)
+  result = [for i in data.utils_stack_config_yaml.example.output : yamldecode(i)]
 }
 
 data "utils_stack_config_yaml" "example" {
@@ -18,5 +18,4 @@ data "utils_stack_config_yaml" "example" {
   input                  = local.stack_config_files
   process_component_deps = true
   process_stack_deps     = false
-  process_imports        = false
 }
