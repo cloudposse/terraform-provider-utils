@@ -44,15 +44,9 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	map2 := map[string]interface{}{}
-
-	for k, v := range merged {
-		map2[k.(string)] = v
-	}
-
 	// Convert result to JSON
 	var json = jsoniter.ConfigDefault
-	jsonResult, err := json.Marshal(map2)
+	jsonResult, err := json.Marshal(merged)
 	if err != nil {
 		return diag.FromErr(err)
 	}
