@@ -1,0 +1,6 @@
+environment: ue2
+installed: true
+namespace: eg
+region: us-east-2
+stage: dev
+tenant: tenant1
