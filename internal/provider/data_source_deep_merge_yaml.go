@@ -24,6 +24,18 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
 			},
+			"append_list": {
+				Description: "A boolean flag to enable/disable appending lists instead of overwriting them.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
+			"deep_copy_list": {
+				Description: "A boolean flag to enable/disable merging of list elements one by one.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"output": {
 				Description: "The deep-merged output.",
 				Type:        schema.TypeString,
@@ -36,13 +48,15 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	input := d.Get("input")
+	appendList := d.Get("append_list").(bool)
+	deepCopyList := d.Get("deep_copy_list").(bool)
 
 	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(input.([]interface{}))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	merged, err := m.Merge(data)
+	merged, err := m.MergeWithOptions(data, appendList, deepCopyList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
