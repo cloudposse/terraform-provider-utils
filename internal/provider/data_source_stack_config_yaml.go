@@ -2,12 +2,11 @@ package provider
 
 import (
 	"context"
-	"strings"
-
-	c "github.com/cloudposse/atmos/pkg/convert"
 	s "github.com/cloudposse/atmos/pkg/stack"
+	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strings"
 )
 
 func dataSourceStackConfigYAML() *schema.Resource {
