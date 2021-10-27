@@ -159,7 +159,7 @@ func TransformStackConfigToSpaceliftStacks(
 					} else {
 						workspace = fmt.Sprintf("%s-%s", stackName, component)
 					}
-					spaceliftConfig["workspace"] = workspace
+					spaceliftConfig["workspace"] = strings.Replace(workspace, "/", "-", -1)
 
 					// labels
 					labels := []string{}
