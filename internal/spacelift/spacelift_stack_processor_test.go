@@ -8,15 +8,15 @@ import (
 )
 
 func TestSpaceliftStackProcessor(t *testing.T) {
-	basePath := "../../examples/complete/stacks"
+	basePath := "../../examples/config/stacks"
 
 	filePaths := []string{
-		"../../examples/complete/stacks/tenant1/ue2/dev.yaml",
-		"../../examples/complete/stacks/tenant1/ue2/prod.yaml",
-		"../../examples/complete/stacks/tenant1/ue2/staging.yaml",
-		"../../examples/complete/stacks/tenant2/ue2/dev.yaml",
-		"../../examples/complete/stacks/tenant2/ue2/prod.yaml",
-		"../../examples/complete/stacks/tenant2/ue2/staging.yaml",
+		"../../examples/config/stacks/tenant1/ue2/dev.yaml",
+		"../../examples/config/stacks/tenant1/ue2/prod.yaml",
+		"../../examples/config/stacks/tenant1/ue2/staging.yaml",
+		"../../examples/config/stacks/tenant2/ue2/dev.yaml",
+		"../../examples/config/stacks/tenant2/ue2/prod.yaml",
+		"../../examples/config/stacks/tenant2/ue2/staging.yaml",
 	}
 
 	processStackDeps := true
