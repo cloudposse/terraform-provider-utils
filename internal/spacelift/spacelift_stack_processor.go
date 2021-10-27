@@ -189,7 +189,12 @@ func TransformStackConfigToSpaceliftStacks(
 					}
 
 					labels = append(labels, fmt.Sprintf("folder:component/%s", component))
-					labels = append(labels, fmt.Sprintf("folder:%s", stackName))
+
+					stackFolder := stackName
+					if !strings.Contains(stackName, "/") {
+						stackFolder = strings.Replace(stackName, "-", "/", -1)
+					}
+					labels = append(labels, fmt.Sprintf("folder:%s", stackFolder))
 
 					spaceliftConfig["labels"] = utils.UniqueStrings(labels)
 
