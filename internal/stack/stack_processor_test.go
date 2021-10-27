@@ -1,12 +1,11 @@
 package stack
 
 import (
-	c "github.com/cloudposse/atmos/pkg/convert"
-	u "github.com/cloudposse/atmos/pkg/utils"
-	"testing"
-
+	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
+	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
+	"testing"
 )
 
 func TestStackProcessor(t *testing.T) {

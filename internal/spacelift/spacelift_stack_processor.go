@@ -2,8 +2,8 @@ package spacelift
 
 import (
 	"fmt"
-	s "github.com/cloudposse/atmos/pkg/stack"
-	"github.com/cloudposse/atmos/pkg/utils"
+	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
+	"github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"strings"
 )

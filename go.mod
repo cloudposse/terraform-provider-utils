@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/bmatcuk/doublestar v1.3.4
-	github.com/cloudposse/atmos v1.2.4
 	github.com/hashicorp/terraform-plugin-docs v0.5.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.8.0
 	github.com/imdario/mergo v0.3.12
