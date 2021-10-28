@@ -5,6 +5,7 @@ NAME=utils
 BINARY=terraform-provider-${NAME}
 VERSION=9999.99.99
 GOOS=darwin
+# GOOS=linux
 GOARCH=amd64
 SHELL := /bin/bash
 
