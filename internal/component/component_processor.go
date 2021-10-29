@@ -142,6 +142,11 @@ func ProcessComponentInStack(component string, stack string) (map[string]interfa
 func ProcessComponentFromContext(component string, tenant string, environment string, stage string) (map[string]interface{}, error) {
 	var stack string
 
+	err := c.InitConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	if len(c.Config.Stacks.NamePattern) < 1 {
 		return nil, errors.New("stack name pattern must be provided in 'stacks.name_pattern' config or 'ATMOS_STACKS_NAME_PATTERN' ENV variable")
 	}
