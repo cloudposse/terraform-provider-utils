@@ -2,11 +2,11 @@ package provider
 
 import (
 	"context"
+	p "github.com/cloudposse/terraform-provider-utils/internal/component"
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
+	"gopkg.in/yaml.v2"
 )
 
 func dataSourceComponentConfig() *schema.Resource {
@@ -27,29 +27,6 @@ func dataSourceComponentConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
-			"stack_name_pattern": {
-				Description: "Stack name pattern.",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-			"base_path": {
-				Description: "Stack config base path.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-			},
-			"process_stack_deps": {
-				Description: "A boolean flag to enable/disable processing all stack dependencies for the component.",
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-			},
-			"process_component_deps": {
-				Description: "A boolean flag to enable/disable processing config dependencies for the component.",
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-			},
 			"output": {
 				Description: "Component configuration.",
 				Type:        schema.TypeString,
@@ -60,32 +37,26 @@ func dataSourceComponentConfig() *schema.Resource {
 }
 
 func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	input := d.Get("input")
-	processStackDeps := d.Get("process_stack_deps")
-	processComponentDeps := d.Get("process_component_deps")
-	basePath := d.Get("base_path")
+	component := d.Get("component")
+	stack := d.Get("stack")
 
-	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	result, _, err := s.ProcessYAMLConfigFiles(
-		basePath.(string),
-		paths,
-		processStackDeps.(bool),
-		processComponentDeps.(bool))
+	result, err := p.ProcessComponent(component.(string), stack.(string))
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("output", result)
+	yamlConfig, err := yaml.Marshal(result)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	id := c.MakeId([]byte(strings.Join(result, "")))
+	err = d.Set("output", string(yamlConfig))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id := c.MakeId(yamlConfig)
 	d.SetId(id)
 
 	return nil
