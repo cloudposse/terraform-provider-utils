@@ -285,16 +285,12 @@ func ProcessConfig(
 
 	// Global backend
 	globalBackendType := ""
-	globalBackend := map[interface{}]interface{}{}
+	globalBackendSection := map[interface{}]interface{}{}
 	if i, ok := globalTerraformSection["backend_type"]; ok {
 		globalBackendType = i.(string)
 	}
-	if len(globalBackendType) > 0 {
-		if i, ok := globalTerraformSection["backend"]; ok {
-			if globalBackendSection, globalBackendSectionExist := i.(map[interface{}]interface{})[globalBackendType]; globalBackendSectionExist {
-				globalBackend = globalBackendSection.(map[interface{}]interface{})
-			}
-		}
+	if i, ok := globalTerraformSection["backend"]; ok {
+		globalBackendSection = i.(map[interface{}]interface{})
 	}
 
 	// Helmfile section
@@ -349,17 +345,13 @@ func ProcessConfig(
 				}
 
 				// Component backend
-				componentBackendType := globalBackendType
-				componentBackend := map[interface{}]interface{}{}
+				componentBackendType := ""
+				componentBackendSection := map[interface{}]interface{}{}
 				if i, ok2 := componentMap["backend_type"]; ok2 {
 					componentBackendType = i.(string)
 				}
-				if len(componentBackendType) > 0 {
-					if i, ok2 := componentMap["backend"]; ok2 {
-						if componentBackendSection, componentBackendSectionExist := i.(map[interface{}]interface{})[componentBackendType]; componentBackendSectionExist {
-							componentBackend = componentBackendSection.(map[interface{}]interface{})
-						}
-					}
+				if i, ok2 := componentMap["backend"]; ok2 {
+					componentBackendSection = i.(map[interface{}]interface{})
 				}
 
 				componentTerraformCommand := "terraform"
@@ -372,8 +364,8 @@ func ProcessConfig(
 				baseComponentEnv := map[interface{}]interface{}{}
 				baseComponentName := ""
 				baseComponentTerraformCommand := ""
-				baseComponentBackendType := globalBackendType
-				baseComponentBackend := map[interface{}]interface{}{}
+				baseComponentBackendType := ""
+				baseComponentBackendSection := map[interface{}]interface{}{}
 
 				if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
 					baseComponentName = baseComponent.(string)
@@ -397,12 +389,8 @@ func ProcessConfig(
 						if i, ok2 := baseComponentMap["backend_type"]; ok2 {
 							baseComponentBackendType = i.(string)
 						}
-						if len(baseComponentBackendType) > 0 {
-							if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
-								if baseComponentBackendTypeSection, baseComponentBackendTypeSectionExist := baseComponentBackendSection.(map[interface{}]interface{})[baseComponentBackendType]; baseComponentBackendTypeSectionExist {
-									baseComponentBackend = baseComponentBackendTypeSection.(map[interface{}]interface{})
-								}
-							}
+						if i, ok2 := baseComponentMap["backend"]; ok2 {
+							baseComponentBackendSection = i.(map[interface{}]interface{})
 						}
 
 						if baseComponentCommandSection, baseComponentCommandSectionExist := baseComponentMap["command"]; baseComponentCommandSectionExist {
@@ -437,9 +425,14 @@ func ProcessConfig(
 					finalComponentBackendType = componentBackendType
 				}
 
-				finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{globalBackend, baseComponentBackend, componentBackend})
+				finalComponentBackendSection, err := m.Merge([]map[interface{}]interface{}{globalBackendSection, baseComponentBackendSection, componentBackendSection})
 				if err != nil {
 					return nil, err
+				}
+
+				finalComponentBackend := map[interface{}]interface{}{}
+				if i, ok2 := finalComponentBackendSection[finalComponentBackendType]; ok2 {
+					finalComponentBackend = i.(map[interface{}]interface{})
 				}
 
 				finalComponentTerraformCommand := componentTerraformCommand
