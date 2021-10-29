@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestStackProcessor(t *testing.T) {
+func TestComponentProcessor(t *testing.T) {
 	component := "test/test-component-override"
 	stack := "tenant1-ue2-dev"
 
