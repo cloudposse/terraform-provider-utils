@@ -116,6 +116,20 @@ func ProcessComponent(component string, stack string) (map[string]interface{}, e
 		}
 	}
 
+	baseComponentName := ""
+	if baseComponent, baseComponentExist := componentSection["component"]; baseComponentExist {
+		baseComponentName = baseComponent.(string)
+	}
+
+	// workspace
+	var workspace string
+	if len(baseComponentName) == 0 {
+		workspace = stack
+	} else {
+		workspace = fmt.Sprintf("%s-%s", stack, component)
+	}
+	componentSection["workspace"] = strings.Replace(workspace, "/", "-", -1)
+
 	return componentSection, nil
 }
 
