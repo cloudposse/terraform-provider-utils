@@ -25,7 +25,26 @@ func dataSourceComponentConfig() *schema.Resource {
 			"stack": {
 				Description: "Stack name.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Default:     "",
+			},
+			"tenant": {
+				Description: "Tenant.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
+			"environment": {
+				Description: "Environment.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
+			"stage": {
+				Description: "Stage.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
 			},
 			"output": {
 				Description: "Component configuration.",
@@ -37,16 +56,28 @@ func dataSourceComponentConfig() *schema.Resource {
 }
 
 func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	component := d.Get("component")
-	stack := d.Get("stack")
+	component := d.Get("component").(string)
+	stack := d.Get("stack").(string)
+	tenant := d.Get("tenant").(string)
+	environment := d.Get("environment").(string)
+	stage := d.Get("stage").(string)
+	var result map[string]interface{}
+	var err error
+	var yamlConfig []byte
 
-	result, err := p.ProcessComponent(component.(string), stack.(string))
-
-	if err != nil {
-		return diag.FromErr(err)
+	if len(stack) > 0 {
+		result, err = p.ProcessComponentInStack(component, stack)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		result, err = p.ProcessComponentFromContext(tenant, environment, stage)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
-	yamlConfig, err := yaml.Marshal(result)
+	yamlConfig, err = yaml.Marshal(result)
 	if err != nil {
 		return diag.FromErr(err)
 	}

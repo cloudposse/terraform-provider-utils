@@ -15,7 +15,7 @@ func TestComponentProcessor(t *testing.T) {
 	var tenant1Ue2DevTestTestComponent map[string]interface{}
 	component = "test/test-component"
 	stack = "tenant1-ue2-dev"
-	tenant1Ue2DevTestTestComponent, err = ProcessComponent(component, stack)
+	tenant1Ue2DevTestTestComponent, err = ProcessComponentInStack(component, stack)
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentBackend := tenant1Ue2DevTestTestComponent["backend"].(map[interface{}]interface{})
 	tenant1Ue2DevTestTestComponentBaseComponent := tenant1Ue2DevTestTestComponent["component"]
@@ -41,7 +41,7 @@ func TestComponentProcessor(t *testing.T) {
 	var tenant1Ue2DevTestTestComponentOverrideComponent map[string]interface{}
 	component = "test/test-component-override"
 	stack = "tenant1-ue2-dev"
-	tenant1Ue2DevTestTestComponentOverrideComponent, err = ProcessComponent(component, stack)
+	tenant1Ue2DevTestTestComponentOverrideComponent, err = ProcessComponentInStack(component, stack)
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentOverrideComponentBackend := tenant1Ue2DevTestTestComponentOverrideComponent["backend"].(map[interface{}]interface{})
 	tenant1Ue2DevTestTestComponentOverrideComponentBaseComponent := tenant1Ue2DevTestTestComponentOverrideComponent["component"].(string)

@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// ProcessComponent accepts a component and a stack name and returns the component configuration in the stack
-func ProcessComponent(component string, stack string) (map[string]interface{}, error) {
+// ProcessComponentInStack accepts a component and a stack name and returns the component configuration in the stack
+func ProcessComponentInStack(component string, stack string) (map[string]interface{}, error) {
 	var configAndStacksInfo c.ConfigAndStacksInfo
 	configAndStacksInfo.Stack = stack
 
@@ -131,6 +131,11 @@ func ProcessComponent(component string, stack string) (map[string]interface{}, e
 	componentSection["workspace"] = strings.Replace(workspace, "/", "-", -1)
 
 	return componentSection, nil
+}
+
+// ProcessComponentFromContext accepts context (tenant, environment, stage) and returns the component configuration in the stack
+func ProcessComponentFromContext(tenant string, environment string, stage string) (map[string]interface{}, error) {
+	return nil, nil
 }
 
 // findComponentConfig finds component config sections
