@@ -71,7 +71,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(tenant, environment, stage)
+		result, err = p.ProcessComponentFromContext(component, tenant, environment, stage)
 		if err != nil {
 			return diag.FromErr(err)
 		}

@@ -134,8 +134,9 @@ func ProcessComponentInStack(component string, stack string) (map[string]interfa
 }
 
 // ProcessComponentFromContext accepts context (tenant, environment, stage) and returns the component configuration in the stack
-func ProcessComponentFromContext(tenant string, environment string, stage string) (map[string]interface{}, error) {
-	return nil, nil
+func ProcessComponentFromContext(component string, tenant string, environment string, stage string) (map[string]interface{}, error) {
+	var stack string
+	return ProcessComponentInStack(component, stack)
 }
 
 // findComponentConfig finds component config sections
