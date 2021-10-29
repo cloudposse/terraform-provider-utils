@@ -8,12 +8,12 @@ import (
 )
 
 func init() {
-	// Set descriptions to support markdown syntax, this will be used in document generation
+	// Set descriptions to support Markdown syntax, this will be used in document generation
 	// and the language server.
 	schema.DescriptionKind = schema.StringMarkdown
 }
 
-// New returns a *schema.Provider
+// New creates a new provider and returns a *schema.Provider
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
@@ -22,6 +22,7 @@ func New(version string) func() *schema.Provider {
 				"utils_deep_merge_yaml":        dataSourceDeepMergeYAML(),
 				"utils_stack_config_yaml":      dataSourceStackConfigYAML(),
 				"utils_spacelift_stack_config": dataSourceSpaceliftStackConfig(),
+				"utils_component_config":       dataSourceComponentConfig(),
 			},
 		}
 

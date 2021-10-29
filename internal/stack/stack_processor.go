@@ -2,9 +2,11 @@ package stack
 
 import (
 	"fmt"
+	"github.com/bmatcuk/doublestar"
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
+	g "github.com/cloudposse/terraform-provider-utils/internal/globals"
 	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
-	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
+	"github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -18,14 +20,16 @@ import (
 var (
 	// Mutex to serialize updates of the result map of ProcessYAMLConfigFiles function
 	processYAMLConfigFilesLock = &sync.Mutex{}
-
-	// Mutex to serialize updates of the result map of ProcessYAMLConfigFile function
-	processYAMLConfigFileLock = &sync.Mutex{}
 )
 
 // ProcessYAMLConfigFiles takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a list of stack configs
-func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processComponentDeps bool) ([]string, map[string]interface{}, error) {
+func ProcessYAMLConfigFiles(
+	basePath string,
+	filePaths []string,
+	processStackDeps bool,
+	processComponentDeps bool) ([]string, map[string]interface{}, error) {
+
 	count := len(filePaths)
 	listResult := make([]string, count)
 	mapResult := map[string]interface{}{}
@@ -37,8 +41,12 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 		go func(i int, p string) {
 			defer wg.Done()
 
-			basePath := path.Dir(p)
-			config, importsConfig, err := ProcessYAMLConfigFile(basePath, p, map[string]map[interface{}]interface{}{})
+			stackBasePath := basePath
+			if len(stackBasePath) < 1 {
+				stackBasePath = path.Dir(p)
+			}
+
+			config, importsConfig, err := ProcessYAMLConfigFile(stackBasePath, p, map[string]map[interface{}]interface{}{})
 			if err != nil {
 				errorResult = err
 				return
@@ -49,19 +57,19 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 				imports = append(imports, k)
 			}
 
-			uniqueImports := u.UniqueStrings(imports)
+			uniqueImports := utils.UniqueStrings(imports)
 			sort.Strings(uniqueImports)
 
 			componentStackMap := map[string]map[string][]string{}
 			if processStackDeps {
-				componentStackMap, err = CreateComponentStackMap(p)
+				componentStackMap, err = CreateComponentStackMap(stackBasePath, p)
 				if err != nil {
 					errorResult = err
 					return
 				}
 			}
 
-			finalConfig, err := ProcessConfig(p, config, processStackDeps, processComponentDeps, "", componentStackMap, importsConfig)
+			finalConfig, err := ProcessConfig(stackBasePath, p, config, processStackDeps, processComponentDeps, "", componentStackMap, importsConfig)
 			if err != nil {
 				errorResult = err
 				return
@@ -75,7 +83,12 @@ func ProcessYAMLConfigFiles(filePaths []string, processStackDeps bool, processCo
 				return
 			}
 
-			stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(p), ".yaml"), ".yml")
+			stackName := strings.TrimSuffix(
+				strings.TrimSuffix(
+					utils.TrimBasePathFromPath(stackBasePath+"/", p),
+					g.DefaultStackConfigFileExtension),
+				".yml",
+			)
 
 			processYAMLConfigFilesLock.Lock()
 			defer processYAMLConfigFilesLock.Unlock()
@@ -117,11 +130,6 @@ func ProcessYAMLConfigFile(
 	if importsSection, ok := stackMapConfig["import"]; ok {
 		imports := importsSection.([]interface{})
 
-		count := len(imports)
-		var errorResult error
-		var wg sync.WaitGroup
-		wg.Add(count)
-
 		for _, im := range imports {
 			imp := im.(string)
 
@@ -129,61 +137,47 @@ func ProcessYAMLConfigFile(
 			impWithExt := imp
 			ext := filepath.Ext(imp)
 			if ext == "" {
-				ext = ".yaml"
+				ext = g.DefaultStackConfigFileExtension
 				impWithExt = imp + ext
 			}
 
 			impWithExtPath := path.Join(basePath, impWithExt)
 
 			if impWithExtPath == filePath {
-				errorMessage := fmt.Sprintf("Invalid import in config file %s. The file imports itself in import: '%s'",
+				errorMessage := fmt.Sprintf("Invalid import in the config file %s.\nThe file imports itself in '%s'",
 					filePath,
 					strings.Replace(impWithExt, basePath+"/", "", 1))
 				return nil, nil, errors.New(errorMessage)
 			}
 
-			// Find all matches in the glob
-			matches, err := filepath.Glob(impWithExtPath)
+			// Find all import matches in the glob
+			importMatches, err := doublestar.Glob(impWithExtPath)
 			if err != nil {
 				return nil, nil, err
 			}
 
-			if matches == nil {
-				errorMessage := fmt.Sprintf("Invalid import in config file %s. No matches found for import: '%s'",
+			if importMatches == nil {
+				errorMessage := fmt.Sprintf("Invalid import in the config file %s.\nNo matches found for the import '%s'",
 					filePath,
 					strings.Replace(impWithExt, basePath+"/", "", 1))
 				return nil, nil, errors.New(errorMessage)
 			}
 
-			// If we import a glob with more than 1 file, add the difference to the WaitGroup
-			if len(matches) > 1 {
-				wg.Add(len(matches) - 1)
+			for _, importFile := range importMatches {
+				yamlConfig, _, err := ProcessYAMLConfigFile(basePath, importFile, importsConfig)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				configs = append(configs, yamlConfig)
+				importRelativePathWithExt := strings.Replace(importFile, basePath+"/", "", 1)
+				ext2 := filepath.Ext(importRelativePathWithExt)
+				if ext2 == "" {
+					ext2 = g.DefaultStackConfigFileExtension
+				}
+				importRelativePathWithoutExt := strings.TrimSuffix(importRelativePathWithExt, ext2)
+				importsConfig[importRelativePathWithoutExt] = yamlConfig
 			}
-
-			for _, importFile := range matches {
-				go func(p string) {
-					defer wg.Done()
-
-					yamlConfig, _, err := ProcessYAMLConfigFile(basePath, p, importsConfig)
-					if err != nil {
-						errorResult = err
-						return
-					}
-
-					processYAMLConfigFileLock.Lock()
-					defer processYAMLConfigFileLock.Unlock()
-					configs = append(configs, yamlConfig)
-					importRelativePathWithExt := strings.Replace(p, basePath+"/", "", 1)
-					importRelativePathWithoutExt := strings.Replace(importRelativePathWithExt, ext, "", 1)
-					importsConfig[importRelativePathWithoutExt] = yamlConfig
-				}(importFile)
-			}
-		}
-
-		wg.Wait()
-
-		if errorResult != nil {
-			return nil, nil, errorResult
 		}
 	}
 
@@ -201,6 +195,7 @@ func ProcessYAMLConfigFile(
 // ProcessConfig takes a raw stack config, deep-merges all variables, settings, environments and backends,
 // and returns the final stack configuration for all Terraform and helmfile components
 func ProcessConfig(
+	basePath string,
 	stack string,
 	config map[interface{}]interface{},
 	processStackDeps bool,
@@ -209,7 +204,12 @@ func ProcessConfig(
 	componentStackMap map[string]map[string][]string,
 	importsConfig map[string]map[interface{}]interface{}) (map[interface{}]interface{}, error) {
 
-	stackName := strings.TrimSuffix(strings.TrimSuffix(path.Base(stack), ".yaml"), ".yml")
+	stackName := strings.TrimSuffix(
+		strings.TrimSuffix(
+			utils.TrimBasePathFromPath(basePath+"/", stack),
+			g.DefaultStackConfigFileExtension),
+		".yml",
+	)
 
 	globalVarsSection := map[interface{}]interface{}{}
 	globalSettingsSection := map[interface{}]interface{}{}
@@ -225,9 +225,6 @@ func ProcessConfig(
 	helmfileVars := map[interface{}]interface{}{}
 	helmfileSettings := map[interface{}]interface{}{}
 	helmfileEnv := map[interface{}]interface{}{}
-
-	backendType := "s3"
-	backend := map[interface{}]interface{}{}
 
 	terraformComponents := map[string]interface{}{}
 	helmfileComponents := map[string]interface{}{}
@@ -286,14 +283,14 @@ func ProcessConfig(
 		return nil, err
 	}
 
+	// Global backend
+	globalBackendType := ""
+	globalBackendSection := map[interface{}]interface{}{}
 	if i, ok := globalTerraformSection["backend_type"]; ok {
-		backendType = i.(string)
+		globalBackendType = i.(string)
 	}
-
 	if i, ok := globalTerraformSection["backend"]; ok {
-		if backendSection, backendSectionExist := i.(map[interface{}]interface{})[backendType]; backendSectionExist {
-			backend = backendSection.(map[interface{}]interface{})
-		}
+		globalBackendSection = i.(map[interface{}]interface{})
 	}
 
 	// Helmfile section
@@ -347,16 +344,28 @@ func ProcessConfig(
 					componentEnv = i.(map[interface{}]interface{})
 				}
 
-				componentBackend := map[interface{}]interface{}{}
+				// Component backend
+				componentBackendType := ""
+				componentBackendSection := map[interface{}]interface{}{}
+				if i, ok2 := componentMap["backend_type"]; ok2 {
+					componentBackendType = i.(string)
+				}
 				if i, ok2 := componentMap["backend"]; ok2 {
-					componentBackend = i.(map[interface{}]interface{})[backendType].(map[interface{}]interface{})
+					componentBackendSection = i.(map[interface{}]interface{})
+				}
+
+				componentTerraformCommand := "terraform"
+				if i, ok2 := componentMap["command"]; ok2 {
+					componentTerraformCommand = i.(string)
 				}
 
 				baseComponentVars := map[interface{}]interface{}{}
 				baseComponentSettings := map[interface{}]interface{}{}
 				baseComponentEnv := map[interface{}]interface{}{}
-				baseComponentBackend := map[interface{}]interface{}{}
 				baseComponentName := ""
+				baseComponentTerraformCommand := ""
+				baseComponentBackendType := ""
+				baseComponentBackendSection := map[interface{}]interface{}{}
 
 				if baseComponent, baseComponentExist := componentMap["component"]; baseComponentExist {
 					baseComponentName = baseComponent.(string)
@@ -376,10 +385,16 @@ func ProcessConfig(
 							baseComponentEnv = baseComponentEnvSection.(map[interface{}]interface{})
 						}
 
-						if baseComponentBackendSection, baseComponentBackendSectionExist := baseComponentMap["backend"]; baseComponentBackendSectionExist {
-							if backendTypeSection, backendTypeSectionExist := baseComponentBackendSection.(map[interface{}]interface{})[backendType]; backendTypeSectionExist {
-								baseComponentBackend = backendTypeSection.(map[interface{}]interface{})
-							}
+						// Base component backend
+						if i, ok2 := baseComponentMap["backend_type"]; ok2 {
+							baseComponentBackendType = i.(string)
+						}
+						if i, ok2 := baseComponentMap["backend"]; ok2 {
+							baseComponentBackendSection = i.(map[interface{}]interface{})
+						}
+
+						if baseComponentCommandSection, baseComponentCommandSectionExist := baseComponentMap["command"]; baseComponentCommandSectionExist {
+							baseComponentTerraformCommand = baseComponentCommandSection.(string)
 						}
 					} else {
 						return nil, errors.New("Terraform component '" + component.(string) + "' defines attribute 'component: " +
@@ -402,17 +417,36 @@ func ProcessConfig(
 					return nil, err
 				}
 
-				finalComponentBackend, err := m.Merge([]map[interface{}]interface{}{backend, baseComponentBackend, componentBackend})
+				finalComponentBackendType := globalBackendType
+				if len(baseComponentBackendType) > 0 {
+					finalComponentBackendType = baseComponentBackendType
+				}
+				if len(componentBackendType) > 0 {
+					finalComponentBackendType = componentBackendType
+				}
+
+				finalComponentBackendSection, err := m.Merge([]map[interface{}]interface{}{globalBackendSection, baseComponentBackendSection, componentBackendSection})
 				if err != nil {
 					return nil, err
+				}
+
+				finalComponentBackend := map[interface{}]interface{}{}
+				if i, ok2 := finalComponentBackendSection[finalComponentBackendType]; ok2 {
+					finalComponentBackend = i.(map[interface{}]interface{})
+				}
+
+				finalComponentTerraformCommand := componentTerraformCommand
+				if len(baseComponentTerraformCommand) > 0 {
+					finalComponentTerraformCommand = baseComponentTerraformCommand
 				}
 
 				comp := map[string]interface{}{}
 				comp["vars"] = finalComponentVars
 				comp["settings"] = finalComponentSettings
 				comp["env"] = finalComponentEnv
-				comp["backend_type"] = backendType
+				comp["backend_type"] = finalComponentBackendType
 				comp["backend"] = finalComponentBackend
+				comp["command"] = finalComponentTerraformCommand
 
 				if baseComponentName != "" {
 					comp["component"] = baseComponentName
@@ -466,6 +500,11 @@ func ProcessConfig(
 					componentEnv = i.(map[interface{}]interface{})
 				}
 
+				componentHelmfileCommand := "helmfile"
+				if i, ok2 := componentMap["command"]; ok2 {
+					componentHelmfileCommand = i.(string)
+				}
+
 				finalComponentVars, err := m.Merge([]map[interface{}]interface{}{globalAndHelmfileVars, componentVars})
 				if err != nil {
 					return nil, err
@@ -485,6 +524,7 @@ func ProcessConfig(
 				comp["vars"] = finalComponentVars
 				comp["settings"] = finalComponentSettings
 				comp["env"] = finalComponentEnv
+				comp["command"] = componentHelmfileCommand
 
 				if processStackDeps == true {
 					componentStacks, err := FindComponentStacks("helmfile", component.(string), "", componentStackMap)

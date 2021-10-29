@@ -3,7 +3,7 @@ package spacelift
 import (
 	"fmt"
 	s "github.com/cloudposse/terraform-provider-utils/internal/stack"
-	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
+	"github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -11,19 +11,20 @@ import (
 // CreateSpaceliftStacks takes a list of paths to YAML config files, processes and deep-merges all imports,
 // and returns a map of Spacelift stack configs
 func CreateSpaceliftStacks(
+	basePath string,
 	filePaths []string,
 	processStackDeps bool,
 	processComponentDeps bool,
 	processImports bool,
 	stackConfigPathTemplate string) (map[string]interface{}, error) {
-	var _, mapResult, err = s.ProcessYAMLConfigFiles(filePaths, processStackDeps, processComponentDeps)
+	var _, mapResult, err = s.ProcessYAMLConfigFiles(basePath, filePaths, processStackDeps, processComponentDeps)
 	if err != nil {
 		return nil, err
 	}
 	return TransformStackConfigToSpaceliftStacks(mapResult, stackConfigPathTemplate, processImports)
 }
 
-// TransformStackConfigToSpaceliftStacks takes a a map of stack configs and transforms it to a map of Spacelift stacks
+// TransformStackConfigToSpaceliftStacks takes a map of stack configs and transforms it to a map of Spacelift stacks
 func TransformStackConfigToSpaceliftStacks(
 	stacks map[string]interface{},
 	stackConfigPathTemplate string,
@@ -50,7 +51,7 @@ func TransformStackConfigToSpaceliftStacks(
 
 	for stackName, stackConfig := range stacks {
 		config := stackConfig.(map[interface{}]interface{})
-		imports := []string{}
+		var imports []string
 
 		if processImports == true {
 			if i, ok := config["imports"]; ok {
@@ -64,7 +65,7 @@ func TransformStackConfigToSpaceliftStacks(
 			if terraformComponents, ok := componentsSection["terraform"]; ok {
 				terraformComponentsMap := terraformComponents.(map[string]interface{})
 
-				terraformComponentNamesInCurrentStack := u.StringKeysFromMap(terraformComponentsMap)
+				terraformComponentNamesInCurrentStack := utils.StringKeysFromMap(terraformComponentsMap)
 
 				for component, v := range terraformComponentsMap {
 					componentMap := v.(map[string]interface{})
@@ -158,7 +159,7 @@ func TransformStackConfigToSpaceliftStacks(
 					} else {
 						workspace = fmt.Sprintf("%s-%s", stackName, component)
 					}
-					spaceliftConfig["workspace"] = workspace
+					spaceliftConfig["workspace"] = strings.Replace(workspace, "/", "-", -1)
 
 					// labels
 					labels := []string{}
@@ -186,17 +187,19 @@ func TransformStackConfigToSpaceliftStacks(
 						}
 						labels = append(labels, fmt.Sprintf("depends-on:%s", spaceliftStackName))
 					}
+
 					labels = append(labels, fmt.Sprintf("folder:component/%s", component))
-					// Split on the first `-` and get the two parts: environment and stage
-					stackNameParts := strings.SplitN(stackName, "-", 2)
-					stackNamePartsLen := len(stackNameParts)
-					if stackNamePartsLen == 2 {
-						labels = append(labels, fmt.Sprintf("folder:%s/%s", stackNameParts[0], stackNameParts[1]))
+
+					stackFolder := stackName
+					if !strings.Contains(stackName, "/") {
+						stackFolder = strings.Replace(stackName, "-", "/", -1)
 					}
-					spaceliftConfig["labels"] = u.UniqueStrings(labels)
+					labels = append(labels, fmt.Sprintf("folder:%s", stackFolder))
+
+					spaceliftConfig["labels"] = utils.UniqueStrings(labels)
 
 					// Add Spacelift stack config to the final map
-					spaceliftStackName := fmt.Sprintf("%s-%s", stackName, component)
+					spaceliftStackName := strings.Replace(fmt.Sprintf("%s-%s", stackName, component), "/", "-", -1)
 					res[spaceliftStackName] = spaceliftConfig
 				}
 			}
@@ -215,9 +218,9 @@ func buildSpaceliftDependsOnStackName(
 ) (string, error) {
 	var spaceliftStackName string
 
-	if u.SliceContainsString(allStackNames, dependsOn) {
+	if utils.SliceContainsString(allStackNames, dependsOn) {
 		spaceliftStackName = dependsOn
-	} else if u.SliceContainsString(componentNamesInCurrentStack, dependsOn) {
+	} else if utils.SliceContainsString(componentNamesInCurrentStack, dependsOn) {
 		spaceliftStackName = fmt.Sprintf("%s-%s", currentStackName, dependsOn)
 	} else {
 		errorMessage := errors.New(fmt.Sprintf("Component '%[1]s' in stack '%[2]s' specifies 'depends_on' dependency '%[3]s', "+

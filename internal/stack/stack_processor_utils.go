@@ -1,7 +1,8 @@
 package stack
 
 import (
-	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
+	g "github.com/cloudposse/terraform-provider-utils/internal/globals"
+	"github.com/cloudposse/terraform-provider-utils/internal/utils"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,7 +31,7 @@ func FindComponentStacks(
 		}
 	}
 
-	unique := u.UniqueStrings(stacks)
+	unique := utils.UniqueStrings(stacks)
 	sort.Strings(unique)
 	return unique, nil
 }
@@ -103,13 +104,13 @@ func FindComponentDependencies(
 	}
 
 	deps = append(deps, stack)
-	unique := u.UniqueStrings(deps)
+	unique := utils.UniqueStrings(deps)
 	sort.Strings(unique)
 	return unique, nil
 }
 
 // CreateComponentStackMap accepts a config file and creates a map of component-stack dependencies
-func CreateComponentStackMap(filePath string) (map[string]map[string][]string, error) {
+func CreateComponentStackMap(basePath string, filePath string) (map[string]map[string][]string, error) {
 	stackComponentMap := map[string]map[string][]string{}
 	stackComponentMap["terraform"] = map[string][]string{}
 	stackComponentMap["helmfile"] = map[string][]string{}
@@ -126,20 +127,22 @@ func CreateComponentStackMap(filePath string) (map[string]map[string][]string, e
 				return err
 			}
 
-			isDirectory, err := u.IsDirectory(p)
+			isDirectory, err := utils.IsDirectory(p)
 			if err != nil {
 				return err
 			}
 
-			isYaml := u.IsYaml(p)
+			isYaml := utils.IsYaml(p)
 
 			if !isDirectory && isYaml {
-				config, _, err := ProcessYAMLConfigFile(dir, p, map[string]map[interface{}]interface{}{})
+				config, _, err := ProcessYAMLConfigFile(basePath, p, map[string]map[interface{}]interface{}{})
 				if err != nil {
 					return err
 				}
 
-				finalConfig, err := ProcessConfig(p,
+				finalConfig, err := ProcessConfig(
+					basePath,
+					p,
 					config,
 					false,
 					false,
@@ -152,7 +155,7 @@ func CreateComponentStackMap(filePath string) (map[string]map[string][]string, e
 
 				if componentsConfig, componentsConfigExists := finalConfig["components"]; componentsConfigExists {
 					componentsSection := componentsConfig.(map[string]interface{})
-					stackName := strings.Replace(p, dir+"/", "", 1)
+					stackName := strings.Replace(p, basePath+"/", "", 1)
 
 					if terraformConfig, terraformConfigExists := componentsSection["terraform"]; terraformConfigExists {
 						terraformSection := terraformConfig.(map[string]interface{})
@@ -181,13 +184,13 @@ func CreateComponentStackMap(filePath string) (map[string]map[string][]string, e
 
 	for stack, components := range stackComponentMap["terraform"] {
 		for _, component := range components {
-			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, ".yaml", "", 1))
+			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, g.DefaultStackConfigFileExtension, "", 1))
 		}
 	}
 
 	for stack, components := range stackComponentMap["helmfile"] {
 		for _, component := range components {
-			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, ".yaml", "", 1))
+			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, g.DefaultStackConfigFileExtension, "", 1))
 		}
 	}
 

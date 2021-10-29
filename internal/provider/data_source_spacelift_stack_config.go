@@ -2,13 +2,11 @@ package provider
 
 import (
 	"context"
-	"gopkg.in/yaml.v2"
-
 	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-
 	s "github.com/cloudposse/terraform-provider-utils/internal/spacelift"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"gopkg.in/yaml.v2"
 )
 
 func dataSourceSpaceliftStackConfig() *schema.Resource {
@@ -24,6 +22,12 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Required:    true,
+			},
+			"base_path": {
+				Description: "Stack config base path.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
 			},
 			"process_stack_deps": {
 				Description: "A boolean flag to enable/disable processing all stack dependencies for the components.",
@@ -63,6 +67,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	processComponentDeps := d.Get("process_component_deps")
 	processImports := d.Get("process_imports")
 	stackConfigPathTemplate := d.Get("stack_config_path_template")
+	basePath := d.Get("base_path")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
@@ -70,6 +75,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		basePath.(string),
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool),

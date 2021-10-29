@@ -1,3 +1,3 @@
 provider "utils" {
-  # no provider-specfic config
+  # no provider-specific config
 }
