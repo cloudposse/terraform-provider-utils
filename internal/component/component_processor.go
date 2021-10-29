@@ -13,7 +13,12 @@ func ProcessComponentInStack(component string, stack string) (map[string]interfa
 	var configAndStacksInfo c.ConfigAndStacksInfo
 	configAndStacksInfo.Stack = stack
 
-	err := c.InitConfig(configAndStacksInfo)
+	err := c.InitConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.ProcessConfig(configAndStacksInfo)
 	if err != nil {
 		return nil, err
 	}
