@@ -137,6 +137,16 @@ func processEnvVars() error {
 		Config.Components.Terraform.DeployRunInit = deployRunInitBool
 	}
 
+	componentsTerraformAutoGenerateBackendFile := os.Getenv("ATMOS_COMPONENTS_TERRAFORM_AUTO_GENERATE_BACKEND_FILE")
+	if len(componentsTerraformAutoGenerateBackendFile) > 0 {
+		color.Cyan("Found ENV var ATMOS_COMPONENTS_TERRAFORM_AUTO_GENERATE_BACKEND_FILE=%s", componentsTerraformAutoGenerateBackendFile)
+		componentsTerraformAutoGenerateBackendFileBool, err := strconv.ParseBool(componentsTerraformAutoGenerateBackendFile)
+		if err != nil {
+			return err
+		}
+		Config.Components.Terraform.AutoGenerateBackendFile = componentsTerraformAutoGenerateBackendFileBool
+	}
+
 	componentsHelmfileBasePath := os.Getenv("ATMOS_COMPONENTS_HELMFILE_BASE_PATH")
 	if len(componentsHelmfileBasePath) > 0 {
 		color.Cyan("Found ENV var ATMOS_COMPONENTS_HELMFILE_BASE_PATH=%s", componentsHelmfileBasePath)
@@ -173,5 +183,19 @@ func checkConfig() error {
 		return errors.New("at least one path must be provided in 'stacks.included_paths' config or ATMOS_STACKS_INCLUDED_PATHS' ENV variable")
 	}
 
+	return nil
+}
+
+func processLogsConfig() error {
+	logVerbose := os.Getenv("ATMOS_LOGS_VERBOSE")
+	if len(logVerbose) > 0 {
+		color.Cyan("Found ENV var ATMOS_LOGS_VERBOSE=%s", logVerbose)
+		logVerboseBool, err := strconv.ParseBool(logVerbose)
+		if err != nil {
+			return err
+		}
+		Config.Logs.Verbose = logVerboseBool
+		g.LogVerbose = logVerboseBool
+	}
 	return nil
 }
