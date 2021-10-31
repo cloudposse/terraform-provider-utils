@@ -80,7 +80,7 @@ type ConfigAndStacksInfo struct {
 	Command                 string
 	SubCommand              string
 	ComponentVarsSection    map[interface{}]interface{}
-	ComponentBackendSection map[string]interface{}
+	ComponentBackendSection map[interface{}]interface{}
 	ComponentBackendType    string
 	AdditionalArgsAndFlags  []string
 	GlobalOptions           []string
