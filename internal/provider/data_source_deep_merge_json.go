@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-	m "github.com/cloudposse/terraform-provider-utils/internal/merge"
+	c "github.com/cloudposse/atmos/pkg/convert"
+	m "github.com/cloudposse/atmos/pkg/merge"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsoniter "github.com/json-iterator/go"

@@ -1,21 +1,21 @@
 package convert
 
 import (
-	"testing"
-
+	c "github.com/cloudposse/atmos/pkg/convert"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestYAMLToMapOfInterfaces(t *testing.T) {
 	input := `---
 hello: world`
-	result, err := YAMLToMapOfInterfaces(input)
+	result, err := c.YAMLToMapOfInterfaces(input)
 	assert.Nil(t, err)
 	assert.Equal(t, result["hello"], "world")
 }
 
 func TestYAMLToMapOfInterfacesRedPath(t *testing.T) {
 	input := "Not YAML"
-	_, err := YAMLToMapOfInterfaces(input)
+	_, err := c.YAMLToMapOfInterfaces(input)
 	assert.NotNil(t, err)
 }
