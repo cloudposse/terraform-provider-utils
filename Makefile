@@ -32,5 +32,5 @@ lint:
 	$(SELF) terraform/install terraform/get-modules terraform/get-plugins terraform/lint terraform/validate
 
 # Run acceptance tests
-testacc:
+testacc: deps
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 20m
