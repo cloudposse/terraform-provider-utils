@@ -1,22 +1,22 @@
 package spacelift
 
 import (
+	s "github.com/cloudposse/atmos/pkg/spacelift"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSpaceliftStackProcessor(t *testing.T) {
-	basePath := "../../examples/config/stacks"
+	basePath := "../../examples/complete/stacks"
 
 	filePaths := []string{
-		"../../examples/config/stacks/tenant1/ue2/dev.yaml",
-		"../../examples/config/stacks/tenant1/ue2/prod.yaml",
-		"../../examples/config/stacks/tenant1/ue2/staging.yaml",
-		"../../examples/config/stacks/tenant2/ue2/dev.yaml",
-		"../../examples/config/stacks/tenant2/ue2/prod.yaml",
-		"../../examples/config/stacks/tenant2/ue2/staging.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/dev.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/prod.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/staging.yaml",
+		"../../examples/complete/stacks/tenant2/ue2/dev.yaml",
+		"../../examples/complete/stacks/tenant2/ue2/prod.yaml",
+		"../../examples/complete/stacks/tenant2/ue2/staging.yaml",
 	}
 
 	processStackDeps := true
@@ -24,7 +24,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	processImports := true
 	stackConfigPathTemplate := "stacks/%s.yaml"
 
-	var spaceliftStacks, err = CreateSpaceliftStacks(basePath, filePaths, processStackDeps, processComponentDeps, processImports, stackConfigPathTemplate)
+	var spaceliftStacks, err = s.CreateSpaceliftStacks(basePath, filePaths, processStackDeps, processComponentDeps, processImports, stackConfigPathTemplate)
 	assert.Nil(t, err)
 
 	tenant1Ue2DevInfraVpcStack := spaceliftStacks["tenant1-ue2-dev-infra-vpc"].(map[string]interface{})

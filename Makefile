@@ -33,4 +33,5 @@ lint:
 
 # Run acceptance tests
 testacc:
+	go get
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 20m

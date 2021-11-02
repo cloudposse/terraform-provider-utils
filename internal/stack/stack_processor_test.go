@@ -1,26 +1,27 @@
 package stack
 
 import (
-	c "github.com/cloudposse/terraform-provider-utils/internal/convert"
-	u "github.com/cloudposse/terraform-provider-utils/internal/utils"
+	c "github.com/cloudposse/atmos/pkg/convert"
+	s "github.com/cloudposse/atmos/pkg/stack"
+	u "github.com/cloudposse/atmos/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
 )
 
 func TestStackProcessor(t *testing.T) {
-	basePath := "../../examples/config/stacks"
+	basePath := "../../examples/complete/stacks"
 
 	filePaths := []string{
-		"../../examples/config/stacks/tenant1/ue2/dev.yaml",
-		"../../examples/config/stacks/tenant1/ue2/prod.yaml",
-		"../../examples/config/stacks/tenant1/ue2/staging.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/dev.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/prod.yaml",
+		"../../examples/complete/stacks/tenant1/ue2/staging.yaml",
 	}
 
 	processStackDeps := true
 	processComponentDeps := true
 
-	var listResult, mapResult, err = ProcessYAMLConfigFiles(basePath, filePaths, processStackDeps, processComponentDeps)
+	var listResult, mapResult, err = s.ProcessYAMLConfigFiles(basePath, filePaths, processStackDeps, processComponentDeps)
 	assert.Nil(t, err)
 	assert.Equal(t, 3, len(listResult))
 	assert.Equal(t, 3, len(mapResult))
