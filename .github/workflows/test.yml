@@ -1,11 +1,11 @@
 name: Tests
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
     paths-ignore:
       - "README.md"
   release:
-    types: [ created ]
+    types: [created]
     paths-ignore:
       - "README.md"
 jobs:
