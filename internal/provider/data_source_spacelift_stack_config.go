@@ -21,7 +21,8 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Description: "A list of stack config file names.",
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Required:    true,
+				Optional:    true,
+				Default:     nil,
 			},
 			"base_path": {
 				Description: "Stack config base path.",
