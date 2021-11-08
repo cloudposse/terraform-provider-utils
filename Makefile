@@ -4,8 +4,8 @@ NAMESPACE=cloudposse
 NAME=utils
 BINARY=terraform-provider-${NAME}
 VERSION=9999.99.99
-GOOS=darwin
-# GOOS=linux
+#GOOS=darwin
+GOOS=linux
 GOARCH=amd64
 SHELL := /bin/bash
 
@@ -14,7 +14,10 @@ export README_DEPS ?= docs/targets.md docs/terraform.md
 
 -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
 
-build:
+get:
+	go get
+
+build: get
 	env GOOS=${GOOS} GOARCH=${GOARCH} go build
 
 deps:
@@ -32,6 +35,5 @@ lint:
 	$(SELF) terraform/install terraform/get-modules terraform/get-plugins terraform/lint terraform/validate
 
 # Run acceptance tests
-testacc:
-	go get
+testacc: install
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 20m
