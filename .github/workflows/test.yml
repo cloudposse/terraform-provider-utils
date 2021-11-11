@@ -8,6 +8,7 @@ on:
     types: [created]
     paths-ignore:
       - "README.md"
+
 jobs:
   # ensure the code builds...
   build:

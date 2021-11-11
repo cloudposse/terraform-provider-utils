@@ -36,4 +36,4 @@ lint:
 
 # Run acceptance tests
 testacc: install
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 20m
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 3m
