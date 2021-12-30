@@ -28,6 +28,12 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			"base_path": {
+				Description: "Base path override.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
 			"tenant": {
 				Description: "Tenant.",
 				Type:        schema.TypeString,
@@ -58,6 +64,7 @@ func dataSourceComponentConfig() *schema.Resource {
 func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
+	basePath := d.Get("base_path").(string)
 	tenant := d.Get("tenant").(string)
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
@@ -66,12 +73,12 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	var yamlConfig []byte
 
 	if len(stack) > 0 {
-		result, err = p.ProcessComponentInStack(component, stack)
+		result, err = p.ProcessComponentInStackWithPath(component, stack, basePath)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(component, tenant, environment, stage)
+		result, err = p.ProcessComponentFromContextWithPath(component, tenant, environment, stage, basePath)
 		if err != nil {
 			return diag.FromErr(err)
 		}
