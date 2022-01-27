@@ -3,8 +3,8 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.16
 
 require (
-	github.com/cloudposse/atmos v1.3.18
-	github.com/gruntwork-io/terratest v0.38.8
+	github.com/cloudposse/atmos v1.3.25
+	github.com/gruntwork-io/terratest v0.38.9
 	github.com/hashicorp/terraform-plugin-docs v0.5.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.10.1
 	github.com/json-iterator/go v1.1.12
