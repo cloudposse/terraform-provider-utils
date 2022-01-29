@@ -37,3 +37,7 @@ lint:
 # Run acceptance tests
 testacc: install
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 3m
+
+tfplugindocs:
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+	tfplugindocs generate
