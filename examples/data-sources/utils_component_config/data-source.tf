@@ -10,13 +10,15 @@ locals {
 }
 
 data "utils_component_config" "example1" {
-  component = local.component
-  stack     = local.stack
+  component     = local.component
+  stack         = local.stack
+  ignore_errors = false
 }
 
 data "utils_component_config" "example2" {
-  component   = local.component
-  tenant      = local.tenant
-  environment = local.environment
-  stage       = local.stage
+  component     = local.component
+  tenant        = local.tenant
+  environment   = local.environment
+  stage         = local.stage
+  ignore_errors = false
 }

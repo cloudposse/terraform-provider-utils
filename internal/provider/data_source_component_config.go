@@ -46,6 +46,12 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			"ignore_errors": {
+				Description: "Flag to ignore errors if the component is not found in the stack.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"output": {
 				Description: "Component configuration.",
 				Type:        schema.TypeString,
@@ -61,20 +67,26 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	tenant := d.Get("tenant").(string)
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
+	ignoreErrors := d.Get("ignore_errors").(bool)
+
 	var result map[string]interface{}
 	var err error
 	var yamlConfig []byte
 
 	if len(stack) > 0 {
 		result, err = p.ProcessComponentInStack(component, stack)
-		if err != nil {
+		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}
 	} else {
 		result, err = p.ProcessComponentFromContext(component, tenant, environment, stage)
-		if err != nil {
+		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}
+	}
+
+	if err != nil {
+		result = map[string]interface{}{}
 	}
 
 	yamlConfig, err = yaml.Marshal(result)
