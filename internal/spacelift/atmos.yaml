@@ -54,6 +54,11 @@ stacks:
   # Can also be set using `ATMOS_STACKS_NAME_PATTERN` ENV var
   name_pattern: "{tenant}-{environment}-{stage}"
 
+workflows:
+  # Can also be set using `ATMOS_WORKFLOWS_BASE_PATH` ENV var, or `--workflows-dir` command-line arguments
+  # Supports both absolute and relative paths
+  base_path: "workflows"
+
 logs:
   verbose: false
   colors: true
