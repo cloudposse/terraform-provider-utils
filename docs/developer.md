@@ -25,6 +25,7 @@ provider_installation {
   dev_overrides  {
     "cloudposse/utils" = "/path/to/your/code/github.com/cloudposse/terraform-provider-utils/"
   }
+
   # For all other providers, install them directly from their origin provider
   # registries as normal. If you omit this, Terraform will _only_ use
   # the dev_overrides block, and so no other providers will be available.
@@ -47,8 +48,10 @@ Then run `terraform init`, `terraform plan` and `terraform apply` as normal.
 ```sh
 $ terraform init
 Initializing the backend...
+
 Initializing provider plugins...
 - Finding latest version of cloudposse/utils...
+
 Warning: Provider development overrides are in effect
 The following provider development overrides are set in the CLI configuration:
  - cloudposse/utils in /path/to/your/code/github.com/cloudposse/terraform-provider-utils
@@ -59,6 +62,7 @@ releases.
 
 ```sh
 terraform apply
+
 Warning: Provider development overrides are in effect
 The following provider development overrides are set in the CLI configuration:
  - cloudposse/utils in /Users/matt/code/src/github.com/cloudposse/terraform-provider-utils
