@@ -41,17 +41,17 @@ data "utils_stack_config_yaml" "example" {
 
 ### Required
 
-- **input** (List of String) A list of stack config file names.
+- `input` (List of String) A list of stack config file names.
 
 ### Optional
 
-- **base_path** (String) Stack config base path.
-- **id** (String) The ID of this resource.
-- **process_component_deps** (Boolean) A boolean flag to enable/disable processing config dependencies for the components.
-- **process_stack_deps** (Boolean) A boolean flag to enable/disable processing all stack dependencies for the components.
+- `base_path` (String) Stack config base path.
+- `id` (String) The ID of this resource.
+- `process_component_deps` (Boolean) A boolean flag to enable/disable processing config dependencies for the components.
+- `process_stack_deps` (Boolean) A boolean flag to enable/disable processing all stack dependencies for the components.
 
 ### Read-Only
 
-- **output** (List of String) A list of stack configurations.
+- `output` (List of String) A list of stack configurations.
 
 

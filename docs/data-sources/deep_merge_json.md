@@ -31,16 +31,16 @@ data "utils_deep_merge_json" "example" {
 
 ### Required
 
-- **input** (List of String) A list of JSON strings that is deep merged into the `output` attribute.
+- `input` (List of String) A list of JSON strings that is deep merged into the `output` attribute.
 
 ### Optional
 
-- **append_list** (Boolean) A boolean flag to enable/disable appending lists instead of overwriting them.
-- **deep_copy_list** (Boolean) A boolean flag to enable/disable merging of list elements one by one.
-- **id** (String) The ID of this resource.
+- `append_list` (Boolean) A boolean flag to enable/disable appending lists instead of overwriting them.
+- `deep_copy_list` (Boolean) A boolean flag to enable/disable merging of list elements one by one.
+- `id` (String) The ID of this resource.
 
 ### Read-Only
 
-- **output** (String) The deep-merged output.
+- `output` (String) The deep-merged output.
 
 
