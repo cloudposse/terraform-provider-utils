@@ -53,8 +53,10 @@ Initializing provider plugins...
 - Finding latest version of cloudposse/utils...
 
 Warning: Provider development overrides are in effect
+
 The following provider development overrides are set in the CLI configuration:
  - cloudposse/utils in /path/to/your/code/github.com/cloudposse/terraform-provider-utils
+
 The behavior may therefore not match any released version of the provider and
 applying changes may cause the state to become incompatible with published
 releases.
@@ -64,15 +66,22 @@ releases.
 terraform apply
 
 Warning: Provider development overrides are in effect
+
 The following provider development overrides are set in the CLI configuration:
  - cloudposse/utils in /Users/matt/code/src/github.com/cloudposse/terraform-provider-utils
+
 The behavior may therefore not match any released version of the provider and
 applying changes may cause the state to become incompatible with published
 releases.
+
+
 An execution plan has been generated and is shown below.
 Resource actions are indicated with the following symbols:
+
 Terraform will perform the following actions:
+
 Plan: 0 to add, 0 to change, 0 to destroy.
+
 Changes to Outputs:
   + deep_merge_output = <<-EOT
         Statement:
