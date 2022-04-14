@@ -25,15 +25,17 @@ locals {
 }
 
 data "utils_component_config" "example1" {
-  component = local.component
-  stack     = local.stack
+  component     = local.component
+  stack         = local.stack
+  ignore_errors = false
 }
 
 data "utils_component_config" "example2" {
-  component   = local.component
-  tenant      = local.tenant
-  environment = local.environment
-  stage       = local.stage
+  component     = local.component
+  tenant        = local.tenant
+  environment   = local.environment
+  stage         = local.stage
+  ignore_errors = false
 }
 ```
 
@@ -42,18 +44,19 @@ data "utils_component_config" "example2" {
 
 ### Required
 
-- **component** (String) Component name.
+- `component` (String) Component name.
 
 ### Optional
 
-- **environment** (String) Environment.
-- **id** (String) The ID of this resource.
-- **stack** (String) Stack name.
-- **stage** (String) Stage.
-- **tenant** (String) Tenant.
+- `environment` (String) Environment.
+- `id` (String) The ID of this resource.
+- `ignore_errors` (Boolean) Flag to ignore errors if the component is not found in the stack.
+- `stack` (String) Stack name.
+- `stage` (String) Stage.
+- `tenant` (String) Tenant.
 
 ### Read-Only
 
-- **output** (String) Component configuration.
+- `output` (String) Component configuration.
 
 
