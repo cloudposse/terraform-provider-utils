@@ -67,7 +67,7 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 				Default:     "",
 			},
 			"kubeconfig": {
-				Description: "kubeconfig path.",
+				Description: "kubeconfig file path. By default, the configuration is written to the first file path in the KUBECONFIG environment variable (if it is set) or the default kubeconfig path (.kube/config) in your home directory",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
