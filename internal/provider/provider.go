@@ -18,11 +18,12 @@ func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"utils_deep_merge_json":        dataSourceDeepMergeJSON(),
-				"utils_deep_merge_yaml":        dataSourceDeepMergeYAML(),
-				"utils_stack_config_yaml":      dataSourceStackConfigYAML(),
-				"utils_spacelift_stack_config": dataSourceSpaceliftStackConfig(),
-				"utils_component_config":       dataSourceComponentConfig(),
+				"utils_deep_merge_json":           dataSourceDeepMergeJSON(),
+				"utils_deep_merge_yaml":           dataSourceDeepMergeYAML(),
+				"utils_stack_config_yaml":         dataSourceStackConfigYAML(),
+				"utils_spacelift_stack_config":    dataSourceSpaceliftStackConfig(),
+				"utils_component_config":          dataSourceComponentConfig(),
+				"utils_aws_eks_update_kubeconfig": dataSourceAwsEksUpdateKubeconfig(),
 			},
 		}
 
