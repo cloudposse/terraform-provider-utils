@@ -12,8 +12,7 @@ import (
 
 func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 	return &schema.Resource{
-		Description: "The `component_config` data source accepts a component and a stack name " +
-			"and returns the component configuration in the stack",
+		Description: "The 'utils_aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands",
 
 		ReadContext: dataSourceAwsEksUpdateKubeconfigRead,
 
