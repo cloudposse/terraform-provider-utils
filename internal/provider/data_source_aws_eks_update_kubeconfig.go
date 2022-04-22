@@ -2,11 +2,12 @@ package provider
 
 import (
 	"context"
-	p "github.com/cloudposse/atmos/pkg/component"
+	a "github.com/cloudposse/atmos/pkg/aws"
+	g "github.com/cloudposse/atmos/pkg/config"
 	c "github.com/cloudposse/atmos/pkg/convert"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/yaml.v2"
+	"time"
 )
 
 func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
@@ -26,12 +27,6 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 			},
 			"stack": {
 				Description: "Stack name.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-			},
-			"namespace": {
-				Description: "Namespace.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
@@ -72,7 +67,7 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
-			"role-arn": {
+			"role_arn": {
 				Description: "IAM role to assume for cluster authentication.",
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -84,6 +79,17 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			"region": {
+				Description: "AWS region.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
+			"output": {
+				Description: "Output.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -94,38 +100,40 @@ func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.Resourc
 	tenant := d.Get("tenant").(string)
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
+	profile := d.Get("profile").(string)
+	clusterName := d.Get("cluster_name").(string)
+	kubeconfig := d.Get("kubeconfig").(string)
+	roleArn := d.Get("role_arn").(string)
+	alias := d.Get("alias").(string)
+	region := d.Get("region").(string)
 
-	var result map[string]interface{}
-	var err error
-	var yamlConfig []byte
-
-	if len(stack) > 0 {
-		result, err = p.ProcessComponentInStack(component, stack)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		result, err = p.ProcessComponentFromContext(component, tenant, environment, stage)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	kubeconfigContext := g.AwsEksUpdateKubeconfigContext{
+		Component:   component,
+		Stack:       stack,
+		Profile:     profile,
+		ClusterName: clusterName,
+		Region:      region,
+		Kubeconfig:  kubeconfig,
+		RoleArn:     roleArn,
+		Alias:       alias,
+		Tenant:      tenant,
+		Environment: environment,
+		Stage:       stage,
 	}
 
-	if err != nil {
-		result = map[string]interface{}{}
-	}
-
-	yamlConfig, err = yaml.Marshal(result)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = d.Set("output", string(yamlConfig))
+	err := a.ExecuteAwsEksUpdateKubeconfig(kubeconfigContext)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	id := c.MakeId(yamlConfig)
+	utc := time.Now().UTC().String()
+
+	err = d.Set("output", utc)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id := c.MakeId([]byte(utc))
 	d.SetId(id)
 
 	return nil
