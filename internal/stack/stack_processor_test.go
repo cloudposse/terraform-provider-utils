@@ -10,7 +10,9 @@ import (
 )
 
 func TestStackProcessor(t *testing.T) {
-	basePath := "../../examples/complete/stacks"
+	stacksBasePath := "../../examples/complete/stacks"
+	terraformComponentsBasePath := "../../examples/complete/components/terraform"
+	helmfileComponentsBasePath := "../../examples/complete/components/helmfile"
 
 	filePaths := []string{
 		"../../examples/complete/stacks/tenant1/ue2/dev.yaml",
@@ -22,7 +24,15 @@ func TestStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var listResult, mapResult, err = s.ProcessYAMLConfigFiles(basePath, filePaths, processStackDeps, processComponentDeps)
+	var listResult, mapResult, err = s.ProcessYAMLConfigFiles(
+		stacksBasePath,
+		terraformComponentsBasePath,
+		helmfileComponentsBasePath,
+		filePaths,
+		processStackDeps,
+		processComponentDeps,
+	)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(listResult))
 	assert.Equal(t, 4, len(mapResult))

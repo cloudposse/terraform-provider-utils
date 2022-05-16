@@ -55,7 +55,7 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
-	basePath := d.Get("base_path")
+	stacksBasePath := d.Get("base_path")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
@@ -63,7 +63,9 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	result, _, err := s.ProcessYAMLConfigFiles(
-		basePath.(string),
+		stacksBasePath.(string),
+		"",
+		"",
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool))

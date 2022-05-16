@@ -114,7 +114,6 @@ data "utils_aws_eks_update_kubeconfig" "example4" {
 - `cluster_name` (String) EKS cluster name.
 - `component` (String) Component name.
 - `environment` (String) Environment.
-- `id` (String) The ID of this resource.
 - `kubeconfig` (String) kubeconfig file path to write the kubeconfig to. By default, the configuration is written to the first file path in the KUBECONFIG environment variable (if it is set) or the default kubeconfig path (.kube/config) in your home directory
 - `profile` (String) AWS profile to use for cluster authentication.
 - `region` (String) AWS region.
@@ -125,6 +124,7 @@ data "utils_aws_eks_update_kubeconfig" "example4" {
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `output` (String) Output.
 
 

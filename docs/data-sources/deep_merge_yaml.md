@@ -37,10 +37,10 @@ data "utils_deep_merge_yaml" "example" {
 
 - `append_list` (Boolean) A boolean flag to enable/disable appending lists instead of overwriting them.
 - `deep_copy_list` (Boolean) A boolean flag to enable/disable merging of list elements one by one.
-- `id` (String) The ID of this resource.
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `output` (String) The deep-merged output.
 
 
