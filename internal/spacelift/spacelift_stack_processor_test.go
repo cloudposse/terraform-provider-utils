@@ -13,7 +13,17 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	processImports := true
 	stackConfigPathTemplate := "stacks/%s.yaml"
 
-	var spaceliftStacks, err = s.CreateSpaceliftStacks("", nil, processStackDeps, processComponentDeps, processImports, stackConfigPathTemplate)
+	var spaceliftStacks, err = s.CreateSpaceliftStacks(
+		"",
+		"",
+		"",
+		nil,
+		processStackDeps,
+		processComponentDeps,
+		processImports,
+		stackConfigPathTemplate,
+	)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 35, len(spaceliftStacks))
 
@@ -89,7 +99,9 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 }
 
 func TestLegacySpaceliftStackProcessor(t *testing.T) {
-	basePath := "../../examples/complete/stacks"
+	stacksBasePath := "../../examples/complete/stacks"
+	terraformComponentsBasePath := "../../examples/complete/components/terraform"
+	helmfileComponentsBasePath := "../../examples/complete/components/helmfile"
 
 	filePaths := []string{
 		"../../examples/complete/stacks/tenant1/ue2/dev.yaml",
@@ -106,7 +118,17 @@ func TestLegacySpaceliftStackProcessor(t *testing.T) {
 	processImports := true
 	stackConfigPathTemplate := "stacks/%s.yaml"
 
-	var spaceliftStacks, err = s.CreateSpaceliftStacks(basePath, filePaths, processStackDeps, processComponentDeps, processImports, stackConfigPathTemplate)
+	var spaceliftStacks, err = s.CreateSpaceliftStacks(
+		stacksBasePath,
+		terraformComponentsBasePath,
+		helmfileComponentsBasePath,
+		filePaths,
+		processStackDeps,
+		processComponentDeps,
+		processImports,
+		stackConfigPathTemplate,
+	)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 35, len(spaceliftStacks))
 

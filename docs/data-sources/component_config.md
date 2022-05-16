@@ -49,7 +49,6 @@ data "utils_component_config" "example2" {
 ### Optional
 
 - `environment` (String) Environment.
-- `id` (String) The ID of this resource.
 - `ignore_errors` (Boolean) Flag to ignore errors if the component is not found in the stack.
 - `stack` (String) Stack name.
 - `stage` (String) Stage.
@@ -57,6 +56,7 @@ data "utils_component_config" "example2" {
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `output` (String) Component configuration.
 
 

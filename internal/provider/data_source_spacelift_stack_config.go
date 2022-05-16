@@ -68,7 +68,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	processComponentDeps := d.Get("process_component_deps")
 	processImports := d.Get("process_imports")
 	stackConfigPathTemplate := d.Get("stack_config_path_template")
-	basePath := d.Get("base_path")
+	stacksBasePath := d.Get("base_path")
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
 	if err != nil {
@@ -76,7 +76,9 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	spaceliftStacks, err := s.CreateSpaceliftStacks(
-		basePath.(string),
+		stacksBasePath.(string),
+		"",
+		"",
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool),

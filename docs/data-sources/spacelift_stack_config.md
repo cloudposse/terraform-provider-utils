@@ -35,7 +35,6 @@ data "utils_spacelift_stack_config" "example" {
 ### Optional
 
 - `base_path` (String) Stack config base path.
-- `id` (String) The ID of this resource.
 - `input` (List of String) A list of stack config file names.
 - `process_component_deps` (Boolean) A boolean flag to enable/disable processing config dependencies for the components.
 - `process_imports` (Boolean) A boolean flag to enable/disable processing stack imports.
@@ -43,6 +42,7 @@ data "utils_spacelift_stack_config" "example" {
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `output` (String) A map of Spacelift stack configurations.
 
 
