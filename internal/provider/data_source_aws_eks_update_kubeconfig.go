@@ -12,7 +12,7 @@ import (
 
 func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 	return &schema.Resource{
-		Description: "The 'utils_aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands",
+		Description: "The 'aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands",
 
 		ReadContext: dataSourceAwsEksUpdateKubeconfigRead,
 
