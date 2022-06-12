@@ -61,7 +61,7 @@ func dataSourceComponentConfig() *schema.Resource {
 	}
 }
 
-func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
 	tenant := d.Get("tenant").(string)
@@ -69,7 +69,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	stage := d.Get("stage").(string)
 	ignoreErrors := d.Get("ignore_errors").(bool)
 
-	var result map[string]interface{}
+	var result map[string]any
 	var err error
 	var yamlConfig []byte
 
@@ -86,7 +86,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if err != nil {
-		result = map[string]interface{}{}
+		result = map[string]any{}
 	}
 
 	yamlConfig, err = yaml.Marshal(result)

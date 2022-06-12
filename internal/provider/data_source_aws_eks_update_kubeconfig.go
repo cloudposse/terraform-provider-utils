@@ -93,7 +93,7 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 	}
 }
 
-func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
 	tenant := d.Get("tenant").(string)

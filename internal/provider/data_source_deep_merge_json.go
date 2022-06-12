@@ -43,12 +43,12 @@ func dataSourceDeepMergeJSON() *schema.Resource {
 	}
 }
 
-func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	input := d.Get("input")
 	appendList := d.Get("append_list").(bool)
 	deepCopyList := d.Get("deep_copy_list").(bool)
 
-	data, err := c.JSONSliceOfInterfaceToSliceOfMaps(input.([]interface{}))
+	data, err := c.JSONSliceOfInterfaceToSliceOfMaps(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
