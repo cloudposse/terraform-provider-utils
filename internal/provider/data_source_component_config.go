@@ -52,6 +52,12 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"base_path": {
+				Description: "Stack config base path.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
 			"output": {
 				Description: "Component configuration.",
 				Type:        schema.TypeString,
