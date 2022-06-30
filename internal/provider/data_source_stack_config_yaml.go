@@ -41,6 +41,16 @@ func dataSourceStackConfigYAML() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			// https://www.terraform.io/plugin/sdkv2/schemas/schema-types#typemap
+			"env": {
+				Description: "Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source",
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Default:  nil,
+			},
 			"output": {
 				Description: "A list of stack configurations.",
 				Type:        schema.TypeList,
@@ -56,6 +66,12 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
 	stacksBasePath := d.Get("base_path")
+	env := d.Get("env").(map[string]any)
+
+	err := setEnv(env)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]any))
 	if err != nil {

@@ -52,11 +52,15 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
-			"base_path": {
-				Description: "Stack config base path.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
+			// https://www.terraform.io/plugin/sdkv2/schemas/schema-types#typemap
+			"env": {
+				Description: "Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source",
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Default:  nil,
 			},
 			"output": {
 				Description: "Component configuration.",
@@ -74,10 +78,16 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
 	ignoreErrors := d.Get("ignore_errors").(bool)
+	env := d.Get("env").(map[string]any)
 
 	var result map[string]any
 	var err error
 	var yamlConfig []byte
+
+	err = setEnv(env)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if len(stack) > 0 {
 		result, err = p.ProcessComponentInStack(component, stack)
