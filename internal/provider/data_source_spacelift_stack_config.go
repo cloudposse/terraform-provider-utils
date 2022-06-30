@@ -53,6 +53,16 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
+			// https://www.terraform.io/plugin/sdkv2/schemas/schema-types#typemap
+			"env": {
+				Description: "Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source",
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Default:  nil,
+			},
 			"output": {
 				Description: "A map of Spacelift stack configurations.",
 				Type:        schema.TypeString,
@@ -62,15 +72,21 @@ func dataSourceSpaceliftStackConfig() *schema.Resource {
 	}
 }
 
-func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
 	processImports := d.Get("process_imports")
 	stackConfigPathTemplate := d.Get("stack_config_path_template")
 	stacksBasePath := d.Get("base_path")
+	env := d.Get("env").(map[string]any)
 
-	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]interface{}))
+	err := setEnv(env)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}

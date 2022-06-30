@@ -12,7 +12,7 @@ import (
 
 func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 	return &schema.Resource{
-		Description: "The 'utils_aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands",
+		Description: "The 'aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands",
 
 		ReadContext: dataSourceAwsEksUpdateKubeconfigRead,
 
@@ -84,6 +84,16 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			// https://www.terraform.io/plugin/sdkv2/schemas/schema-types#typemap
+			"env": {
+				Description: "Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source",
+				Type:        schema.TypeMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional: true,
+				Default:  nil,
+			},
 			"output": {
 				Description: "Output.",
 				Type:        schema.TypeString,
@@ -93,7 +103,7 @@ func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
 	}
 }
 
-func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
 	tenant := d.Get("tenant").(string)
@@ -105,6 +115,7 @@ func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.Resourc
 	roleArn := d.Get("role_arn").(string)
 	alias := d.Get("alias").(string)
 	region := d.Get("region").(string)
+	env := d.Get("env").(map[string]any)
 
 	kubeconfigContext := g.AwsEksUpdateKubeconfigContext{
 		Component:   component,
@@ -120,7 +131,12 @@ func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.Resourc
 		Stage:       stage,
 	}
 
-	err := a.ExecuteAwsEksUpdateKubeconfig(kubeconfigContext)
+	err := setEnv(env)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = a.ExecuteAwsEksUpdateKubeconfig(kubeconfigContext)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -43,13 +43,13 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 	}
 }
 
-func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	input := d.Get("input")
 	appendList := d.Get("append_list").(bool)
 	deepCopyList := d.Get("deep_copy_list").(bool)
 
-	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(input.([]interface{}))
+	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
