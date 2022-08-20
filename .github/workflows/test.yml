@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2.1.3
         with:
-          go-version: "1.18"
+          go-version: "1.19"
         id: go
 
       - name: Check out code into the Go module directory
@@ -43,14 +43,15 @@ jobs:
       fail-fast: false
       matrix:
         terraform:
-          - "0.12.30"
           - "0.13.6"
-          - "0.14.5"
+          - "0.14.11"
+          - "0.15.5"
+          - "1.2.7"
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.1.3
         with:
-          go-version: "1.18"
+          go-version: "1.19"
         id: go
 
       - name: Check out code into the Go module directory
