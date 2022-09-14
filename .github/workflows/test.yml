@@ -46,7 +46,7 @@ jobs:
           - "0.13.6"
           - "0.14.11"
           - "0.15.5"
-          - "1.2.7"
+          - "1.2.9"
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.1.3
