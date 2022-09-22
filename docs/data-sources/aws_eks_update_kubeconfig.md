@@ -3,12 +3,12 @@
 page_title: "utils_aws_eks_update_kubeconfig Data Source - terraform-provider-utils"
 subcategory: ""
 description: |-
-  The 'utilsawseksupdatekubeconfig' data source executes 'aws eks update-kubeconfig' commands
+  The 'awseksupdate_kubeconfig' data source executes 'aws eks update-kubeconfig' commands
 ---
 
 # utils_aws_eks_update_kubeconfig (Data Source)
 
-The 'utils_aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands
+The 'aws_eks_update_kubeconfig' data source executes 'aws eks update-kubeconfig' commands
 
 ## Example Usage
 
@@ -113,6 +113,7 @@ data "utils_aws_eks_update_kubeconfig" "example4" {
 - `alias` (String) Alias for the cluster context name. Defaults to match cluster ARN.
 - `cluster_name` (String) EKS cluster name.
 - `component` (String) Component name.
+- `env` (Map of String) Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source
 - `environment` (String) Environment.
 - `kubeconfig` (String) kubeconfig file path to write the kubeconfig to. By default, the configuration is written to the first file path in the KUBECONFIG environment variable (if it is set) or the default kubeconfig path (.kube/config) in your home directory
 - `profile` (String) AWS profile to use for cluster authentication.

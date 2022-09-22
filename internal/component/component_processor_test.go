@@ -11,6 +11,7 @@ func TestComponentProcessor(t *testing.T) {
 	var err error
 	var component string
 	var stack string
+	namespace := ""
 	var yamlConfig []byte
 
 	var tenant1Ue2DevTestTestComponent map[string]any
@@ -49,7 +50,7 @@ func TestComponentProcessor(t *testing.T) {
 	tenant := "tenant1"
 	environment := "ue2"
 	stage := "dev"
-	tenant1Ue2DevTestTestComponent2, err = c.ProcessComponentFromContext(component, tenant, environment, stage)
+	tenant1Ue2DevTestTestComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage)
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentBackend2 := tenant1Ue2DevTestTestComponent2["backend"].(map[any]any)
 	tenant1Ue2DevTestTestComponentRemoteStateBackend2 := tenant1Ue2DevTestTestComponent2["remote_state_backend"].(map[any]any)
@@ -119,7 +120,7 @@ func TestComponentProcessor(t *testing.T) {
 	tenant = "tenant1"
 	environment = "ue2"
 	stage = "dev"
-	tenant1Ue2DevTestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, tenant, environment, stage)
+	tenant1Ue2DevTestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage)
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentOverrideComponent2Backend := tenant1Ue2DevTestTestComponentOverrideComponent2["backend"].(map[any]any)
 	tenant1Ue2DevTestTestComponentOverrideComponent2Workspace := tenant1Ue2DevTestTestComponentOverrideComponent2["workspace"].(string)
@@ -137,7 +138,7 @@ func TestComponentProcessor(t *testing.T) {
 	tenant = "tenant1"
 	environment = "ue2"
 	stage = "test-1"
-	tenant1Ue2Test1TestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, tenant, environment, stage)
+	tenant1Ue2Test1TestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage)
 	assert.Nil(t, err)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2Backend := tenant1Ue2DevTestTestComponentOverrideComponent2["backend"].(map[any]any)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2Workspace := tenant1Ue2Test1TestTestComponentOverrideComponent2["workspace"].(string)
