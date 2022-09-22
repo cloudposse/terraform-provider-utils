@@ -35,6 +35,7 @@ data "utils_spacelift_stack_config" "example" {
 ### Optional
 
 - `base_path` (String) Stack config base path.
+- `env` (Map of String) Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source
 - `input` (List of String) A list of stack config file names.
 - `process_component_deps` (Boolean) A boolean flag to enable/disable processing config dependencies for the components.
 - `process_imports` (Boolean) A boolean flag to enable/disable processing stack imports.

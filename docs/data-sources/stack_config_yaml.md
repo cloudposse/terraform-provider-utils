@@ -14,7 +14,7 @@ The `stack_config_yaml` data source accepts a list of stack config file names an
 
 ```terraform
 locals {
-  base_path = "../../config/stacks"
+  base_path = "../../complete/stacks"
 
   stack_config_files = [
     "${local.base_path}/tenant1/ue2/dev.yaml",
@@ -46,6 +46,7 @@ data "utils_stack_config_yaml" "example" {
 ### Optional
 
 - `base_path` (String) Stack config base path.
+- `env` (Map of String) Map of ENV vars in the format 'key=value'. These ENV vars will be set before executing the data source
 - `process_component_deps` (Boolean) A boolean flag to enable/disable processing config dependencies for the components.
 - `process_stack_deps` (Boolean) A boolean flag to enable/disable processing all stack dependencies for the components.
 
