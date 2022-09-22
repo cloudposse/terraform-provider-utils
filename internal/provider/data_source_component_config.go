@@ -34,6 +34,12 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			"namespace": {
+				Description: "Namespace.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
 			"environment": {
 				Description: "Environment.",
 				Type:        schema.TypeString,
@@ -74,6 +80,7 @@ func dataSourceComponentConfig() *schema.Resource {
 func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
+	namespace := d.Get("namespace").(string)
 	tenant := d.Get("tenant").(string)
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
@@ -95,7 +102,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(component, tenant, environment, stage)
+		result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage)
 		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}

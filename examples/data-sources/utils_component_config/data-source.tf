@@ -1,6 +1,7 @@
 locals {
   component   = "test/test-component-override"
   stack       = "tenant1-ue2-dev"
+  namespace   = ""
   tenant      = "tenant1"
   environment = "ue2"
   stage       = "dev"
@@ -24,6 +25,7 @@ data "utils_component_config" "example1" {
 
 data "utils_component_config" "example2" {
   component     = local.component
+  namespace     = local.namespace
   tenant        = local.tenant
   environment   = local.environment
   stage         = local.stage
