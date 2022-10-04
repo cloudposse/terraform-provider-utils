@@ -68,6 +68,18 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional: true,
 				Default:  nil,
 			},
+			"atmos_cli_config_path": {
+				Description: "atmos CLI config path.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
+			"atmos_base_path": {
+				Description: "atmos base path to components and stacks.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+			},
 			"output": {
 				Description: "Component configuration.",
 				Type:        schema.TypeString,
@@ -86,6 +98,8 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	stage := d.Get("stage").(string)
 	ignoreErrors := d.Get("ignore_errors").(bool)
 	env := d.Get("env").(map[string]any)
+	atmosCliConfigPath := d.Get("atmos_cli_config_path").(string)
+	atmosBasePath := d.Get("atmos_base_path").(string)
 
 	var result map[string]any
 	var err error
@@ -97,12 +111,12 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if len(stack) > 0 {
-		result, err = p.ProcessComponentInStack(component, stack)
+		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath)
 		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage)
+		result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage, atmosCliConfigPath, atmosBasePath)
 		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}

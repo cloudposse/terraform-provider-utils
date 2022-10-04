@@ -14,6 +14,7 @@ locals {
 
   result1 = yamldecode(data.utils_component_config.example1.output)
   result2 = yamldecode(data.utils_component_config.example2.output)
+  result3 = yamldecode(data.utils_component_config.example3.output)
 }
 
 data "utils_component_config" "example1" {
@@ -31,4 +32,12 @@ data "utils_component_config" "example2" {
   stage         = local.stage
   ignore_errors = false
   env           = local.env
+}
+
+data "utils_component_config" "example3" {
+  component             = local.component
+  stack                 = local.stack
+  ignore_errors         = false
+  atmos_cli_config_path = "."
+  atmos_base_path       = "../../complete"
 }
