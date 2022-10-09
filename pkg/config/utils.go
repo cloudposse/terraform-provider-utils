@@ -45,7 +45,7 @@ func FindAllStackConfigsInPathsForStack(
 
 		// Exclude files that match any of the excludePaths
 		for _, matchedFileAbsolutePath := range matches {
-			matchedFileRelativePath := u.TrimBasePathFromPath(ProcessedConfig.StacksBaseAbsolutePath+"/", matchedFileAbsolutePath)
+			matchedFileRelativePath := u.TrimBasePathFromPath(Config.StacksBaseAbsolutePath+"/", matchedFileAbsolutePath)
 
 			// Check if the provided stack matches a file in the config folders (excluding the files from `excludeStackPaths`)
 			stackMatch := strings.HasSuffix(matchedFileAbsolutePath, stack+g.DefaultStackConfigFileExtension)
@@ -123,7 +123,7 @@ func FindAllStackConfigsInPaths(
 
 		// Exclude files that match any of the excludePaths
 		for _, matchedFileAbsolutePath := range matches {
-			matchedFileRelativePath := u.TrimBasePathFromPath(ProcessedConfig.StacksBaseAbsolutePath+"/", matchedFileAbsolutePath)
+			matchedFileRelativePath := u.TrimBasePathFromPath(Config.StacksBaseAbsolutePath+"/", matchedFileAbsolutePath)
 			include := true
 
 			for _, excludePath := range excludeStackPaths {
@@ -153,7 +153,6 @@ func processEnvVars() error {
 	if len(basePath) > 0 {
 		u.PrintInfoVerbose(fmt.Sprintf("Found ENV var ATMOS_BASE_PATH=%s", basePath))
 		Config.BasePath = basePath
-		return fmt.Errorf("AtmosBasePath is set from ATMOS_BASE_PATH=%s", basePath)
 	}
 
 	stacksBasePath := os.Getenv("ATMOS_STACKS_BASE_PATH")
@@ -293,7 +292,6 @@ func processCommandLineArgs(configAndStacksInfo ConfigAndStacksInfo) error {
 	if len(configAndStacksInfo.BasePath) > 0 {
 		Config.BasePath = configAndStacksInfo.BasePath
 		u.PrintInfoVerbose(fmt.Sprintf("Using command line argument '%s' as base path for stacks and components", configAndStacksInfo.BasePath))
-		return fmt.Errorf("AtmosBasePath is set from configAndStacksInfo.BasePath=%s", configAndStacksInfo.BasePath)
 	}
 	if len(configAndStacksInfo.TerraformDir) > 0 {
 		Config.Components.Terraform.BasePath = configAndStacksInfo.TerraformDir
