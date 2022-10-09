@@ -17,7 +17,7 @@ import (
 
 var (
 	// Config is the CLI configuration structure
-	Config Configuration
+	Config CliConfiguration
 )
 
 // InitConfig finds and merges CLI configurations in the following order: system dir, home dir, current dir, ENV vars, command-line arguments
