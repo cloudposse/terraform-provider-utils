@@ -34,9 +34,9 @@ func InitConfig(configAndStacksInfo ConfigAndStacksInfo) error {
 	// ENV vars
 	// Command-line arguments
 
-	if Config.Initialized {
-		return nil
-	}
+	//if Config.Initialized {
+	//	return nil
+	//}
 
 	err := processLogsConfig()
 	if err != nil {
