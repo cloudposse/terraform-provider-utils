@@ -1,9 +1,9 @@
 package stack
 
 import (
-	c "github.com/cloudposse/atmos/pkg/convert"
-	s "github.com/cloudposse/atmos/pkg/stack"
-	u "github.com/cloudposse/atmos/pkg/utils"
+	c "github.com/cloudposse/terraform-provider-utils/pkg/convert"
+	s "github.com/cloudposse/terraform-provider-utils/pkg/stack"
+	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"

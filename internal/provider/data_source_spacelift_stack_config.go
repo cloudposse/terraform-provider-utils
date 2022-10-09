@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/atmos/pkg/convert"
-	s "github.com/cloudposse/atmos/pkg/spacelift"
+	c "github.com/cloudposse/terraform-provider-utils/pkg/convert"
+	s "github.com/cloudposse/terraform-provider-utils/pkg/spacelift"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"

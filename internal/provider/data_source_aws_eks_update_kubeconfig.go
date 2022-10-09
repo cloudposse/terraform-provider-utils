@@ -2,9 +2,9 @@ package provider
 
 import (
 	"context"
-	a "github.com/cloudposse/atmos/pkg/aws"
-	g "github.com/cloudposse/atmos/pkg/config"
-	c "github.com/cloudposse/atmos/pkg/convert"
+	a "github.com/cloudposse/terraform-provider-utils/pkg/aws"
+	g "github.com/cloudposse/terraform-provider-utils/pkg/config"
+	c "github.com/cloudposse/terraform-provider-utils/pkg/convert"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"time"

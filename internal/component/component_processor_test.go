@@ -1,7 +1,7 @@
 package component
 
 import (
-	c "github.com/cloudposse/atmos/pkg/component"
+	c "github.com/cloudposse/terraform-provider-utils/pkg/component"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"

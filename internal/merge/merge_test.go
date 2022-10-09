@@ -1,7 +1,7 @@
 package merge
 
 import (
-	m "github.com/cloudposse/atmos/pkg/merge"
+	m "github.com/cloudposse/terraform-provider-utils/pkg/merge"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

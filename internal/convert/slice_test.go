@@ -1,7 +1,7 @@
 package convert
 
 import (
-	c "github.com/cloudposse/atmos/pkg/convert"
+	c "github.com/cloudposse/terraform-provider-utils/pkg/convert"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

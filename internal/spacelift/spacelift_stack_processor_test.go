@@ -1,7 +1,7 @@
 package spacelift
 
 import (
-	s "github.com/cloudposse/atmos/pkg/spacelift"
+	s "github.com/cloudposse/terraform-provider-utils/pkg/spacelift"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 	"testing"
