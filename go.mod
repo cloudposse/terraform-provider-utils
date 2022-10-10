@@ -3,7 +3,7 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.19
 
 require (
-	github.com/cloudposse/atmos v1.9.1
+	github.com/cloudposse/atmos v1.10.0
 	github.com/gruntwork-io/terratest v0.40.22
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.23.0
@@ -31,7 +31,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.2.0 // indirect
-	github.com/bytecodealliance/wasmtime-go v0.36.0 // indirect
+	github.com/bytecodealliance/wasmtime-go v1.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/containerd v1.6.8 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -102,7 +102,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	github.com/open-policy-agent/opa v0.44.0 // indirect
+	github.com/open-policy-agent/opa v0.45.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
 	github.com/otiai10/copy v1.7.0 // indirect
