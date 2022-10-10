@@ -39,7 +39,8 @@ func FindAllStackConfigsInPathsForStack(
 			// TODO: review `doublestar` library
 			matches, err = u.GetGlobMatches(pathWithExt)
 			if err != nil {
-				return nil, nil, false, err
+				y, _ := u.ConvertToYAML(cliConfig)
+				return nil, nil, false, fmt.Errorf("%v\n\n\nCLI config:\n\n%v", err, y)
 			}
 		}
 
@@ -118,7 +119,8 @@ func FindAllStackConfigsInPaths(
 			// TODO: review `doublestar` library
 			matches, err = u.GetGlobMatches(pathWithExt)
 			if err != nil {
-				return nil, nil, err
+				y, _ := u.ConvertToYAML(cliConfig)
+				return nil, nil, fmt.Errorf("%v\n\n\nCLI config:\n\n%v", err, y)
 			}
 		}
 

@@ -30,7 +30,7 @@ func GetGlobMatches(pattern string) ([]string, error) {
 	}
 
 	if matches == nil {
-		return nil, fmt.Errorf("failed to find a match for the import '%s' ('%s' + '%s')", pattern, base, cleanPattern)
+		return nil, fmt.Errorf("failed to find a match for the import '%s'\n('%s' + '%s')", pattern, base, cleanPattern)
 	}
 
 	var fullMatches []string
