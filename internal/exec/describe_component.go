@@ -2,10 +2,11 @@ package exec
 
 import (
 	"fmt"
-	c "github.com/cloudposse/terraform-provider-utils/pkg/config"
-	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	cfg "github.com/cloudposse/terraform-provider-utils/pkg/config"
+	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 )
 
 // ExecuteDescribeComponent executes `describe component` command
@@ -23,16 +24,22 @@ func ExecuteDescribeComponent(cmd *cobra.Command, args []string) error {
 
 	component := args[0]
 
-	var configAndStacksInfo c.ConfigAndStacksInfo
+	var configAndStacksInfo cfg.ConfigAndStacksInfo
 	configAndStacksInfo.ComponentFromArg = component
 	configAndStacksInfo.Stack = stack
 
-	configAndStacksInfo.ComponentType = "terraform"
-	configAndStacksInfo, err = ProcessStacks(configAndStacksInfo, true)
+	cliConfig, err := cfg.InitCliConfig(configAndStacksInfo, true)
 	if err != nil {
-		u.PrintErrorVerbose(err)
+		u.PrintErrorToStdError(err)
+		return err
+	}
+
+	configAndStacksInfo.ComponentType = "terraform"
+	configAndStacksInfo, err = ProcessStacks(cliConfig, configAndStacksInfo, true)
+	if err != nil {
+		u.PrintErrorVerbose(cliConfig.Logs.Verbose, err)
 		configAndStacksInfo.ComponentType = "helmfile"
-		configAndStacksInfo, err = ProcessStacks(configAndStacksInfo, true)
+		configAndStacksInfo, err = ProcessStacks(cliConfig, configAndStacksInfo, true)
 		if err != nil {
 			return err
 		}

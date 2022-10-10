@@ -3,7 +3,6 @@ package stack
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	cfg "github.com/cloudposse/terraform-provider-utils/pkg/config"
 	c "github.com/cloudposse/terraform-provider-utils/pkg/convert"
-	g "github.com/cloudposse/terraform-provider-utils/pkg/globals"
 	m "github.com/cloudposse/terraform-provider-utils/pkg/merge"
 	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 )
@@ -229,13 +228,13 @@ func CreateComponentStackMap(
 
 	for stack, components := range stackComponentMap["terraform"] {
 		for _, component := range components {
-			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, g.DefaultStackConfigFileExtension, "", 1))
+			componentStackMap["terraform"][component] = append(componentStackMap["terraform"][component], strings.Replace(stack, cfg.DefaultStackConfigFileExtension, "", 1))
 		}
 	}
 
 	for stack, components := range stackComponentMap["helmfile"] {
 		for _, component := range components {
-			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, g.DefaultStackConfigFileExtension, "", 1))
+			componentStackMap["helmfile"][component] = append(componentStackMap["helmfile"][component], strings.Replace(stack, cfg.DefaultStackConfigFileExtension, "", 1))
 		}
 	}
 
@@ -250,7 +249,7 @@ func getFileContent(filePath string) (string, error) {
 		return fmt.Sprintf("%s", existingContent), nil
 	}
 
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}

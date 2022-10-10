@@ -2,12 +2,13 @@ package exec
 
 import (
 	"fmt"
-	c "github.com/cloudposse/terraform-provider-utils/pkg/config"
-	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 	"strings"
+
+	cfg "github.com/cloudposse/terraform-provider-utils/pkg/config"
+	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 )
 
-func executeWorkflowSteps(workflowDefinition c.WorkflowDefinition, dryRun bool, commandLineStack string) error {
+func executeWorkflowSteps(workflowDefinition cfg.WorkflowDefinition, dryRun bool, commandLineStack string) error {
 	var steps = workflowDefinition.Steps
 
 	for _, step := range steps {

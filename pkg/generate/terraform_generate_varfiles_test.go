@@ -1,18 +1,19 @@
 package vender
 
 import (
-	e "github.com/cloudposse/terraform-provider-utils/internal/exec"
-	c "github.com/cloudposse/terraform-provider-utils/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"strconv"
 	"testing"
 	"time"
+
+	e "github.com/cloudposse/terraform-provider-utils/internal/exec"
+	cfg "github.com/cloudposse/terraform-provider-utils/pkg/config"
 )
 
 func TestTerraformGenerateVarfiles(t *testing.T) {
-	err := c.InitConfig(c.ConfigAndStacksInfo{})
+	cliConfig, err := cfg.InitCliConfig(cfg.ConfigAndStacksInfo{}, true)
 	assert.Nil(t, err)
 
 	tempDir, err := os.MkdirTemp("", strconv.FormatInt(time.Now().Unix(), 10))
@@ -28,6 +29,6 @@ func TestTerraformGenerateVarfiles(t *testing.T) {
 	filePattern := path.Join(tempDir, "varfiles/{tenant}-{environment}-{stage}-{component}.tfvars")
 	format := "hcl"
 
-	err = e.ExecuteTerraformGenerateVarfiles(filePattern, format, stacks, components)
+	err = e.ExecuteTerraformGenerateVarfiles(cliConfig, filePattern, format, stacks, components)
 	assert.Nil(t, err)
 }

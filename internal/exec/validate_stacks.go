@@ -2,25 +2,19 @@ package exec
 
 import (
 	"fmt"
-	c "github.com/cloudposse/terraform-provider-utils/pkg/config"
-	s "github.com/cloudposse/terraform-provider-utils/pkg/stack"
-	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"path"
 	"strings"
+
+	cfg "github.com/cloudposse/terraform-provider-utils/pkg/config"
+	s "github.com/cloudposse/terraform-provider-utils/pkg/stack"
+	u "github.com/cloudposse/terraform-provider-utils/pkg/utils"
 )
 
 // ExecuteValidateStacks executes `validate stacks` command
 func ExecuteValidateStacks(cmd *cobra.Command, args []string) error {
-	var configAndStacksInfo c.ConfigAndStacksInfo
-
-	err := c.InitConfig(configAndStacksInfo)
-	if err != nil {
-		return err
-	}
-
-	err = c.ProcessConfig(configAndStacksInfo, false)
+	cliConfig, err := cfg.InitCliConfig(cfg.ConfigAndStacksInfo{}, true)
 	if err != nil {
 		return err
 	}
@@ -29,31 +23,31 @@ func ExecuteValidateStacks(cmd *cobra.Command, args []string) error {
 	includedPaths := []string{"**/*"}
 	// Don't exclude any YAML files for validation
 	excludedPaths := []string{}
-	includeStackAbsPaths, err := u.JoinAbsolutePathWithPaths(c.Config.StacksBaseAbsolutePath, includedPaths)
+	includeStackAbsPaths, err := u.JoinAbsolutePathWithPaths(cliConfig.StacksBaseAbsolutePath, includedPaths)
 	if err != nil {
 		return err
 	}
 
-	stackConfigFilesAbsolutePaths, _, err := c.FindAllStackConfigsInPaths(includeStackAbsPaths, excludedPaths)
+	stackConfigFilesAbsolutePaths, _, err := cfg.FindAllStackConfigsInPaths(cliConfig, includeStackAbsPaths, excludedPaths)
 	if err != nil {
 		return err
 	}
 
 	u.PrintInfo(fmt.Sprintf("Validating all YAML files in the '%s' folder and all subfolders\n",
-		path.Join(c.Config.BasePath, c.Config.Stacks.BasePath)))
+		path.Join(cliConfig.BasePath, cliConfig.Stacks.BasePath)))
 
 	var errorMessages []string
 	for _, filePath := range stackConfigFilesAbsolutePaths {
-		stackConfig, importsConfig, err := s.ProcessYAMLConfigFile(c.Config.StacksBaseAbsolutePath, filePath, map[string]map[any]any{})
+		stackConfig, importsConfig, err := s.ProcessYAMLConfigFile(cliConfig.StacksBaseAbsolutePath, filePath, map[string]map[any]any{})
 		if err != nil {
 			errorMessages = append(errorMessages, err.Error())
 		}
 
 		componentStackMap := map[string]map[string][]string{}
 		_, err = s.ProcessStackConfig(
-			c.Config.StacksBaseAbsolutePath,
-			c.Config.TerraformDirAbsolutePath,
-			c.Config.HelmfileDirAbsolutePath,
+			cliConfig.StacksBaseAbsolutePath,
+			cliConfig.TerraformDirAbsolutePath,
+			cliConfig.HelmfileDirAbsolutePath,
 			filePath,
 			stackConfig,
 			false,
