@@ -157,6 +157,11 @@ func InitCliConfig(configAndStacksInfo ConfigAndStacksInfo, verbose bool) (CliCo
 		return cliConfig, err
 	}
 
+	// Process the base path specified in the Terraform provider (which calls into the atmos code)
+	if configAndStacksInfo.AtmosBasePath != "" {
+		cliConfig.BasePath = configAndStacksInfo.AtmosBasePath
+	}
+
 	// Check config
 	err = checkConfig(cliConfig)
 	if err != nil {
@@ -244,11 +249,6 @@ func InitCliConfig(configAndStacksInfo ConfigAndStacksInfo, verbose bool) (CliCo
 		if err != nil {
 			return cliConfig, err
 		}
-	}
-
-	// Process the base path specified in the Terraform provider (which calls into the atmos code)
-	if configAndStacksInfo.AtmosBasePath != "" {
-		cliConfig.BasePath = configAndStacksInfo.AtmosBasePath
 	}
 
 	cliConfig.Initialized = true
