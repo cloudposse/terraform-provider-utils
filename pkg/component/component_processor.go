@@ -23,8 +23,6 @@ func ProcessComponentInStack(
 	configAndStacksInfo.AtmosBasePath = atmosBasePath
 
 	cliConfig, err := cfg.InitCliConfig(configAndStacksInfo, true)
-	//y, _ := u.ConvertToYAML(cliConfig)
-	//return nil, fmt.Errorf("\n\n\nCLI config 2:\n\n%v/n/n", y)
 	if err != nil {
 		u.PrintErrorToStdError(err)
 		return nil, err
