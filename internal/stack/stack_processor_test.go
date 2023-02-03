@@ -1,12 +1,14 @@
 package stack
 
 import (
+	"gopkg.in/yaml.v2"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	c "github.com/cloudposse/atmos/pkg/convert"
 	s "github.com/cloudposse/atmos/pkg/stack"
 	u "github.com/cloudposse/atmos/pkg/utils"
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
-	"testing"
 )
 
 func TestStackProcessor(t *testing.T) {
@@ -24,13 +26,14 @@ func TestStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var listResult, mapResult, err = s.ProcessYAMLConfigFiles(
+	var listResult, mapResult, _, err = s.ProcessYAMLConfigFiles(
 		stacksBasePath,
 		terraformComponentsBasePath,
 		helmfileComponentsBasePath,
 		filePaths,
 		processStackDeps,
 		processComponentDeps,
+		false,
 	)
 
 	assert.Nil(t, err)
@@ -169,11 +172,10 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "catalog/helmfile/infra-server", infraInfraServerOverrideComponentDeps[0])
 	assert.Equal(t, "catalog/helmfile/infra-server-override", infraInfraServerOverrideComponentDeps[1])
 	assert.Equal(t, "catalog/terraform/spacelift-and-backend-override-1", infraInfraServerOverrideComponentDeps[2])
-	assert.Equal(t, "catalog/terraform/test-component-override-3", infraInfraServerOverrideComponentDeps[3])
-	assert.Equal(t, "mixins/region/us-east-2", infraInfraServerOverrideComponentDeps[4])
-	assert.Equal(t, "mixins/stage/dev", infraInfraServerOverrideComponentDeps[5])
-	assert.Equal(t, "orgs/cp/_defaults", infraInfraServerOverrideComponentDeps[6])
-	assert.Equal(t, "orgs/cp/tenant1/_defaults", infraInfraServerOverrideComponentDeps[7])
+	assert.Equal(t, "mixins/region/us-east-2", infraInfraServerOverrideComponentDeps[3])
+	assert.Equal(t, "mixins/stage/dev", infraInfraServerOverrideComponentDeps[4])
+	assert.Equal(t, "orgs/cp/_defaults", infraInfraServerOverrideComponentDeps[5])
+	assert.Equal(t, "orgs/cp/tenant1/_defaults", infraInfraServerOverrideComponentDeps[6])
 	assert.Equal(t, "infra/infra-server", infraInfraServerOverrideComponentInheritance[0])
 	assert.Equal(t, "1_override", infraInfraServerOverrideComponentVarsA)
 
@@ -182,7 +184,7 @@ func TestStackProcessor(t *testing.T) {
 	testTestComponentOverrideComponent3TerraformWorkspace := testTestComponentOverrideComponent3Metadata["terraform_workspace"]
 	testTestComponentOverrideComponent3Deps := testTestComponentOverrideComponent3["deps"].([]any)
 	assert.Equal(t, "test-component-override-3-workspace", testTestComponentOverrideComponent3TerraformWorkspace)
-	assert.Equal(t, 17, len(testTestComponentOverrideComponent3Deps))
+	assert.Equal(t, 16, len(testTestComponentOverrideComponent3Deps))
 	assert.Equal(t, "catalog/terraform/mixins/test-1", testTestComponentOverrideComponent3Deps[0])
 	assert.Equal(t, "catalog/terraform/mixins/test-2", testTestComponentOverrideComponent3Deps[1])
 	assert.Equal(t, "catalog/terraform/services/service-1", testTestComponentOverrideComponent3Deps[2])
@@ -198,8 +200,7 @@ func TestStackProcessor(t *testing.T) {
 	assert.Equal(t, "mixins/stage/dev", testTestComponentOverrideComponent3Deps[12])
 	assert.Equal(t, "orgs/cp/_defaults", testTestComponentOverrideComponent3Deps[13])
 	assert.Equal(t, "orgs/cp/tenant1/_defaults", testTestComponentOverrideComponent3Deps[14])
-	assert.Equal(t, "orgs/cp/tenant1/dev/_defaults", testTestComponentOverrideComponent3Deps[15])
-	assert.Equal(t, "orgs/cp/tenant1/dev/us-east-2", testTestComponentOverrideComponent3Deps[16])
+	assert.Equal(t, "orgs/cp/tenant1/dev/us-east-2", testTestComponentOverrideComponent3Deps[15])
 
 	yamlConfig, err := yaml.Marshal(mapConfig1)
 	assert.Nil(t, err)

@@ -78,13 +78,15 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	result, _, err := s.ProcessYAMLConfigFiles(
+	result, _, _, err := s.ProcessYAMLConfigFiles(
 		stacksBasePath.(string),
 		"",
 		"",
 		paths,
 		processStackDeps.(bool),
-		processComponentDeps.(bool))
+		processComponentDeps.(bool),
+		false,
+	)
 
 	if err != nil {
 		return diag.FromErr(err)
