@@ -2,12 +2,14 @@ package provider
 
 import (
 	"context"
-	a "github.com/cloudposse/atmos/pkg/aws"
-	g "github.com/cloudposse/atmos/pkg/config"
-	c "github.com/cloudposse/atmos/pkg/convert"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"time"
+
+	a "github.com/cloudposse/atmos/pkg/aws"
+	c "github.com/cloudposse/atmos/pkg/convert"
+	g "github.com/cloudposse/atmos/pkg/schema"
 )
 
 func dataSourceAwsEksUpdateKubeconfig() *schema.Resource {
