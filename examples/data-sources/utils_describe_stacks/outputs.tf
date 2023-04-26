@@ -27,3 +27,8 @@ output "output6" {
   value       = local.result6
   description = "Result of `describe stacks`"
 }
+
+output "output7" {
+  value       = local.result7
+  description = "Result of `describe stacks`"
+}

@@ -91,3 +91,22 @@ func TestDescribeStacksWithFilter4(t *testing.T) {
 	assert.Nil(t, err)
 	t.Log(string(dependentsYaml))
 }
+
+func TestDescribeStacksWithFilter5(t *testing.T) {
+	configAndStacksInfo := schema.ConfigAndStacksInfo{}
+
+	cliConfig, err := cfg.InitCliConfig(configAndStacksInfo, true)
+	assert.Nil(t, err)
+
+	componentTypes := []string{"terraform"}
+	components := []string{"top-level-component1"}
+	sections := []string{"vars"}
+
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", components, componentTypes, sections, false)
+	assert.Nil(t, err)
+	assert.Equal(t, 7, len(stacks))
+
+	dependentsYaml, err := yaml.Marshal(stacks)
+	assert.Nil(t, err)
+	t.Log(string(dependentsYaml))
+}

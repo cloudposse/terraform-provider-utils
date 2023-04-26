@@ -17,6 +17,7 @@ locals {
   result4 = yamldecode(data.utils_describe_stacks.example4.output)
   result5 = yamldecode(data.utils_describe_stacks.example5.output)
   result6 = yamldecode(data.utils_describe_stacks.example6.output)
+  result7 = yamldecode(data.utils_describe_stacks.example7.output)
 }
 
 data "utils_describe_stacks" "example1" {
@@ -54,4 +55,10 @@ data "utils_describe_stacks" "example6" {
   component_types = ["terraform"]
   components      = ["test/test-component-override-3"]
   sections        = ["vars", "metadata", "env"]
+}
+
+data "utils_describe_stacks" "example7" {
+  component_types = ["terraform"]
+  components      = ["top-level-component1"]
+  sections        = ["vars"]
 }
