@@ -2,13 +2,14 @@ package provider
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"
 
-	p "github.com/cloudposse/atmos/pkg/component"
+	e "github.com/cloudposse/atmos/internal/exec"
+	cfg "github.com/cloudposse/atmos/pkg/config"
 	c "github.com/cloudposse/atmos/pkg/convert"
+	s "github.com/cloudposse/atmos/pkg/schema"
 )
 
 func dataSourceDescribeStacks() *schema.Resource {
@@ -18,43 +19,59 @@ func dataSourceDescribeStacks() *schema.Resource {
 		ReadContext: dataSourceDescribeStacksRead,
 
 		Schema: map[string]*schema.Schema{
-			"component": {
-				Description: "Component name.",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
 			"stack": {
-				Description: "Stack name.",
+				Description: "Atmos stack to filter by.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"tenant": {
-				Description: "Tenant.",
+				Description: "Tenant to filter by.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"namespace": {
-				Description: "Namespace.",
+				Description: "Namespace to filter by.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"environment": {
-				Description: "Environment.",
+				Description: "Environment to filter by.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"stage": {
-				Description: "Stage.",
+				Description: "Stage to filter by.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
+			"components": {
+				Description: "List of Atmos components to filter by.",
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Default:     nil,
+			},
+			"component-types": {
+				Description: "List of component types to filter by.",
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Default:     nil,
+			},
+			"sections": {
+				Description: "Output only the specified component sections.",
+				Type:        schema.TypeList,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Default:     nil,
+			},
 			"ignore_errors": {
-				Description: "Flag to ignore errors if the component is not found in the stack.",
+				Description: "Flag to ignore errors in the provider when executing 'describe stacks' command.",
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
@@ -70,19 +87,19 @@ func dataSourceDescribeStacks() *schema.Resource {
 				Default:  nil,
 			},
 			"atmos_cli_config_path": {
-				Description: "atmos CLI config path.",
+				Description: "Atmos CLI config path.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"atmos_base_path": {
-				Description: "atmos base path to components and stacks.",
+				Description: "Atmos base path to components and stacks.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 			},
 			"output": {
-				Description: "Component configuration.",
+				Description: "Stack configurations.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
@@ -91,12 +108,14 @@ func dataSourceDescribeStacks() *schema.Resource {
 }
 
 func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	component := d.Get("component").(string)
 	stack := d.Get("stack").(string)
 	namespace := d.Get("namespace").(string)
 	tenant := d.Get("tenant").(string)
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
+	components := d.Get("components")
+	componentTypes := d.Get("component-types")
+	sections := d.Get("sections")
 	ignoreErrors := d.Get("ignore_errors").(bool)
 	env := d.Get("env").(map[string]any)
 	atmosCliConfigPath := d.Get("atmos_cli_config_path").(string)
@@ -106,21 +125,56 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 	var err error
 	var yamlConfig []byte
 
+	componentsList, err := c.SliceOfInterfacesToSliceOfStrings(components.([]any))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	componentTypesList, err := c.SliceOfInterfacesToSliceOfStrings(componentTypes.([]any))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	sectionsList, err := c.SliceOfInterfacesToSliceOfStrings(sections.([]any))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	err = setEnv(env)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if len(stack) > 0 {
-		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath)
-		if err != nil && !ignoreErrors {
+	info := s.ConfigAndStacksInfo{
+		AtmosBasePath:      atmosBasePath,
+		AtmosCliConfigPath: atmosCliConfigPath,
+	}
+
+	cliConfig, err := cfg.InitCliConfig(info, true)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var filterByStack string
+
+	if stack != "" {
+		filterByStack = stack
+	} else if namespace != "" || tenant != "" || environment != "" || stage != "" {
+		filterByStack, err = cfg.GetStackNameFromContextAndStackNamePattern(namespace, tenant, environment, stage, cliConfig.Stacks.NamePattern)
+		if err != nil {
 			return diag.FromErr(err)
 		}
-	} else {
-		result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage, atmosCliConfigPath, atmosBasePath)
-		if err != nil && !ignoreErrors {
-			return diag.FromErr(err)
-		}
+	}
+
+	result, err = e.ExecuteDescribeStacks(
+		cliConfig,
+		filterByStack,
+		componentsList,
+		componentTypesList,
+		sectionsList,
+		false)
+	if err != nil && !ignoreErrors {
+		return diag.FromErr(err)
 	}
 
 	if err != nil {
