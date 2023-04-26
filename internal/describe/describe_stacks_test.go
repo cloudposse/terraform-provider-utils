@@ -106,6 +106,18 @@ func TestDescribeStacksWithFilter5(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 7, len(stacks))
 
+	tenant1Ue2DevStack := stacks["tenant1-ue2-dev"].(map[string]any)
+	tenant1Ue2DevStackComponents := tenant1Ue2DevStack["components"].(map[string]any)
+	tenant1Ue2DevStackComponentsTerraform := tenant1Ue2DevStackComponents["terraform"].(map[string]any)
+	tenant1Ue2DevStackComponentsTerraformComponent := tenant1Ue2DevStackComponentsTerraform["top-level-component1"].(map[string]any)
+	tenant1Ue2DevStackComponentsTerraformComponentVars := tenant1Ue2DevStackComponentsTerraformComponent["vars"].(map[any]any)
+	tenant1Ue2DevStackComponentsTerraformComponentVarsTenant := tenant1Ue2DevStackComponentsTerraformComponentVars["tenant"].(string)
+	tenant1Ue2DevStackComponentsTerraformComponentVarsStage := tenant1Ue2DevStackComponentsTerraformComponentVars["stage"].(string)
+	tenant1Ue2DevStackComponentsTerraformComponentVarsEnvironment := tenant1Ue2DevStackComponentsTerraformComponentVars["environment"].(string)
+	assert.Equal(t, "tenant1", tenant1Ue2DevStackComponentsTerraformComponentVarsTenant)
+	assert.Equal(t, "ue2", tenant1Ue2DevStackComponentsTerraformComponentVarsEnvironment)
+	assert.Equal(t, "dev", tenant1Ue2DevStackComponentsTerraformComponentVarsStage)
+
 	stacksYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
 	t.Log(string(stacksYaml))
