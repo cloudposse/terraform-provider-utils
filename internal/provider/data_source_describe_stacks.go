@@ -14,7 +14,7 @@ import (
 
 func dataSourceDescribeStacks() *schema.Resource {
 	return &schema.Resource{
-		Description: "The `describe-stacks` data source shows configuration for atmos stacks and components in the stacks",
+		Description: "The `describe_stacks` data source shows configuration for Atmos stacks and components in the stacks",
 
 		ReadContext: dataSourceDescribeStacksRead,
 
