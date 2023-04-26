@@ -3,7 +3,7 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.20
 
 require (
-	github.com/cloudposse/atmos v1.34.0
+	github.com/cloudposse/atmos v1.34.1
 	github.com/gruntwork-io/terratest v0.41.18
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
@@ -106,7 +106,7 @@ require (
 	github.com/open-policy-agent/opa v0.51.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
-	github.com/otiai10/copy v1.10.0 // indirect
+	github.com/otiai10/copy v1.11.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

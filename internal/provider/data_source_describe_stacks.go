@@ -2,13 +2,14 @@ package provider
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v2"
 
-	e "github.com/cloudposse/atmos/internal/exec"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	cfg "github.com/cloudposse/atmos/pkg/config"
 	c "github.com/cloudposse/atmos/pkg/convert"
+	"github.com/cloudposse/atmos/pkg/describe"
 	s "github.com/cloudposse/atmos/pkg/schema"
 )
 
@@ -166,7 +167,7 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	result, err = e.ExecuteDescribeStacks(
+	result, err = describe.ExecuteDescribeStacks(
 		cliConfig,
 		filterByStack,
 		componentsList,
