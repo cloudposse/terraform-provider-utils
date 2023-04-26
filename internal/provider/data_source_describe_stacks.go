@@ -57,7 +57,7 @@ func dataSourceDescribeStacks() *schema.Resource {
 				Optional:    true,
 				Default:     nil,
 			},
-			"component-types": {
+			"component_types": {
 				Description: "List of component types to filter by.",
 				Type:        schema.TypeList,
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -115,7 +115,7 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 	environment := d.Get("environment").(string)
 	stage := d.Get("stage").(string)
 	components := d.Get("components")
-	componentTypes := d.Get("component-types")
+	componentTypes := d.Get("component_types")
 	sections := d.Get("sections")
 	ignoreErrors := d.Get("ignore_errors").(bool)
 	env := d.Get("env").(map[string]any)
