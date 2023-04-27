@@ -24,6 +24,7 @@ func New(version string) func() *schema.Provider {
 				"utils_spacelift_stack_config":    dataSourceSpaceliftStackConfig(),
 				"utils_component_config":          dataSourceComponentConfig(),
 				"utils_aws_eks_update_kubeconfig": dataSourceAwsEksUpdateKubeconfig(),
+				"utils_describe_stacks":           dataSourceDescribeStacks(),
 			},
 		}
 
