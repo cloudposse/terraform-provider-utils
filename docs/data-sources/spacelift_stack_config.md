@@ -45,5 +45,3 @@ data "utils_spacelift_stack_config" "example" {
 
 - `id` (String) The ID of this resource.
 - `output` (String) A map of Spacelift stack configurations.
-
-

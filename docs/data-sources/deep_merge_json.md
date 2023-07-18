@@ -42,5 +42,3 @@ data "utils_deep_merge_json" "example" {
 
 - `id` (String) The ID of this resource.
 - `output` (String) The deep-merged output.
-
-

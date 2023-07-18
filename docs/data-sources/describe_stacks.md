@@ -69,13 +69,13 @@ data "utils_describe_stacks" "example6" {
   stage           = local.stage
   component_types = ["terraform"]
   components      = ["test/test-component-override-3"]
-  sections        = ["vars", "metadata", "env"]
+  sections        = ["vars", "metadata", "env", "workspace"]
 }
 
 data "utils_describe_stacks" "example7" {
   component_types = ["terraform"]
   components      = ["top-level-component1"]
-  sections        = ["vars"]
+  sections        = ["vars", "workspace"]
 }
 ```
 
@@ -101,5 +101,3 @@ data "utils_describe_stacks" "example7" {
 
 - `id` (String) The ID of this resource.
 - `output` (String) Stack configurations.
-
-
