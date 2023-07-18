@@ -28,7 +28,7 @@ func TestSpaceliftStackProcessorWithTerraform(t *testing.T) {
 	terraform.OutputStruct(t, terraformOptions, "output", &output)
 	spaceliftStacks := output.(map[string]any)
 
-	assert.Equal(t, 42, len(spaceliftStacks))
+	assert.Equal(t, 44, len(spaceliftStacks))
 
 	tenant1Ue2DevInfraVpcStack := spaceliftStacks["tenant1-ue2-dev-infra-vpc"].(map[string]any)
 	tenant1Ue2DevInfraVpcStackInfrastructureStackName := tenant1Ue2DevInfraVpcStack["stack"].(string)
