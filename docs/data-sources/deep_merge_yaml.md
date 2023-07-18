@@ -42,5 +42,3 @@ data "utils_deep_merge_yaml" "example" {
 
 - `id` (String) The ID of this resource.
 - `output` (String) The deep-merged output.
-
-

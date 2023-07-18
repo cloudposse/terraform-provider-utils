@@ -20,9 +20,9 @@ func TestDescribeStacks(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, nil, nil, false)
 	assert.Nil(t, err)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(string(dependentsYaml))
 }
 
 func TestDescribeStacksWithFilter1(t *testing.T) {
@@ -36,9 +36,9 @@ func TestDescribeStacksWithFilter1(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, nil, false)
 	assert.Nil(t, err)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(string(dependentsYaml))
 }
 
 func TestDescribeStacksWithFilter2(t *testing.T) {
@@ -53,9 +53,9 @@ func TestDescribeStacksWithFilter2(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, nil, nil, false)
 	assert.Nil(t, err)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(string(dependentsYaml))
 }
 
 func TestDescribeStacksWithFilter3(t *testing.T) {
@@ -70,9 +70,9 @@ func TestDescribeStacksWithFilter3(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, sections, false)
 	assert.Nil(t, err)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(string(dependentsYaml))
 }
 
 func TestDescribeStacksWithFilter4(t *testing.T) {
@@ -87,9 +87,9 @@ func TestDescribeStacksWithFilter4(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, componentTypes, sections, false)
 	assert.Nil(t, err)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := yaml.Marshal(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(string(dependentsYaml))
 }
 
 func TestDescribeStacksWithFilter5(t *testing.T) {

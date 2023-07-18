@@ -54,5 +54,3 @@ data "utils_stack_config_yaml" "example" {
 
 - `id` (String) The ID of this resource.
 - `output` (List of String) A list of stack configurations.
-
-

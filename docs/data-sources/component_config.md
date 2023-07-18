@@ -81,5 +81,3 @@ data "utils_component_config" "example3" {
 
 - `id` (String) The ID of this resource.
 - `output` (String) Component configuration.
-
-
