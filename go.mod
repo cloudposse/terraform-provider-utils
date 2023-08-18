@@ -3,7 +3,7 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.20
 
 require (
-	github.com/cloudposse/atmos v1.43.0
+	github.com/cloudposse/atmos v1.44.0
 	github.com/gruntwork-io/terratest v0.43.11
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
@@ -76,7 +76,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.17.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
-	github.com/hashicorp/terraform-config-inspect v0.0.0-20230614215431-f32df32a01cd // indirect
+	github.com/hashicorp/terraform-config-inspect v0.0.0-20230808231734-f15f31bf62b3 // indirect
 	github.com/hashicorp/terraform-exec v0.18.1 // indirect
 	github.com/hashicorp/terraform-json v0.17.1 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.16.0 // indirect
