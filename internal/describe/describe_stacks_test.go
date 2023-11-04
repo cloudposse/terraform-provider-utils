@@ -104,7 +104,7 @@ func TestDescribeStacksWithFilter5(t *testing.T) {
 
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", components, componentTypes, sections, false)
 	assert.Nil(t, err)
-	assert.Equal(t, 7, len(stacks))
+	assert.Equal(t, 8, len(stacks))
 
 	tenant1Ue2DevStack := stacks["tenant1-ue2-dev"].(map[string]any)
 	tenant1Ue2DevStackComponents := tenant1Ue2DevStack["components"].(map[string]any)
