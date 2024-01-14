@@ -1,5 +1,5 @@
 locals {
-  base_path = "../../complete/stacks"
+  base_path = "../../tests/stacks"
 
   stack_config_files = [
     "${local.base_path}/tenant1/ue2/dev.yaml",

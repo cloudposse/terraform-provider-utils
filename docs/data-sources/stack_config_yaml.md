@@ -14,7 +14,7 @@ The `stack_config_yaml` data source accepts a list of stack config file names an
 
 ```terraform
 locals {
-  base_path = "../../complete/stacks"
+  base_path = "../../tests/stacks"
 
   stack_config_files = [
     "${local.base_path}/tenant1/ue2/dev.yaml",

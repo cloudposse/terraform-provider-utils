@@ -39,5 +39,5 @@ data "utils_component_config" "example3" {
   stack                 = local.stack
   ignore_errors         = false
   atmos_cli_config_path = "."
-  atmos_base_path       = "../../complete"
+  atmos_base_path       = "../../tests"
 }

@@ -52,7 +52,7 @@ data "utils_describe_stacks" "example3" {
 
 data "utils_describe_stacks" "example4" {
   atmos_cli_config_path = "."
-  atmos_base_path       = "../../complete"
+  atmos_base_path       = "../../tests"
   component_types       = ["terraform"]
   sections              = ["none"]
 }
