@@ -15,7 +15,7 @@
 # are independent settings (supporting both absolute and relative paths).
 # If `base_path` is provided, `components.terraform.base_path`, `components.helmfile.base_path`, `stacks.base_path` and `workflows.base_path`
 # are considered paths relative to `base_path`.
-base_path: "../../complete"
+base_path: "../../tests"
 
 components:
   terraform:
@@ -334,8 +334,3 @@ schemas:
     # Can also be set using 'ATMOS_SCHEMAS_OPA_BASE_PATH' ENV var, or '--schemas-opa-dir' command-line arguments
     # Supports both absolute and relative paths
     base_path: "stacks/schemas/opa"
-  # https://cuelang.org
-  cue:
-    # Can also be set using 'ATMOS_SCHEMAS_CUE_BASE_PATH' ENV var, or '--schemas-cue-dir' command-line arguments
-    # Supports both absolute and relative paths
-    base_path: "stacks/schemas/cue"
