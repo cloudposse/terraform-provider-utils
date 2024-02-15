@@ -46,7 +46,7 @@ references:
 
 # Short description of this project
 description: |-
-  Terraform provider for various utilities (deep merging, stack configuration management), and to add additional missing functionality to Terraform
+  Terraform provider for various utilities (deep merging, Atmos stack configuration management), and to add additional missing functionality to Terraform
 
 #introduction: |-
 #  This is an introduction.
@@ -60,11 +60,12 @@ usage: |-
     required_providers {
       utils = {
         source = "cloudposse/utils"
-        version = ">= 0.3.0"
+        version = ">= 1.17.0"
       }
     }
   }
   ```
+  
   See the [Docs](./docs) for additional information.
 
 # Example usage
@@ -99,8 +100,8 @@ examples: |-
 
   Here are some additional examples:
 
-  - [`examples/data-sources/deep_merge_json`](/examples/data-sources/deep_merge_json/)
-  - [`examples/data-sources/deep_merge_yaml`](/examples/data-sources/deep_merge_yaml/)
+  - [`examples/data-sources/utils_deep_merge_json`](examples/data-sources/utils_deep_merge_json)
+  - [`examples/data-sources/utils_deep_merge_yaml`](examples/data-sources/utils_deep_merge_yaml)
 
 include:
   - "docs/developer.md"
