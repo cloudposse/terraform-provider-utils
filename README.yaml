@@ -31,6 +31,14 @@ badges:
     url: https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml
 
 # List any related terraform modules that this module may be used with or that this module depends on.
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudposse/terraform-provider-utils.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-provider-utils/commits
+  - name: Tests
+    image: https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml
+
+# List any related terraform modules that this module may be used with or that this module depends on.
   - name: Latest Release
     image: https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg?style=for-the-badge
     url: https://github.com/cloudposse/terraform-provider-utils/releases/latest
