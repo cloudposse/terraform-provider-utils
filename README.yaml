@@ -1,4 +1,3 @@
----
 #
 # This is the canonical configuration for the `README.md`
 # Run `make readme` to rebuild the `README.md`
@@ -24,24 +23,26 @@ github_repo: cloudposse/terraform-provider-utils
 
 # Badges to display
 badges:
-  - name: "Latest Release"
-    image: "https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg"
-    url: "https://github.com/cloudposse/terraform-provider-utils/releases/latest"
-  - name: "Slack Community"
-    image: "https://slack.cloudposse.com/badge.svg"
-    url: "https://slack.cloudposse.com"
-  - name: "Discourse Forum"
-    image: "https://img.shields.io/discourse/https/ask.sweetops.com/posts.svg"
-    url: "https://ask.sweetops.com/"
+  - name: Latest Release
+    image: https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-provider-utils/releases/latest
+  - name: Last Updated
+    image: https://img.shields.io/github/last-commit/cloudposse/terraform-provider-utils.svg?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-provider-utils/commits
+  - name: Slack Community
+    image: https://slack.cloudposse.com/for-the-badge.svg
+    url: https://slack.cloudposse.com
+  - name: Tests
+    image: https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge
+    url: https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml
 
+# List any related terraform modules that this module may be used with or that this module depends on.
 related:
 
 # List any resources helpful for someone to get started. For example, link to the hashicorp documentation or AWS documentation.
 references:
   - name: "Terraform Plugins"
-    description:
-      "Terraform is logically split into two main parts: Terraform Core and Terraform Plugins. Each plugin exposes an
-      implementation for a specific service, such as the AWS provider or the cloud-init provider."
+    description: "Terraform is logically split into two main parts: Terraform Core and Terraform Plugins. Each plugin exposes an implementation for a specific service, such as the AWS provider or the cloud-init provider."
     url: "https://www.terraform.io/docs/extend/plugin-types.html#providers"
 
 # Short description of this project
@@ -65,7 +66,7 @@ usage: |-
     }
   }
   ```
-  
+
   See the [Docs](./docs) for additional information.
 
 # Example usage
@@ -107,10 +108,4 @@ include:
   - "docs/developer.md"
 
 # Contributors to this project
-contributors:
-  - name: "Matt Calhoun"
-    github: "mcalhoun"
-  - name: "Andriy Knysh"
-    github: "aknysh"
-  - name: "Erik Osterman"
-    github: "osterman"
+contributors: []
