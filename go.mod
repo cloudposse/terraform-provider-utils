@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/cloudposse/atmos v1.66.0
-	github.com/gruntwork-io/terratest v0.46.11
+	github.com/gruntwork-io/terratest v0.46.12
 	github.com/hashicorp/terraform-plugin-docs v0.18.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/json-iterator/go v1.1.12
