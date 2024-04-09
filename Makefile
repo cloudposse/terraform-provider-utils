@@ -4,9 +4,9 @@ NAMESPACE=cloudposse
 NAME=utils
 BINARY=terraform-provider-${NAME}
 VERSION=9999.99.99
-GOOS=darwin
-#GOOS=linux
-GOARCH=arm64
+#GOOS=darwin
+GOOS=linux
+GOARCH=amd64
 SHELL := /bin/bash
 
 # List of targets the `readme` target should call before generating the readme
