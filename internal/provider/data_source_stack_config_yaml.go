@@ -2,11 +2,15 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/atmos/pkg/convert"
-	s "github.com/cloudposse/atmos/pkg/stack"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
+
+	cfg "github.com/cloudposse/atmos/pkg/config"
+	c "github.com/cloudposse/atmos/pkg/convert"
+	atmosSchema "github.com/cloudposse/atmos/pkg/schema"
+	s "github.com/cloudposse/atmos/pkg/stack"
 )
 
 func dataSourceStackConfigYAML() *schema.Resource {
@@ -62,13 +66,18 @@ func dataSourceStackConfigYAML() *schema.Resource {
 }
 
 func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	cliConfig, err := cfg.InitCliConfig(atmosSchema.ConfigAndStacksInfo{}, true)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
 	stacksBasePath := d.Get("base_path")
 	env := d.Get("env").(map[string]any)
 
-	err := setEnv(env)
+	err = setEnv(env)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -79,6 +88,7 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	result, _, _, err := s.ProcessYAMLConfigFiles(
+		cliConfig,
 		stacksBasePath.(string),
 		"",
 		"",

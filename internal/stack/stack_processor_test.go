@@ -6,12 +6,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 
+	cfg "github.com/cloudposse/atmos/pkg/config"
 	c "github.com/cloudposse/atmos/pkg/convert"
+	atmosSchema "github.com/cloudposse/atmos/pkg/schema"
 	s "github.com/cloudposse/atmos/pkg/stack"
 	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
 func TestStackProcessor(t *testing.T) {
+	cliConfig, err := cfg.InitCliConfig(atmosSchema.ConfigAndStacksInfo{}, false)
+	assert.Nil(t, err)
+
 	stacksBasePath := "../../examples/tests/stacks"
 	terraformComponentsBasePath := "../../examples/tests/components/terraform"
 	helmfileComponentsBasePath := "../../examples/tests/components/helmfile"
@@ -26,7 +31,8 @@ func TestStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	var listResult, mapResult, _, err = s.ProcessYAMLConfigFiles(
+	listResult, mapResult, _, err := s.ProcessYAMLConfigFiles(
+		cliConfig,
 		stacksBasePath,
 		terraformComponentsBasePath,
 		helmfileComponentsBasePath,
