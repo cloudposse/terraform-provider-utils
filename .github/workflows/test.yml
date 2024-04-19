@@ -14,6 +14,10 @@ on:
       - 'examples/**'
       - 'test/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # ensure the code builds...
   build:
