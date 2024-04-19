@@ -4,10 +4,15 @@ on:
     types: [opened, synchronize, reopened]
     paths-ignore:
       - "README.md"
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
+      - release/v*
     paths-ignore:
-      - "README.md"
+      - '.github/**'
+      - 'docs/**'
+      - 'examples/**'
+      - 'test/**'
 
 jobs:
   # ensure the code builds...
