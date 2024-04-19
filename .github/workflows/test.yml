@@ -75,3 +75,11 @@ jobs:
           TF_ACC_TERRAFORM_VERSION: ${{ matrix.terraform }}
         run: |
           make testacc
+
+  release:
+    needs: test
+    if: github.event_name == 'push'
+    uses: cloudposse/.github/.github/workflows/shared-go-auto-release.yml@main
+    with:
+      publish: true
+    secrets: inherit
