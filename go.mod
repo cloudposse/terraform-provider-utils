@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/cloudposse/atmos v1.70.0
 	github.com/gruntwork-io/terratest v0.46.14
-	github.com/hashicorp/terraform-plugin-docs v0.19.1
+	github.com/hashicorp/terraform-plugin-docs v0.19.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.33.0
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.9.0
@@ -229,7 +229,7 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
-	github.com/yuin/goldmark v1.7.0 // indirect
+	github.com/yuin/goldmark v1.7.1 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zealic/xignore v0.3.3 // indirect
