@@ -720,8 +720,8 @@ github.com/grpc-ecosystem/grpc-gateway v1.16.0 h1:gmcG1KaJ57LophUzW0Hy8NmPhnMZb4
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0 h1:YBftPWNWd4WwGqtY2yeZL2ef8rHAxPBD8KFhJpmcqms=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.0/go.mod h1:YN5jB8ie0yfIUg6VvR9Kz84aCaG7AsGZnLjhHbUqwPg=
-github.com/gruntwork-io/terratest v0.46.15 h1:qfqjTFveymaqe7aAWn3LjlK0SwVGpRfoOut5ggNyfQ8=
-github.com/gruntwork-io/terratest v0.46.15/go.mod h1:9bd22zAojjBBiYdsp+AR1iyl2iB6bRUVm2Yf1AFhfrA=
+github.com/gruntwork-io/terratest v0.47.0 h1:xIy1pT7NbGVlMLDZEHl3+3iSnvffh8tN2pL6idn448c=
+github.com/gruntwork-io/terratest v0.47.0/go.mod h1:oywHw1cFKXSYvKPm27U7quZVzDUlA22H2xUrKCe26xM=
 github.com/hairyhenderson/go-fsimpl v0.0.0-20220529183339-9deae3e35047 h1:nSSfN9G8O8XXDqB3aDEHJ8K+0llYYToNlTcWOe1Pti8=
 github.com/hairyhenderson/go-fsimpl v0.0.0-20220529183339-9deae3e35047/go.mod h1:30RY4Ey+bg+BGKBufZE2IEmxk7hok9U9mjdgZYomwN4=
 github.com/hairyhenderson/gomplate/v3 v3.11.8 h1:T63wLRk+Y9C601ChYa/+FZ30XT/UEWydMDZhOOJM3K0=
@@ -749,8 +749,8 @@ github.com/hashicorp/go-cleanhttp v0.5.2 h1:035FKYIWjmULyFRBKPs8TBQoi0x6d9G4xc9n
 github.com/hashicorp/go-cleanhttp v0.5.2/go.mod h1:kO/YDlP8L1346E6Sodw+PrpBSV4/SoxCXGY6BqNFT48=
 github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 h1:1/D3zfFHttUKaCaGKZ/dR2roBXv0vKbSCnssIldfQdI=
 github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320/go.mod h1:EiZBMaudVLy8fmjf9Npq1dq9RalhveqZG5w/yz3mHWs=
-github.com/hashicorp/go-getter v1.7.4 h1:3yQjWuxICvSpYwqSayAdKRFcvBl1y/vogCxczWSmix0=
-github.com/hashicorp/go-getter v1.7.4/go.mod h1:W7TalhMmbPmsSMdNjD0ZskARur/9GJ17cfHTRtXV744=
+github.com/hashicorp/go-getter v1.7.5 h1:dT58k9hQ/vbxNMwoI5+xFYAJuv6152UNvdHokfI5wE4=
+github.com/hashicorp/go-getter v1.7.5/go.mod h1:W7TalhMmbPmsSMdNjD0ZskARur/9GJ17cfHTRtXV744=
 github.com/hashicorp/go-hclog v0.9.2/go.mod h1:5CU+agLiy3J7N7QjHK5d05KxGsuXiQLrjA0H7acj2lQ=
 github.com/hashicorp/go-hclog v0.14.1/go.mod h1:whpDNt7SSdeAju8AWKIWsul05p54N/39EeqMAyrmvFQ=
 github.com/hashicorp/go-hclog v0.16.2/go.mod h1:whpDNt7SSdeAju8AWKIWsul05p54N/39EeqMAyrmvFQ=
