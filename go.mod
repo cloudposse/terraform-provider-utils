@@ -3,7 +3,7 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.21
 
 require (
-	github.com/cloudposse/atmos v1.84.0
+	github.com/cloudposse/atmos v1.85.0
 	github.com/gruntwork-io/terratest v0.47.0
 	github.com/hashicorp/terraform-plugin-docs v0.19.4
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.34.0
@@ -70,8 +70,8 @@ require (
 	github.com/chainguard-dev/git-urls v1.0.2 // indirect
 	github.com/charmbracelet/bubbles v0.18.0 // indirect
 	github.com/charmbracelet/bubbletea v0.26.6 // indirect
-	github.com/charmbracelet/lipgloss v0.11.1 // indirect
-	github.com/charmbracelet/x/ansi v0.1.3 // indirect
+	github.com/charmbracelet/lipgloss v0.12.1 // indirect
+	github.com/charmbracelet/x/ansi v0.1.4 // indirect
 	github.com/charmbracelet/x/input v0.1.2 // indirect
 	github.com/charmbracelet/x/term v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.1.2 // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/go-containerregistry v0.20.0 // indirect
+	github.com/google/go-containerregistry v0.20.1 // indirect
 	github.com/google/go-github/v59 v59.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
@@ -211,7 +211,7 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1-0.20230530133925-c48e322e2a8f // indirect
-	github.com/samber/lo v1.44.0 // indirect
+	github.com/samber/lo v1.46.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
@@ -239,7 +239,7 @@ require (
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
 	github.com/yuin/goldmark v1.7.1 // indirect
 	github.com/yuin/goldmark-meta v1.1.0 // indirect
-	github.com/zclconf/go-cty v1.14.4 // indirect
+	github.com/zclconf/go-cty v1.15.0 // indirect
 	github.com/zealic/xignore v0.3.3 // indirect
 	go.abhg.dev/goldmark/frontmatter v0.2.0 // indirect
 	go.etcd.io/bbolt v1.3.10 // indirect
