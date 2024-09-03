@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	p "github.com/cloudposse/atmos/pkg/component"
 	c "github.com/cloudposse/atmos/pkg/convert"

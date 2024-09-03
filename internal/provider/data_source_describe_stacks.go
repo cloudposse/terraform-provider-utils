@@ -2,10 +2,10 @@ package provider
 
 import (
 	"context"
-	"gopkg.in/yaml.v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"gopkg.in/yaml.v3"
 
 	cfg "github.com/cloudposse/atmos/pkg/config"
 	c "github.com/cloudposse/atmos/pkg/convert"
@@ -126,17 +126,17 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 	var err error
 	var yamlConfig []byte
 
-	componentsList, err := c.SliceOfInterfacesToSliceOfStrings(components.([]any))
+	componentsList, err := SliceOfInterfacesToSliceOfStrings(components.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	componentTypesList, err := c.SliceOfInterfacesToSliceOfStrings(componentTypes.([]any))
+	componentTypesList, err := SliceOfInterfacesToSliceOfStrings(componentTypes.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	sectionsList, err := c.SliceOfInterfacesToSliceOfStrings(sections.([]any))
+	sectionsList, err := SliceOfInterfacesToSliceOfStrings(sections.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}

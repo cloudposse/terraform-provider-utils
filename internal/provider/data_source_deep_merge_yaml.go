@@ -2,11 +2,13 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/atmos/pkg/convert"
-	m "github.com/cloudposse/atmos/pkg/merge"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	c "github.com/cloudposse/atmos/pkg/convert"
+	m "github.com/cloudposse/atmos/pkg/merge"
 )
 
 func dataSourceDeepMergeYAML() *schema.Resource {
@@ -44,12 +46,11 @@ func dataSourceDeepMergeYAML() *schema.Resource {
 }
 
 func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-
 	input := d.Get("input")
 	appendList := d.Get("append_list").(bool)
 	deepCopyList := d.Get("deep_copy_list").(bool)
 
-	data, err := c.YAMLSliceOfInterfaceToSliceOfMaps(input.([]any))
+	data, err := YAMLSliceOfInterfaceToSliceOfMaps(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
