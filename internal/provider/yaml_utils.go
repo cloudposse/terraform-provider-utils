@@ -1,19 +1,8 @@
 package provider
 
 import (
-	"gopkg.in/yaml.v3"
+	u "github.com/cloudposse/atmos/pkg/utils"
 )
-
-// YAMLToMapOfInterfaces takes a YAML string as input and returns a map[string]any
-func YAMLToMapOfInterfaces(input string) (map[string]any, error) {
-	var data map[string]any
-	byt := []byte(input)
-
-	if err := yaml.Unmarshal(byt, &data); err != nil {
-		return nil, err
-	}
-	return data, nil
-}
 
 // YAMLSliceOfInterfaceToSliceOfMaps takes a slice of interfaces as input and returns a slice of map[any]any
 func YAMLSliceOfInterfaceToSliceOfMaps(input []any) ([]map[string]any, error) {
@@ -21,7 +10,7 @@ func YAMLSliceOfInterfaceToSliceOfMaps(input []any) ([]map[string]any, error) {
 	for _, current := range input {
 		// Apply YAMLToMap only if string is passed
 		if currentYaml, ok := current.(string); ok {
-			data, err := YAMLToMapOfInterfaces(currentYaml)
+			data, err := u.UnmarshalYAML[map[string]any](currentYaml)
 			if err != nil {
 				return nil, err
 			}
