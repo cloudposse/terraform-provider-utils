@@ -1,20 +1,22 @@
 package convert
 
 import (
-	c "github.com/cloudposse/atmos/pkg/convert"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
 func TestJSONToMapOfInterfaces(t *testing.T) {
 	input := "{\"hello\": \"world\"}"
-	result, err := c.JSONToMapOfInterfaces(input)
+	result, err := u.JSONToMapOfInterfaces(input)
 	assert.Nil(t, err)
 	assert.Equal(t, result["hello"], "world")
 }
 
 func TestJSONToMapOfInterfacesRedPath(t *testing.T) {
 	input := "Not JSON"
-	_, err := c.JSONToMapOfInterfaces(input)
+	_, err := u.JSONToMapOfInterfaces(input)
 	assert.NotNil(t, err)
 }

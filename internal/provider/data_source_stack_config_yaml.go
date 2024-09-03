@@ -11,6 +11,7 @@ import (
 	c "github.com/cloudposse/atmos/pkg/convert"
 	atmosSchema "github.com/cloudposse/atmos/pkg/schema"
 	s "github.com/cloudposse/atmos/pkg/stack"
+	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
 func dataSourceStackConfigYAML() *schema.Resource {
@@ -82,7 +83,7 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]any))
+	paths, err := u.SliceOfInterfacesToSliceOfStrings(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}

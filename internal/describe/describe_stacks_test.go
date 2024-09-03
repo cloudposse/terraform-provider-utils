@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 
 	cfg "github.com/cloudposse/atmos/pkg/config"
-	"github.com/cloudposse/atmos/pkg/describe"
+	describe "github.com/cloudposse/atmos/pkg/describe"
 	"github.com/cloudposse/atmos/pkg/schema"
+	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
 func TestDescribeStacks(t *testing.T) {
@@ -20,9 +20,9 @@ func TestDescribeStacks(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, nil, nil, false)
 	assert.Nil(t, err)
 
-	dependentsYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(dependentsYaml))
+	t.Log(dependentsYaml)
 }
 
 func TestDescribeStacksWithFilter1(t *testing.T) {
@@ -36,9 +36,9 @@ func TestDescribeStacksWithFilter1(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, nil, false)
 	assert.Nil(t, err)
 
-	dependentsYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(dependentsYaml))
+	t.Log(dependentsYaml)
 }
 
 func TestDescribeStacksWithFilter2(t *testing.T) {
@@ -53,9 +53,9 @@ func TestDescribeStacksWithFilter2(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, nil, nil, false)
 	assert.Nil(t, err)
 
-	dependentsYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(dependentsYaml))
+	t.Log(dependentsYaml)
 }
 
 func TestDescribeStacksWithFilter3(t *testing.T) {
@@ -70,9 +70,9 @@ func TestDescribeStacksWithFilter3(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, sections, false)
 	assert.Nil(t, err)
 
-	dependentsYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(dependentsYaml))
+	t.Log(dependentsYaml)
 }
 
 func TestDescribeStacksWithFilter4(t *testing.T) {
@@ -87,9 +87,9 @@ func TestDescribeStacksWithFilter4(t *testing.T) {
 	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, componentTypes, sections, false)
 	assert.Nil(t, err)
 
-	dependentsYaml, err := yaml.Marshal(stacks)
+	dependentsYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(dependentsYaml))
+	t.Log(dependentsYaml)
 }
 
 func TestDescribeStacksWithFilter5(t *testing.T) {
@@ -110,7 +110,7 @@ func TestDescribeStacksWithFilter5(t *testing.T) {
 	tenant1Ue2DevStackComponents := tenant1Ue2DevStack["components"].(map[string]any)
 	tenant1Ue2DevStackComponentsTerraform := tenant1Ue2DevStackComponents["terraform"].(map[string]any)
 	tenant1Ue2DevStackComponentsTerraformComponent := tenant1Ue2DevStackComponentsTerraform["top-level-component1"].(map[string]any)
-	tenant1Ue2DevStackComponentsTerraformComponentVars := tenant1Ue2DevStackComponentsTerraformComponent["vars"].(map[any]any)
+	tenant1Ue2DevStackComponentsTerraformComponentVars := tenant1Ue2DevStackComponentsTerraformComponent["vars"].(map[string]any)
 	tenant1Ue2DevStackComponentsTerraformComponentVarsTenant := tenant1Ue2DevStackComponentsTerraformComponentVars["tenant"].(string)
 	tenant1Ue2DevStackComponentsTerraformComponentVarsStage := tenant1Ue2DevStackComponentsTerraformComponentVars["stage"].(string)
 	tenant1Ue2DevStackComponentsTerraformComponentVarsEnvironment := tenant1Ue2DevStackComponentsTerraformComponentVars["environment"].(string)
@@ -118,9 +118,9 @@ func TestDescribeStacksWithFilter5(t *testing.T) {
 	assert.Equal(t, "ue2", tenant1Ue2DevStackComponentsTerraformComponentVarsEnvironment)
 	assert.Equal(t, "dev", tenant1Ue2DevStackComponentsTerraformComponentVarsStage)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	stacksYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(stacksYaml)
 }
 
 func TestDescribeStacksWithFilter6(t *testing.T) {
@@ -145,9 +145,9 @@ func TestDescribeStacksWithFilter6(t *testing.T) {
 	tenant1Ue2DevStackComponentsTerraformWorkspace := tenant1Ue2DevStackComponentsTerraformComponent["workspace"].(string)
 	assert.Equal(t, "tenant1-ue2-dev", tenant1Ue2DevStackComponentsTerraformWorkspace)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	stacksYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(stacksYaml)
 }
 
 func TestDescribeStacksWithFilter7(t *testing.T) {
@@ -172,7 +172,7 @@ func TestDescribeStacksWithFilter7(t *testing.T) {
 	tenant1Ue2DevStackComponentsTerraformWorkspace := tenant1Ue2DevStackComponentsTerraformComponent["workspace"].(string)
 	assert.Equal(t, "test-component-override-3-workspace", tenant1Ue2DevStackComponentsTerraformWorkspace)
 
-	stacksYaml, err := yaml.Marshal(stacks)
+	stacksYaml, err := u.ConvertToYAML(stacks)
 	assert.Nil(t, err)
-	t.Log(string(stacksYaml))
+	t.Log(stacksYaml)
 }

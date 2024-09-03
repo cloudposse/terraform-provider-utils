@@ -1,9 +1,11 @@
 package convert
 
 import (
-	c "github.com/cloudposse/atmos/pkg/convert"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
 func TestSliceOfInterfacesToSliceOfStrings(t *testing.T) {
@@ -12,7 +14,7 @@ func TestSliceOfInterfacesToSliceOfStrings(t *testing.T) {
 	input = append(input, "b")
 	input = append(input, "c")
 
-	result, err := c.SliceOfInterfacesToSliceOfStrings(input)
+	result, err := u.SliceOfInterfacesToSliceOfStrings(input)
 
 	assert.Nil(t, err)
 	assert.Equal(t, len(input), len(result))

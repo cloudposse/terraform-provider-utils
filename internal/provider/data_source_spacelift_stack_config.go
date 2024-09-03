@@ -2,11 +2,13 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/atmos/pkg/convert"
-	s "github.com/cloudposse/atmos/pkg/spacelift"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+
+	c "github.com/cloudposse/atmos/pkg/convert"
+	s "github.com/cloudposse/atmos/pkg/spacelift"
 )
 
 func dataSourceSpaceliftStackConfig() *schema.Resource {
@@ -86,7 +88,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	paths, err := c.SliceOfInterfacesToSliceOfStrings(input.([]any))
+	paths, err := SliceOfInterfacesToSliceOfStrings(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}

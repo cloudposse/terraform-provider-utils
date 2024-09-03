@@ -2,11 +2,13 @@ package provider
 
 import (
 	"context"
-	c "github.com/cloudposse/atmos/pkg/convert"
-	m "github.com/cloudposse/atmos/pkg/merge"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsoniter "github.com/json-iterator/go"
+
+	c "github.com/cloudposse/atmos/pkg/convert"
+	m "github.com/cloudposse/atmos/pkg/merge"
 )
 
 func dataSourceDeepMergeJSON() *schema.Resource {
@@ -48,7 +50,7 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 	appendList := d.Get("append_list").(bool)
 	deepCopyList := d.Get("deep_copy_list").(bool)
 
-	data, err := c.JSONSliceOfInterfaceToSliceOfMaps(input.([]any))
+	data, err := JSONSliceOfInterfaceToSliceOfMaps(input.([]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
