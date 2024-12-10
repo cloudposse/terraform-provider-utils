@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://atmos.tools/schemas/atmos/atmos-manifest/1.0/atmos-manifest.json
+
 components:
   terraform:
     derived-component-2:
@@ -10,3 +12,9 @@ components:
         enabled: true
         service_1_name: "derived-component-2-service-1"
         service_2_name: "derived-component-2-service-2"
+      settings:
+        depends_on:
+          1:
+            # If the `context` is not provided,
+            # the `component` is from the same Atmos stack as this component
+            component: "derived-component-1"

@@ -1,0 +1,38 @@
+{
+  "provider": {
+    "context": {
+      "delimiter": "-",
+      "enabled": true,
+      "properties": {
+        "environment": {
+          "max_length": 6,
+          "min_length": 2,
+          "required": true
+        },
+        "namespace": {
+          "max_length": 4,
+          "min_length": 2,
+          "required": true
+        },
+        "stage": {
+          "max_length": 20,
+          "min_length": 2,
+          "required": true
+        },
+        "tenant": {
+          "max_length": 10,
+          "min_length": 2,
+          "required": true
+        }
+      },
+      "values": {
+        "atmos_component": "test/test-component-override-3",
+        "atmos_stack": "tenant1-ue2-staging",
+        "environment": "ue2",
+        "namespace": "cp",
+        "stage": "staging",
+        "tenant": "tenant1"
+      }
+    }
+  }
+}

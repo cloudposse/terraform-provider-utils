@@ -17,7 +17,7 @@ func TestDescribeStacks(t *testing.T) {
 	cliConfig, err := cfg.InitCliConfig(configAndStacksInfo, true)
 	assert.Nil(t, err)
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, nil, nil, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, nil, nil, false, false)
 	assert.Nil(t, err)
 
 	dependentsYaml, err := u.ConvertToYAML(stacks)
@@ -33,7 +33,7 @@ func TestDescribeStacksWithFilter1(t *testing.T) {
 
 	stack := "tenant1-ue2-dev"
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, nil, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, nil, false, false)
 	assert.Nil(t, err)
 
 	dependentsYaml, err := u.ConvertToYAML(stacks)
@@ -50,7 +50,7 @@ func TestDescribeStacksWithFilter2(t *testing.T) {
 	stack := "tenant1-ue2-dev"
 	components := []string{"infra/vpc"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, nil, nil, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, nil, nil, false, false)
 	assert.Nil(t, err)
 
 	dependentsYaml, err := u.ConvertToYAML(stacks)
@@ -67,7 +67,7 @@ func TestDescribeStacksWithFilter3(t *testing.T) {
 	stack := "tenant1-ue2-dev"
 	sections := []string{"vars"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, sections, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, nil, nil, sections, false, false)
 	assert.Nil(t, err)
 
 	dependentsYaml, err := u.ConvertToYAML(stacks)
@@ -84,7 +84,7 @@ func TestDescribeStacksWithFilter4(t *testing.T) {
 	componentTypes := []string{"terraform"}
 	sections := []string{"none"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, componentTypes, sections, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", nil, componentTypes, sections, false, false)
 	assert.Nil(t, err)
 
 	dependentsYaml, err := u.ConvertToYAML(stacks)
@@ -102,7 +102,7 @@ func TestDescribeStacksWithFilter5(t *testing.T) {
 	components := []string{"top-level-component1"}
 	sections := []string{"vars"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", components, componentTypes, sections, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "", components, componentTypes, sections, false, false)
 	assert.Nil(t, err)
 	assert.Equal(t, 8, len(stacks))
 
@@ -134,7 +134,7 @@ func TestDescribeStacksWithFilter6(t *testing.T) {
 	components := []string{"top-level-component1"}
 	sections := []string{"workspace"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "tenant1-ue2-dev", components, componentTypes, sections, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, "tenant1-ue2-dev", components, componentTypes, sections, false, false)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(stacks))
 
@@ -161,7 +161,7 @@ func TestDescribeStacksWithFilter7(t *testing.T) {
 	components := []string{"test/test-component-override-3"}
 	sections := []string{"workspace"}
 
-	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, componentTypes, sections, false)
+	stacks, err := describe.ExecuteDescribeStacks(cliConfig, stack, components, componentTypes, sections, false, false)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(stacks))
 

@@ -173,7 +173,9 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 		componentsList,
 		componentTypesList,
 		sectionsList,
-		false)
+		false,
+		true,
+	)
 	if err != nil && !ignoreErrors {
 		return diag.FromErr(err)
 	}
