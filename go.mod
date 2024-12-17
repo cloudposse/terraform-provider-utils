@@ -3,7 +3,7 @@ module github.com/cloudposse/terraform-provider-utils
 go 1.23
 
 require (
-	github.com/cloudposse/atmos v1.122.0
+	github.com/cloudposse/atmos v1.128.0
 	github.com/gruntwork-io/terratest v0.48.0
 	github.com/hashicorp/terraform-plugin-docs v0.20.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.35.0
@@ -115,6 +115,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
