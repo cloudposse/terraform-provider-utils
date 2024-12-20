@@ -27,7 +27,7 @@ terraform:
     # The `testing` Team uses `tofu` instead of `terraform`
     # https://opentofu.org
     # The commands `atmos terraform <sub-command> ...` will execute the `tofu` binary
-    command: tofu
+    # command: tofu
 
 # Helmfile overrides
 # Override the variables, env, command and settings ONLY in the Helmfile components managed by the `testing` Team.
