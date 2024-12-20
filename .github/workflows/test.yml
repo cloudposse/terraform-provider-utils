@@ -68,6 +68,12 @@ jobs:
           go-version-file: go.mod
         id: go
 
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+
       - name: Get dependencies
         run: |
           make deps
