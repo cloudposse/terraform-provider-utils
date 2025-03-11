@@ -25,7 +25,7 @@ func TestStackProcessor(t *testing.T) {
 	processStackDeps := true
 	processComponentDeps := true
 
-	cliConfig := schema.CliConfiguration{
+	cliConfig := schema.AtmosConfiguration{
 		Templates: schema.Templates{
 			Settings: schema.TemplatesSettings{
 				Enabled: true,
