@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/cloudposse/atmos v1.177.0
 	github.com/gruntwork-io/terratest v0.49.0
-	github.com/hashicorp/terraform-plugin-docs v0.21.0
+	github.com/hashicorp/terraform-plugin-docs v0.22.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
 	github.com/json-iterator/go v1.1.12
 	github.com/pkg/errors v0.9.1
@@ -323,13 +323,13 @@ require (
 	gocloud.dev v0.41.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
