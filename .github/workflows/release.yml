@@ -3,7 +3,10 @@ on:
   release:
     types: [published]
 
-permissions: {}
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}
