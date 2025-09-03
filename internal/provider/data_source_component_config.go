@@ -107,9 +107,11 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	var err error
 	var yamlConfig []byte
 
-	err = setEnv(env)
-	if err != nil {
-		return diag.FromErr(err)
+	if env != nil {
+		err = setEnv(env)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if len(stack) > 0 {
