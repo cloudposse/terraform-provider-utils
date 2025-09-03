@@ -14,6 +14,7 @@ func TestStackProcessor(t *testing.T) {
 	stacksBasePath := "../../examples/tests/stacks"
 	terraformComponentsBasePath := "../../examples/tests/components/terraform"
 	helmfileComponentsBasePath := "../../examples/tests/components/helmfile"
+	packerComponentsBasePath := "../../examples/tests/components/packer"
 
 	filePaths := []string{
 		"../../examples/tests/stacks/orgs/cp/tenant1/dev/us-east-2.yaml",
@@ -39,11 +40,12 @@ func TestStackProcessor(t *testing.T) {
 		},
 	}
 
-	var listResult, mapResult, _, err = s.ProcessYAMLConfigFiles(
-		cliConfig,
+	listResult, mapResult, _, err := s.ProcessYAMLConfigFiles(
+		&cliConfig,
 		stacksBasePath,
 		terraformComponentsBasePath,
 		helmfileComponentsBasePath,
+		packerComponentsBasePath,
 		filePaths,
 		processStackDeps,
 		processComponentDeps,
