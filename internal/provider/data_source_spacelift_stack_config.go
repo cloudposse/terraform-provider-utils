@@ -97,12 +97,12 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		stacksBasePath.(string),
 		"",
 		"",
+		"",
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool),
 		processImports.(bool),
 		stackConfigPathTemplate.(string))
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
