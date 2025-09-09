@@ -1,0 +1,76 @@
+# Atmos Configuration — powered by https://atmos.tools
+#
+# This configuration enables centralized, DRY, and consistent project scaffolding using Atmos.
+#
+# Included features:
+# - Organizational custom commands: https://atmos.tools/core-concepts/custom-commands
+# - Automated README generation: https://atmos.tools/cli/commands/docs/generate
+#
+
+# Import shared configuration used by all modules
+# import:
+#   - https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/.github/atmos/terraform-provider.yaml
+
+docs:
+  generate:
+    readme:
+      base-dir: .
+      input:
+        - "./README.yaml"
+        - get_support: true        
+      template: "https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/README.md.gotmpl"
+      output: "./README.md"
+      terraform:
+        source: .
+        enabled: true
+        format: "markdown table"
+        show_providers: false
+        show_inputs: true
+        show_outputs: true
+        sort_by: "name"
+        hide_empty: false
+        indent_level: 2
+
+commands:
+- name: go
+  description: Install Go
+  commands:
+    - name: get
+      description: Get dependencies
+      steps:
+        - "go get"
+
+    - name: build
+      description: Build the provider
+      steps:
+        - "atmos go get"
+        - "env GOOS=${GOOS:-linux} GOARCH=${GOARCH:-amd64} go build"
+
+    - name: deps
+      description: Get dependencies
+      steps:
+        - "go mod download"
+
+    - name: docs
+      description: Generate docs
+      steps:
+        - "go generate"
+
+- name: install
+  description: Install the provider
+  steps:
+    - |
+      OUTPUT_DIR=~/.terraform.d/plugins/${HOSTNAME:-registry.terraform.io}/${NAMESPACE:-cloudposse}/${NAME:-utils}/${VERSION:-9999.99.99}/${GOOS:-linux}_${GOARCH:-amd64}
+      mkdir -p ${OUTPUT_DIR}
+      mv ${BINARY:-terraform-provider-utils} ${OUTPUT_DIR}
+
+- name: testacc
+  description: Run acceptance tests
+  steps:
+    - "TF_ACC=1 go test $(go list ./... | grep -v 'vendor') -v ${TESTARGS:-} -timeout 3m"
+
+- name: tfplugindocs
+  description: Generate docs
+  steps:
+    - "go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs"
+    - "tfplugindocs generate"

@@ -28,6 +28,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
 
+      - name: Install Atmos
+        uses: cloudposse/github-action-setup-atmos@v2
+        with:
+          token: ${{ github.token }}
+          install-wrapper: false        
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -40,7 +46,7 @@ jobs:
 
       - name: Build
         run: |
-          make build
+          atmos go build
 
   # run acceptance tests in a matrix with Terraform core versions
   test:
@@ -62,6 +68,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
 
+      - name: Install Atmos
+        uses: cloudposse/github-action-setup-atmos@v2
+        with:
+          token: ${{ github.token }}
+          install-wrapper: false
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -76,7 +88,7 @@ jobs:
 
       - name: Get dependencies
         run: |
-          make deps
+          atmos go deps
 
       - name: TF acceptance tests
         timeout-minutes: 10
@@ -84,7 +96,7 @@ jobs:
           TF_ACC: "1"
           TF_ACC_TERRAFORM_VERSION: ${{ matrix.terraform }}
         run: |
-          make testacc
+          atmos testacc
 
   release:
     needs: test
