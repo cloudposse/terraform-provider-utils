@@ -8,30 +8,14 @@
 #
 
 # Import shared configuration used by all modules
-# import:
-#   - https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/.github/atmos/terraform-provider.yaml
-
-docs:
-  generate:
-    readme:
-      base-dir: .
-      input:
-        - "./README.yaml"
-        - get_support: true        
-      template: "https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/README.md.gotmpl"
-      output: "./README.md"
-      terraform:
-        source: .
-        enabled: true
-        format: "markdown table"
-        show_providers: false
-        show_inputs: true
-        show_outputs: true
-        sort_by: "name"
-        hide_empty: false
-        indent_level: 2
+import:
+  - https://raw.githubusercontent.com/cloudposse/.github/refs/heads/main/.github/atmos/default.yaml
 
 commands:
+- name: readme
+  steps:
+    - "atmos docs generate readme"
+
 - name: go
   description: Install Go
   commands:

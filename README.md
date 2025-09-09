@@ -2,7 +2,11 @@
 
 <!-- markdownlint-disable -->
 # terraform-provider-utils <a href="https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-provider-utils&utm_content="><img align="right" src="https://cloudposse.com/logo-300x69.svg" width="150" /></a>
-<a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/commits"><img src="https://img.shields.io/github/last-commit/cloudposse/terraform-provider-utils.svg?style=for-the-badge" alt="Last Updated"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a>
+
+
+<a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/terraform-provider-utils.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/commits"><img src="https://img.shields.io/github/last-commit/cloudposse/terraform-provider-utils.svg?style=for-the-badge" alt="Last Updated"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a><a href="https://github.com/cloudposse/terraform-provider-utils/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/cloudposse/terraform-provider-utils/test.yml?style=for-the-badge" alt="Tests"/></a><a href="https://cloudposse.com/support/"><img src="https://img.shields.io/badge/Get_Support-success.svg?style=for-the-badge" alt="Get Support"/></a>
+
+
 <!-- markdownlint-restore -->
 
 <!--
@@ -36,7 +40,7 @@ Terraform provider for various utilities (deep merging, Atmos stack configuratio
 >
 > <details>
 > <summary><strong>Watch demo of using Atmos with Terraform</strong></summary>
-> <img src="https://github.com/cloudposse/atmos/blob/master/docs/demo.gif?raw=true"/><br/>
+> <img src="https://github.com/cloudposse/atmos/blob/main/docs/demo.gif?raw=true"/><br/>
 > <i>Example of running <a href="https://atmos.tools"><code>atmos</code></a> to manage infrastructure from our <a href="https://atmos.tools/quick-start/">Quick Start</a> tutorial.</i>
 > </detalis>
 
@@ -109,20 +113,26 @@ Here are some additional examples:
 
 
 
+
+
+
+
 ## Developing the Provider
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
+
+Install [atmos](https://atmos.tools/install)
 
 To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 To generate or update documentation, run `go generate`.
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of Acceptance tests, run `atmos testacc`.
 
 _Note:_ Acceptance tests create real resources, and often cost money to run.
 
 ```sh
-$ make testacc
+$ atmos testacc
 ```
 
 ### Testing Locally
@@ -352,7 +362,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 ## Copyrights
 
-Copyright © 2021-2024 [Cloud Posse, LLC](https://cloudposse.com)
+Copyright © 2021-2025 [Cloud Posse, LLC](https://cloudposse.com)
 
 
 
