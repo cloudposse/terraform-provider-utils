@@ -9,6 +9,7 @@
 **/*.terraform.tfvars.json
 **/*.helmfile.vars.yaml
 **/.terraform.lock.hcl
+.atmos
 
 # Module directory
 .terraform
