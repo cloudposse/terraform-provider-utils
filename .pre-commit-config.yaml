@@ -45,7 +45,7 @@ repos:
       - id: end-of-file-fixer
         exclude: ^(vendor/|tests/test-cases/|tests/testdata/|tests/snapshots/|.*\.svg|website/src/components/Screengrabs/)
       - id: check-yaml
-        exclude: ^(vendor/)
+        exclude: ^(vendor/|examples/tests/stacks/catalog/invalid-yaml-and-schema/|examples/tests/components/helmfile/.*/helmfile.yaml)
         args: [--allow-multiple-documents, --unsafe]
       - id: check-added-large-files
         args: [--maxkb=500]
