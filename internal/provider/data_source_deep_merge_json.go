@@ -61,7 +61,7 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	// Convert result to JSON
-	var json = jsoniter.ConfigDefault
+	json := jsoniter.ConfigDefault
 	jsonResult, err := json.Marshal(merged)
 	if err != nil {
 		return diag.FromErr(err)

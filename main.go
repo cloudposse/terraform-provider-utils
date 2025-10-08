@@ -9,9 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
-var (
-	version = "dev"
-)
+var version = "dev"
 
 func main() {
 	var debugMode bool
