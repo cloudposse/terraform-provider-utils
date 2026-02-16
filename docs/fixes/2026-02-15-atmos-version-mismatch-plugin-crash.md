@@ -1,6 +1,6 @@
 # Atmos Version Mismatch Causes `utils_component_config` Plugin Crash
 
-**Reported by:** Prezzee (`prezzeepay-infra`)
+**Reported by:** Community user
 
 **Affected Versions:** `cloudposse/utils` provider v1.31.0 (embeds Atmos v1.189.0)
 
@@ -41,7 +41,7 @@ The `cloudposse/utils` Terraform provider v1.31.0 has Atmos **v1.189.0** compile
 `data "utils_describe_stacks"`, or `data "utils_stack_config_yaml"` executes, the provider calls
 `cfg.InitCliConfig()` which parses the project's `atmos.yaml` and processes all stack configurations.
 
-The user's infrastructure (`prezzeepay-infra`) uses Atmos CLI v1.200+ and their `atmos.yaml` and stack
+The user's infrastructure uses Atmos CLI v1.200+ and their `atmos.yaml` and stack
 files contain features that did not exist in Atmos v1.189.0:
 
 - **`stores`** block (AWS SSM Parameter Store configuration) - new top-level config section
@@ -112,7 +112,7 @@ package** and cannot be imported by external Go modules.
 
 ### User's affected components
 
-In the `prezzeepay-infra` repo, the crash affects any component using
+The crash affects any component using
 `cloudposse/stack-config/yaml//modules/remote-state` (version 1.8.0), which internally calls
 `data "utils_component_config"`. This module is used by **56 components** across the codebase,
 including `aws-sso`, `vpc`, `ecs`, `aurora-postgres`, `dns-delegated`, and many more.

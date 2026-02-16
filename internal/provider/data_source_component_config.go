@@ -120,7 +120,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(p.ComponentFromContextParams{
+		result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
 			Component:          component,
 			Namespace:          namespace,
 			Tenant:             tenant,
