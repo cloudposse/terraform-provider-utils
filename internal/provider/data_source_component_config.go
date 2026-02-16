@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v3"
 
-	p "github.com/cloudposse/atmos/pkg/component"
 	c "github.com/cloudposse/atmos/pkg/convert"
+	p "github.com/cloudposse/atmos/pkg/describe"
 )
 
 func dataSourceComponentConfig() *schema.Resource {

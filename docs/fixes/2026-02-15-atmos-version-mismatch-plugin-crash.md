@@ -124,34 +124,37 @@ Two components also declare the `cloudposse/utils` provider directly:
 
 ## Fix
 
-Upgrading the provider's Atmos dependency from v1.189.0 to v1.206.2 requires two changes:
+The fix spans two repos: Atmos (restore public API) and this provider (update import + bump version).
 
-### 1. Restore or replace `ProcessComponentInStack` / `ProcessComponentFromContext`
+### 1. Atmos: restore public API in `pkg/describe`
 
-**Option A (preferred): Add public API wrappers in the Atmos repo**
+The functions cannot be restored in `pkg/component` because `internal/exec` now imports `pkg/component`
+(for the `ComponentProvider` interface), which would create an import cycle. Instead,
+`ProcessComponentInStack` and `ProcessComponentFromContext` are added to `pkg/describe/component_processor.go`
+as thin wrappers delegating to `internal/exec.ExecuteDescribeComponent`.
 
-Expose new public functions in `pkg/component` (or a new `pkg/component/compat` package) that
-replicate the old behavior using the new internal implementation. This preserves the external API
-contract for the provider and any other consumers.
+See Atmos doc: `docs/fixes/2026-02-15-restore-component-processor-public-api.md`
 
-**Option B: Inline the logic in the provider**
+Atmos branch: `aknysh/update-for-utils-provider-1`
 
-Rewrite `data_source_component_config.go` to use only the remaining public APIs
-(`pkg/config.InitCliConfig`, `pkg/describe.ExecuteDescribeStacks`) to resolve component
-configuration without the deleted functions. This would make the provider self-contained but
-duplicates logic.
+### 2. Provider: update import and bump Atmos version
 
-### 2. Bump the Atmos dependency in `go.mod`
+**`internal/provider/data_source_component_config.go`** — change import:
+
+```go
+// Before:
+p "github.com/cloudposse/atmos/pkg/component"
+
+// After:
+p "github.com/cloudposse/atmos/pkg/describe"
+```
+
+The function signatures are identical, so no other code changes are needed.
+
+**`go.mod`** — bump Atmos dependency:
 
 ```
-github.com/cloudposse/atmos v1.189.0 -> v1.206.2
+github.com/cloudposse/atmos v1.189.0 -> v1.206.3
 ```
 
-### Files to change in `terraform-provider-utils`
-
-- `go.mod` - bump Atmos version
-- `internal/provider/data_source_component_config.go` - replace `pkg/component` API calls
-
-### Files to change in `atmos` (if Option A)
-
-- `pkg/component/` - add public API functions wrapping the internal implementation
+The provider will compile once Atmos v1.206.3 is released with the restored API.
