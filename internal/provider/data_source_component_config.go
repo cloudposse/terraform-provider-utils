@@ -120,7 +120,15 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			return diag.FromErr(err)
 		}
 	} else {
-		result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage, atmosCliConfigPath, atmosBasePath)
+		result, err = p.ProcessComponentFromContext(p.ComponentFromContextParams{
+			Component:          component,
+			Namespace:          namespace,
+			Tenant:             tenant,
+			Environment:        environment,
+			Stage:              stage,
+			AtmosCliConfigPath: atmosCliConfigPath,
+			AtmosBasePath:      atmosBasePath,
+		})
 		if err != nil && !ignoreErrors {
 			return diag.FromErr(err)
 		}
