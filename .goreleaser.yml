@@ -1,0 +1,57 @@
+# Local goreleaser config — overrides the org-wide config at cloudposse/.github/.github/goreleaser.yml
+# Needed because Go 1.24+ dropped support for windows/arm (32-bit), which the shared config includes.
+
+builds:
+- env:
+    - CGO_ENABLED=0
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - -trimpath
+  ldflags:
+    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+  goos:
+    - freebsd
+    - windows
+    - linux
+    - darwin
+  goarch:
+    - amd64
+    - '386'
+    - arm
+    - arm64
+  ignore:
+    - goos: windows
+      goarch: arm
+  binary: '{{ .ProjectName }}'
+
+archives:
+- format: "{{ .Env.ARCHIVES_FORMAT }}"
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
+release:
+  draft: true
+  replace_existing_draft: true
+  replace_existing_artifacts: true
+  mode: keep-existing
+  make_latest: false
+  name_template: '{{.Tag}}'
+  target_commitish: '{{ if index .Env "GO_RELEASER_TARGET_COMMITISH"  }}{{ .Env.GO_RELEASER_TARGET_COMMITISH }}{{ else }}{{ .Branch }}{{ end }}'
+  prerelease: auto
+
+changelog:
+  skip: true
