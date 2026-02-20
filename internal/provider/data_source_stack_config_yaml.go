@@ -105,7 +105,6 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 			false,
 		)
 	}()
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
