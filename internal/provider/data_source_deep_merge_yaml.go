@@ -55,7 +55,7 @@ func dataSourceDeepMergeYAMLRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	merged, err := m.MergeWithOptions(data, appendList, deepCopyList)
+	merged, err := m.MergeWithOptions(nil, data, appendList, deepCopyList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
