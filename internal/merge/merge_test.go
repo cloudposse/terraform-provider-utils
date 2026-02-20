@@ -225,6 +225,27 @@ func TestMergeWithOptionsAppendList(t *testing.T) {
 	assert.Equal(t, "d", list[3])
 }
 
+// TestMergeWithOptionsDeepCopyList tests MergeWithOptions with deepCopyList=true
+// and nil AtmosConfiguration, exercising element-wise list merging.
+func TestMergeWithOptionsDeepCopyList(t *testing.T) {
+	map1 := map[string]any{
+		"items": []any{
+			map[string]any{"name": "a", "value": "1"},
+		},
+	}
+	map2 := map[string]any{
+		"items": []any{
+			map[string]any{"name": "b", "value": "2"},
+		},
+	}
+
+	inputs := []map[string]any{map1, map2}
+
+	result, err := m.MergeWithOptions(nil, inputs, false, true)
+	assert.Nil(t, err)
+	assert.NotNil(t, result["items"])
+}
+
 // TestMergeWithOptionsSingleInput tests MergeWithOptions with a single input map.
 func TestMergeWithOptionsSingleInput(t *testing.T) {
 	map1 := map[string]any{"key": "value"}

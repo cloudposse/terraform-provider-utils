@@ -139,7 +139,7 @@ Atmos branch: `aknysh/update-for-utils-provider-1`
 
 ### 2. Provider: update import and bump Atmos version
 
-**`internal/provider/data_source_component_config.go`** — change import:
+**`internal/provider/data_source_component_config.go`** — change import and update call sites:
 
 ```go
 // Before:
@@ -149,12 +149,34 @@ p "github.com/cloudposse/atmos/pkg/component"
 p "github.com/cloudposse/atmos/pkg/describe"
 ```
 
-The function signatures are identical, so no other code changes are needed.
+`ProcessComponentInStack` keeps the same positional signature. `ProcessComponentFromContext` now
+takes a `*ComponentFromContextParams` struct instead of individual arguments:
+
+```go
+// Before:
+result, err = p.ProcessComponentFromContext(component, namespace, tenant, environment, stage, atmosCliConfigPath, atmosBasePath)
+
+// After:
+result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
+    Component:          component,
+    Namespace:          namespace,
+    Tenant:             tenant,
+    Environment:        environment,
+    Stage:              stage,
+    AtmosCliConfigPath: atmosCliConfigPath,
+    AtmosBasePath:      atmosBasePath,
+})
+```
+
+Additional API changes in v1.207.0 that required provider updates:
+
+- `pkg/merge.MergeWithOptions` — added `*AtmosConfiguration` as first parameter (pass `nil` from provider)
+- `pkg/spacelift.CreateSpaceliftStacks` — added `ansibleComponentsBasePath string` parameter (pass `""`)
+- `pkg/stack.ProcessYAMLConfigFiles` — added `ansibleComponentsBasePath string` parameter (pass `""`)
+- `pkg/utils.SliceOfInterfacesToSliceOfStrings` — now returns `[]string` only (no error)
 
 **`go.mod`** — bump Atmos dependency:
 
+```go
+github.com/cloudposse/atmos v1.189.0 -> v1.207.0
 ```
-github.com/cloudposse/atmos v1.189.0 -> v1.206.3
-```
-
-The provider will compile once Atmos v1.206.3 is released with the restored API.

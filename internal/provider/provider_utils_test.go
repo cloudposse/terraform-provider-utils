@@ -31,6 +31,14 @@ func TestSliceOfInterfacesToSliceOfStringsNil(t *testing.T) {
 	assert.Equal(t, "input must not be nil", err.Error())
 }
 
+func TestSliceOfInterfacesToSliceOfStringsNonString(t *testing.T) {
+	input := []any{"a", 42, "c"}
+
+	_, err := SliceOfInterfacesToSliceOfStrings(input)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "element at index 1 is not a string")
+}
+
 func TestSetEnvEmpty(t *testing.T) {
 	err := setEnv(map[string]any{})
 	assert.Nil(t, err)
