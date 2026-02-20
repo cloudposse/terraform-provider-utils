@@ -114,11 +114,9 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
+	atmosMu.Lock()
 	if len(stack) > 0 {
 		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath)
-		if err != nil && !ignoreErrors {
-			return diag.FromErr(err)
-		}
 	} else {
 		result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
 			Component:          component,
@@ -129,9 +127,11 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			AtmosCliConfigPath: atmosCliConfigPath,
 			AtmosBasePath:      atmosBasePath,
 		})
-		if err != nil && !ignoreErrors {
-			return diag.FromErr(err)
-		}
+	}
+	atmosMu.Unlock()
+
+	if err != nil && !ignoreErrors {
+		return diag.FromErr(err)
 	}
 
 	if err != nil {

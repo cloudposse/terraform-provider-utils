@@ -151,8 +151,10 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 		AtmosCliConfigPath: atmosCliConfigPath,
 	}
 
+	atmosMu.Lock()
 	cliConfig, err := cfg.InitCliConfig(info, true)
 	if err != nil {
+		atmosMu.Unlock()
 		return diag.FromErr(err)
 	}
 
@@ -163,6 +165,7 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 	} else if namespace != "" || tenant != "" || environment != "" || stage != "" {
 		filterByStack, err = cfg.GetStackNameFromContextAndStackNamePattern(namespace, tenant, environment, stage, cliConfig.Stacks.NamePattern)
 		if err != nil {
+			atmosMu.Unlock()
 			return diag.FromErr(err)
 		}
 	}
@@ -176,6 +179,8 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 		false,
 		true,
 	)
+	atmosMu.Unlock()
+
 	if err != nil && !ignoreErrors {
 		return diag.FromErr(err)
 	}

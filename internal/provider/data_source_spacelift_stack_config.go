@@ -93,6 +93,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
+	atmosMu.Lock()
 	spaceliftStacks, err := s.CreateSpaceliftStacks(
 		stacksBasePath.(string),
 		"",
@@ -104,6 +105,8 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		processComponentDeps.(bool),
 		processImports.(bool),
 		stackConfigPathTemplate.(string))
+	atmosMu.Unlock()
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
