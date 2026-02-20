@@ -1,14 +1,14 @@
-# Concurrent `ReadDataSource` Crashes Provider — `os.Exit(1)` from Thread-Unsafe Atmos Library
+# Provider `ReadDataSource` Crash — `os.Exit(1)` from Atmos Library
 
 **Affected Versions:** `cloudposse/utils` provider v2.0.0 (Atmos v1.207.0 embedded)
 
-**Severity:** Critical — provider process exits with code 1 during concurrent `ReadDataSource`
+**Severity:** Critical — provider process exits with code 1 during `ReadDataSource`
 calls, producing "Plugin did not respond" errors in Terraform
 
 ## Symptoms
 
-Components with multiple `data "utils_component_config"` data sources (e.g., 5 concurrent reads)
-crash the provider during `terraform plan`:
+Components with multiple `data "utils_component_config"` data sources crash the provider during
+`terraform plan`:
 
 ```text
 Error: Plugin did not respond
@@ -25,11 +25,32 @@ Error: Plugin did not respond
 provider: plugin process exited: path=...terraform-provider-utils pid=3934 error="exit status 1"
 ```
 
-Components with 1–3 concurrent reads typically work. Components with 5+ concurrent reads crash
-near-deterministically. The crash happens ~700ms after the first `ReadDataSource` request — all
-concurrent reads fail, none returns a response.
+## Root Causes
 
-## Root Cause
+Investigation revealed **two independent issues** that can each trigger `os.Exit(1)` inside the
+Atmos library, killing the provider's gRPC plugin process. Both are addressed in this fix.
+
+### Issue 1: `os.Exit(1)` on errors in the Atmos library
+
+The Atmos library uses `CheckErrorPrintAndExit()` in many code paths within `internal/exec`.
+This function is designed for CLI usage — it prints an error and exits the process. Inside a
+Terraform provider (gRPC plugin), calling `os.Exit(1)` terminates the plugin without returning
+a diagnostic error to Terraform.
+
+Any error that reaches `CheckErrorPrintAndExit` silently crashes the provider. Code paths that
+use it include:
+
+- `utils.go:664-673` — duplicate component config detection
+- `utils.go:753,765` — template processing errors
+- `yaml_func_store.go:29,89,99,107` — `!store` YAML tag errors
+- `yaml_func_store_get.go:52,90,101,116` — `!store.get` YAML tag errors
+- `describe_stacks.go:489,743,982` — describe stacks errors
+
+**Any** error reaching these paths will crash the provider via `os.Exit(1)`. The provider cannot
+intercept `os.Exit` — the Atmos library kills the process before the provider can return a
+diagnostic to Terraform.
+
+### Issue 2: Thread-unsafe global state (LATENT)
 
 The Atmos library was designed as a single-threaded CLI tool. It has **package-level mutable
 state** that is explicitly documented as not thread-safe:
@@ -47,29 +68,14 @@ Additional thread-unsafe global state includes:
 - `errors/error_funcs.go:28` — `var render *markdown.Renderer`
 - `errors/error_funcs.go:34` — `var verboseFlag`
 
-### Crash sequence
+Terraform invokes `ReadDataSource` concurrently (one goroutine per data source instance). Each
+call enters `ProcessComponentInStack` → `InitCliConfig` → `LoadConfig`, which resets and writes
+to the shared `mergedConfigFiles` slice. Concurrent goroutines can corrupt the slice through
+interleaved reads/writes, causing downstream errors that hit `CheckErrorPrintAndExit` →
+`os.Exit(1)`.
 
-1. Terraform invokes multiple `ReadDataSource` calls concurrently (one per data source instance)
-2. Each call enters `ProcessComponentInStack` → `InitCliConfig` → `LoadConfig`
-3. `LoadConfig` resets and writes to the shared `mergedConfigFiles` slice (`mergedConfigFiles = nil`)
-4. Concurrent goroutines corrupt the slice through interleaved reads/writes
-5. Corrupted config causes errors during template or YAML function processing
-6. Errors hit `CheckErrorPrintAndExit()` → `Exit()` → `os.Exit(1)`
-7. `os.Exit(1)` kills the gRPC plugin process without returning an error to Terraform
-8. Terraform reports "Plugin did not respond"
-
-### Why `os.Exit` instead of error propagation
-
-The Atmos library uses `CheckErrorPrintAndExit()` in many code paths within `internal/exec`:
-
-- `utils.go:753,765` — template processing errors
-- `yaml_func_store.go:29,89,99,107` — `!store` YAML tag errors
-- `yaml_func_store_get.go:52,90,101,116` — `!store.get` YAML tag errors
-- `describe_stacks.go:489,743,982` — describe stacks errors
-
-This function is designed for CLI usage — it prints an error and exits the process. Inside a
-Terraform provider (gRPC plugin), calling `os.Exit(1)` terminates the plugin without returning
-a diagnostic error to Terraform.
+This is a **latent** issue — it is a real data race that could cause unpredictable failures
+under concurrent load.
 
 ### Debug log timeline (provider v2.0.0, pid=3934)
 
@@ -85,16 +91,14 @@ a diagnostic error to Terraform.
 | `19:24:16.817` | **Plugin process exited: exit status 1**                     |
 | `19:24:16.817` | gRPC: "connection reset by peer"                             |
 
-GetProviderSchema, Configure, and ValidateDataSourceConfig all succeed because they don't call
-`LoadConfig`. The crash happens specifically during `ReadDataSource` → `ProcessComponentInStack`
-→ `InitCliConfig` → `LoadConfig`.
-
 ## Fix
 
-### Provider-side fix (this repo)
+### Provider-side fix
 
 Add a package-level `sync.Mutex` in the provider to serialize all calls into the Atmos library.
-This prevents concurrent goroutines from accessing the thread-unsafe global state simultaneously.
+This addresses **Issue 2** by preventing concurrent goroutines from accessing the thread-unsafe
+global state simultaneously. It does not prevent `os.Exit(1)` from stack config errors (Issue 1),
+but it eliminates the data race as a potential trigger.
 
 **New file: `internal/provider/atmos_lock.go`**
 
@@ -121,15 +125,17 @@ Each `ReadContext` function wraps its Atmos library calls with `atmosMu.Lock()` 
 - `data_source_describe_stacks.go` — wraps `InitCliConfig` + `ExecuteDescribeStacks`
 - `data_source_stack_config_yaml.go` — wraps `InitCliConfig` + `ProcessYAMLConfigFiles`
 - `data_source_spacelift_stack_config.go` — wraps `CreateSpaceliftStacks`
+- `data_source_aws_eks_update_kubeconfig.go` — wraps `ExecuteAwsEksUpdateKubeconfig`
 
 ### Long-term fix (Atmos library)
 
 The Atmos library should be refactored to:
 
-1. Eliminate package-level mutable state in `pkg/config` and `errors`
-2. Pass configuration through context or options structs instead of global variables
-3. Replace `CheckErrorPrintAndExit` / `os.Exit` calls in library code paths with proper error
-   returns, so embedded consumers (like this provider) can handle errors gracefully
+1. Replace `CheckErrorPrintAndExit` / `os.Exit` calls in library code paths with proper error
+   returns, so embedded consumers (like this provider) can handle errors gracefully — this is
+   the most critical fix, as it would convert silent crashes into visible Terraform diagnostics
+2. Eliminate package-level mutable state in `pkg/config` and `errors`
+3. Pass configuration through context or options structs instead of global variables
 
 ## References
 
