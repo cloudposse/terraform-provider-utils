@@ -138,7 +138,10 @@ func dataSourceAwsEksUpdateKubeconfigRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
+	atmosMu.Lock()
 	err = a.ExecuteAwsEksUpdateKubeconfig(kubeconfigContext)
+	atmosMu.Unlock()
+
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -66,18 +66,13 @@ func dataSourceStackConfigYAML() *schema.Resource {
 }
 
 func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	cliConfig, err := cfg.InitCliConfig(atmosSchema.ConfigAndStacksInfo{}, true)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	input := d.Get("input")
 	processStackDeps := d.Get("process_stack_deps")
 	processComponentDeps := d.Get("process_component_deps")
 	stacksBasePath := d.Get("base_path")
 	env := d.Get("env").(map[string]any)
 
-	err = setEnv(env)
+	err := setEnv(env)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,18 +82,29 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	result, _, _, err := s.ProcessYAMLConfigFiles(
-		&cliConfig,
-		stacksBasePath.(string),
-		"",
-		"",
-		"",
-		"",
-		paths,
-		processStackDeps.(bool),
-		processComponentDeps.(bool),
-		false,
-	)
+	var result []string
+	result, _, _, err = func() ([]string, map[string]any, map[string]map[string]any, error) {
+		atmosMu.Lock()
+		defer atmosMu.Unlock()
+
+		cliConfig, err := cfg.InitCliConfig(atmosSchema.ConfigAndStacksInfo{}, true)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		return s.ProcessYAMLConfigFiles(
+			&cliConfig,
+			stacksBasePath.(string),
+			"",
+			"",
+			"",
+			"",
+			paths,
+			processStackDeps.(bool),
+			processComponentDeps.(bool),
+			false,
+		)
+	}()
 	if err != nil {
 		return diag.FromErr(err)
 	}
