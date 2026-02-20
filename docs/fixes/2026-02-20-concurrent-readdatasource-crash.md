@@ -141,4 +141,3 @@ The Atmos library should be refactored to:
 
 - Atmos `LoadConfig` thread-safety comment: `pkg/config/load.go:51-54`
 - `CheckErrorPrintAndExit` implementation: `errors/error_funcs.go:324-366`
-- Previous fix (version mismatch): `docs/fixes/2026-02-19-atmos-version-mismatch-plugin-crash.md`

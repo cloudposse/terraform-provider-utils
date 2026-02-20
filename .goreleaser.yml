@@ -1,3 +1,5 @@
+version: 2
+
 # Local goreleaser config — overrides the org-wide config at cloudposse/.github/.github/goreleaser.yml
 # Needed because Go 1.24+ dropped support for windows/arm (32-bit), which the shared config includes.
 
@@ -8,7 +10,7 @@ builds:
   flags:
     - -trimpath
   ldflags:
-    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+    - '-s -w -X main.version={{.Version}} -X main.commit={{.FullCommit}}'
   goos:
     - freebsd
     - windows
