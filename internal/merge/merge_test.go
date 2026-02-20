@@ -243,7 +243,16 @@ func TestMergeWithOptionsDeepCopyList(t *testing.T) {
 
 	result, err := m.MergeWithOptions(nil, inputs, false, true)
 	assert.Nil(t, err)
-	assert.NotNil(t, result["items"])
+
+	items, ok := result["items"].([]any)
+	assert.True(t, ok, "items should be a slice")
+	// deepCopyList=true merges element-by-element (element[0] with element[0]),
+	// so one merged element should result from two single-element lists
+	assert.Equal(t, 1, len(items), "expected one merged item from element-wise merge")
+
+	merged := items[0].(map[string]any)
+	assert.Equal(t, "b", merged["name"], "name should be overridden by second input")
+	assert.Equal(t, "2", merged["value"], "value should be overridden by second input")
 }
 
 // TestMergeWithOptionsSingleInput tests MergeWithOptions with a single input map.

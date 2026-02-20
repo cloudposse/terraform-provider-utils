@@ -5,9 +5,21 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/stretchr/testify/require"
+
 	s "github.com/cloudposse/atmos/pkg/spacelift"
 	u "github.com/cloudposse/atmos/pkg/utils"
 )
+
+// buildSpaceliftStacks is a shared helper for tests that need the default stack corpus.
+func buildSpaceliftStacks(t *testing.T) map[string]any {
+	t.Helper()
+	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		"", "", "", "", "", nil, true, true, true, "stacks/%s.yaml",
+	)
+	require.NoError(t, err)
+	return spaceliftStacks
+}
 
 func TestSpaceliftStackProcessor(t *testing.T) {
 	processStackDeps := true
@@ -109,25 +121,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 // TestSpaceliftStackProcessorProdStack tests that prod stack components are correctly
 // processed in the Spacelift output.
 func TestSpaceliftStackProcessorProdStack(t *testing.T) {
-	processStackDeps := true
-	processComponentDeps := true
-	processImports := true
-	stackConfigPathTemplate := "stacks/%s.yaml"
-
-	spaceliftStacks, err := s.CreateSpaceliftStacks(
-		"",
-		"",
-		"",
-		"",
-		"",
-		nil,
-		processStackDeps,
-		processComponentDeps,
-		processImports,
-		stackConfigPathTemplate,
-	)
-
-	assert.Nil(t, err)
+	spaceliftStacks := buildSpaceliftStacks(t)
 
 	// Verify prod stack components exist
 	tenant1Ue2ProdTopLevelComponent1 := spaceliftStacks["tenant1-ue2-prod-top-level-component1"].(map[string]any)
@@ -143,25 +137,7 @@ func TestSpaceliftStackProcessorProdStack(t *testing.T) {
 
 // TestSpaceliftStackProcessorTenant2 tests that tenant2 stacks are correctly processed.
 func TestSpaceliftStackProcessorTenant2(t *testing.T) {
-	processStackDeps := true
-	processComponentDeps := true
-	processImports := true
-	stackConfigPathTemplate := "stacks/%s.yaml"
-
-	spaceliftStacks, err := s.CreateSpaceliftStacks(
-		"",
-		"",
-		"",
-		"",
-		"",
-		nil,
-		processStackDeps,
-		processComponentDeps,
-		processImports,
-		stackConfigPathTemplate,
-	)
-
-	assert.Nil(t, err)
+	spaceliftStacks := buildSpaceliftStacks(t)
 
 	// Verify tenant2 stack exists
 	tenant2Ue2DevInfraVpc := spaceliftStacks["tenant2-ue2-dev-infra-vpc"].(map[string]any)
@@ -173,25 +149,7 @@ func TestSpaceliftStackProcessorTenant2(t *testing.T) {
 // TestSpaceliftStackProcessorComponentBaseComponent tests that component overrides
 // correctly reference their base components.
 func TestSpaceliftStackProcessorComponentBaseComponent(t *testing.T) {
-	processStackDeps := true
-	processComponentDeps := true
-	processImports := true
-	stackConfigPathTemplate := "stacks/%s.yaml"
-
-	spaceliftStacks, err := s.CreateSpaceliftStacks(
-		"",
-		"",
-		"",
-		"",
-		"",
-		nil,
-		processStackDeps,
-		processComponentDeps,
-		processImports,
-		stackConfigPathTemplate,
-	)
-
-	assert.Nil(t, err)
+	spaceliftStacks := buildSpaceliftStacks(t)
 
 	// Verify component override has correct base_component
 	overrideComponent := spaceliftStacks["tenant1-ue2-dev-test-test-component-override"].(map[string]any)

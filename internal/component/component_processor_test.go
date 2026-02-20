@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	c "github.com/cloudposse/atmos/pkg/describe"
 	u "github.com/cloudposse/atmos/pkg/utils"
@@ -152,7 +153,7 @@ func TestComponentProcessor(t *testing.T) {
 		Stage:       stage,
 	})
 	assert.Nil(t, err)
-	tenant1Ue2Test1TestTestComponentOverrideComponent2Backend := tenant1Ue2DevTestTestComponentOverrideComponent2["backend"].(map[string]any)
+	tenant1Ue2Test1TestTestComponentOverrideComponent2Backend := tenant1Ue2Test1TestTestComponentOverrideComponent2["backend"].(map[string]any)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2Workspace := tenant1Ue2Test1TestTestComponentOverrideComponent2["workspace"].(string)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2WorkspaceKeyPrefix := tenant1Ue2Test1TestTestComponentOverrideComponent2Backend["workspace_key_prefix"].(string)
 	assert.Equal(t, "tenant1-ue2-test-1-test-test-component-override-2", tenant1Ue2Test1TestTestComponentOverrideComponent2Workspace)
@@ -188,7 +189,8 @@ func TestComponentProcessorConsistency(t *testing.T) {
 	stack := "tenant1-ue2-dev"
 
 	resultByStack, err := c.ProcessComponentInStack(component, stack, "", "")
-	assert.Nil(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, resultByStack)
 
 	resultByContext, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
 		Component:   component,
@@ -197,7 +199,8 @@ func TestComponentProcessorConsistency(t *testing.T) {
 		Environment: "ue2",
 		Stage:       "dev",
 	})
-	assert.Nil(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, resultByContext)
 
 	// Both paths should produce the same backend config
 	stackBackend := resultByStack["backend"].(map[string]any)
@@ -211,12 +214,7 @@ func TestComponentProcessorConsistency(t *testing.T) {
 	assert.Equal(t, resultByStack["component"], resultByContext["component"])
 
 	// Both paths should produce the same deps
-	stackDeps := resultByStack["deps"].([]any)
-	contextDeps := resultByContext["deps"].([]any)
-	assert.Equal(t, len(stackDeps), len(contextDeps))
-	for i := range stackDeps {
-		assert.Equal(t, stackDeps[i], contextDeps[i])
-	}
+	assert.Equal(t, resultByStack["deps"], resultByContext["deps"])
 }
 
 // TestComponentProcessorProdStack tests processing a component in a different stack (prod)
@@ -226,8 +224,8 @@ func TestComponentProcessorProdStack(t *testing.T) {
 	stack := "tenant1-ue2-prod"
 
 	result, err := c.ProcessComponentInStack(component, stack, "", "")
-	assert.Nil(t, err)
-	assert.NotNil(t, result)
+	require.NoError(t, err)
+	require.NotNil(t, result)
 
 	workspace := result["workspace"].(string)
 	assert.Equal(t, "tenant1-ue2-prod", workspace)
@@ -251,14 +249,15 @@ func TestComponentProcessorFromContextProdStack(t *testing.T) {
 		Environment: "ue2",
 		Stage:       "prod",
 	})
-	assert.Nil(t, err)
-	assert.NotNil(t, result)
+	require.NoError(t, err)
+	require.NotNil(t, result)
 
 	workspace := result["workspace"].(string)
 	assert.Equal(t, "tenant1-ue2-prod", workspace)
 
 	vars := result["vars"].(map[string]any)
 	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
 	assert.Equal(t, "prod", vars["stage"])
 }
 
@@ -276,8 +275,8 @@ func TestComponentProcessorInfraVpc(t *testing.T) {
 	stack := "tenant1-ue2-dev"
 
 	result, err := c.ProcessComponentInStack(component, stack, "", "")
-	assert.Nil(t, err)
-	assert.NotNil(t, result)
+	require.NoError(t, err)
+	require.NotNil(t, result)
 
 	backend := result["backend"].(map[string]any)
 	assert.Equal(t, "infra-vpc", backend["workspace_key_prefix"])
