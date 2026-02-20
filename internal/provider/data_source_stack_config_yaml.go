@@ -83,14 +83,12 @@ func dataSourceStackConfigYAMLRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	paths, err := u.SliceOfInterfacesToSliceOfStrings(input.([]any))
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	paths := u.SliceOfInterfacesToSliceOfStrings(input.([]any))
 
 	result, _, _, err := s.ProcessYAMLConfigFiles(
 		&cliConfig,
 		stacksBasePath.(string),
+		"",
 		"",
 		"",
 		"",

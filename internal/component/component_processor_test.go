@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	c "github.com/cloudposse/atmos/pkg/component"
+	c "github.com/cloudposse/atmos/pkg/describe"
 	u "github.com/cloudposse/atmos/pkg/utils"
 )
 
@@ -13,7 +13,6 @@ func TestComponentProcessor(t *testing.T) {
 	var err error
 	var component string
 	var stack string
-	namespace := ""
 	var yamlConfig string
 
 	var tenant1Ue2DevTestTestComponent map[string]any
@@ -50,7 +49,13 @@ func TestComponentProcessor(t *testing.T) {
 	tenant := "tenant1"
 	environment := "ue2"
 	stage := "dev"
-	tenant1Ue2DevTestTestComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage, "", "")
+	tenant1Ue2DevTestTestComponent2, err = c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      tenant,
+		Environment: environment,
+		Stage:       stage,
+	})
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentBackend2 := tenant1Ue2DevTestTestComponent2["backend"].(map[string]any)
 	tenant1Ue2DevTestTestComponentRemoteStateBackend2 := tenant1Ue2DevTestTestComponent2["remote_state_backend"].(map[string]any)
@@ -115,7 +120,13 @@ func TestComponentProcessor(t *testing.T) {
 	tenant = "tenant1"
 	environment = "ue2"
 	stage = "dev"
-	tenant1Ue2DevTestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage, "", "")
+	tenant1Ue2DevTestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      tenant,
+		Environment: environment,
+		Stage:       stage,
+	})
 	assert.Nil(t, err)
 	tenant1Ue2DevTestTestComponentOverrideComponent2Backend := tenant1Ue2DevTestTestComponentOverrideComponent2["backend"].(map[string]any)
 	tenant1Ue2DevTestTestComponentOverrideComponent2Workspace := tenant1Ue2DevTestTestComponentOverrideComponent2["workspace"].(string)
@@ -133,7 +144,13 @@ func TestComponentProcessor(t *testing.T) {
 	tenant = "tenant1"
 	environment = "ue2"
 	stage = "test-1"
-	tenant1Ue2Test1TestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(component, namespace, tenant, environment, stage, "", "")
+	tenant1Ue2Test1TestTestComponentOverrideComponent2, err = c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      tenant,
+		Environment: environment,
+		Stage:       stage,
+	})
 	assert.Nil(t, err)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2Backend := tenant1Ue2DevTestTestComponentOverrideComponent2["backend"].(map[string]any)
 	tenant1Ue2Test1TestTestComponentOverrideComponent2Workspace := tenant1Ue2Test1TestTestComponentOverrideComponent2["workspace"].(string)
@@ -163,15 +180,124 @@ func TestComponentProcessor(t *testing.T) {
 	assert.Equal(t, "orgs/cp/tenant1/dev/us-east-2", tenant1Ue2DevTestTestComponentOverrideComponent3Deps[10])
 }
 
+// TestComponentProcessorConsistency verifies that ProcessComponentInStack and
+// ProcessComponentFromContext return identical results for the same component and stack.
+// This is critical because the provider uses both paths depending on user input.
+func TestComponentProcessorConsistency(t *testing.T) {
+	component := "test/test-component"
+	stack := "tenant1-ue2-dev"
+
+	resultByStack, err := c.ProcessComponentInStack(component, stack, "", "")
+	assert.Nil(t, err)
+
+	resultByContext, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      "tenant1",
+		Environment: "ue2",
+		Stage:       "dev",
+	})
+	assert.Nil(t, err)
+
+	// Both paths should produce the same backend config
+	stackBackend := resultByStack["backend"].(map[string]any)
+	contextBackend := resultByContext["backend"].(map[string]any)
+	assert.Equal(t, stackBackend["workspace_key_prefix"], contextBackend["workspace_key_prefix"])
+
+	// Both paths should produce the same workspace
+	assert.Equal(t, resultByStack["workspace"], resultByContext["workspace"])
+
+	// Both paths should produce the same base component
+	assert.Equal(t, resultByStack["component"], resultByContext["component"])
+
+	// Both paths should produce the same deps
+	stackDeps := resultByStack["deps"].([]any)
+	contextDeps := resultByContext["deps"].([]any)
+	assert.Equal(t, len(stackDeps), len(contextDeps))
+	for i := range stackDeps {
+		assert.Equal(t, stackDeps[i], contextDeps[i])
+	}
+}
+
+// TestComponentProcessorProdStack tests processing a component in a different stack (prod)
+// to ensure the provider works across environments.
+func TestComponentProcessorProdStack(t *testing.T) {
+	component := "top-level-component1"
+	stack := "tenant1-ue2-prod"
+
+	result, err := c.ProcessComponentInStack(component, stack, "", "")
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+
+	workspace := result["workspace"].(string)
+	assert.Equal(t, "tenant1-ue2-prod", workspace)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "top-level-component1", backend["workspace_key_prefix"])
+
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "prod", vars["stage"])
+}
+
+// TestComponentProcessorFromContextProdStack tests ProcessComponentFromContext
+// for the prod stack to verify tenant/environment/stage resolution.
+func TestComponentProcessorFromContextProdStack(t *testing.T) {
+	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   "top-level-component1",
+		Namespace:   "",
+		Tenant:      "tenant1",
+		Environment: "ue2",
+		Stage:       "prod",
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+
+	workspace := result["workspace"].(string)
+	assert.Equal(t, "tenant1-ue2-prod", workspace)
+
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "prod", vars["stage"])
+}
+
+// TestComponentProcessorFromContextNilParams tests that ProcessComponentFromContext
+// returns an error when called with nil params.
+func TestComponentProcessorFromContextNilParams(t *testing.T) {
+	_, err := c.ProcessComponentFromContext(nil)
+	assert.NotNil(t, err)
+}
+
+// TestComponentProcessorInfraVpc tests the infra/vpc component which is commonly
+// used with remote-state modules (the original bug report scenario).
+func TestComponentProcessorInfraVpc(t *testing.T) {
+	component := "infra/vpc"
+	stack := "tenant1-ue2-dev"
+
+	result, err := c.ProcessComponentInStack(component, stack, "", "")
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "infra-vpc", backend["workspace_key_prefix"])
+	assert.Equal(t, "s3", result["backend_type"])
+}
+
 func TestComponentProcessorHierarchicalInheritance(t *testing.T) {
 	var yamlConfig string
-	namespace := ""
 	component := "derived-component-2"
 	tenant := "tenant1"
 	environment := "ue2"
 	stage := "test-1"
 
-	componentMap, err := c.ProcessComponentFromContext(component, namespace, tenant, environment, stage, "", "")
+	componentMap, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      tenant,
+		Environment: environment,
+		Stage:       stage,
+	})
 	assert.Nil(t, err)
 
 	componentVars := componentMap["vars"].(map[string]any)

@@ -20,6 +20,7 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 		"",
 		"",
 		"",
+		"",
 		nil,
 		processStackDeps,
 		processComponentDeps,
@@ -105,6 +106,101 @@ func TestSpaceliftStackProcessor(t *testing.T) {
 	t.Log(yamlSpaceliftStacks)
 }
 
+// TestSpaceliftStackProcessorProdStack tests that prod stack components are correctly
+// processed in the Spacelift output.
+func TestSpaceliftStackProcessorProdStack(t *testing.T) {
+	processStackDeps := true
+	processComponentDeps := true
+	processImports := true
+	stackConfigPathTemplate := "stacks/%s.yaml"
+
+	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		"",
+		"",
+		"",
+		"",
+		"",
+		nil,
+		processStackDeps,
+		processComponentDeps,
+		processImports,
+		stackConfigPathTemplate,
+	)
+
+	assert.Nil(t, err)
+
+	// Verify prod stack components exist
+	tenant1Ue2ProdTopLevelComponent1 := spaceliftStacks["tenant1-ue2-prod-top-level-component1"].(map[string]any)
+	assert.Equal(t, "tenant1-ue2-prod", tenant1Ue2ProdTopLevelComponent1["stack"].(string))
+
+	backend := tenant1Ue2ProdTopLevelComponent1["backend"].(map[string]any)
+	assert.Equal(t, "top-level-component1", backend["workspace_key_prefix"])
+
+	// Verify depends_on labels are set
+	labels := tenant1Ue2ProdTopLevelComponent1["labels"].([]string)
+	assert.True(t, len(labels) > 0, "labels should not be empty")
+}
+
+// TestSpaceliftStackProcessorTenant2 tests that tenant2 stacks are correctly processed.
+func TestSpaceliftStackProcessorTenant2(t *testing.T) {
+	processStackDeps := true
+	processComponentDeps := true
+	processImports := true
+	stackConfigPathTemplate := "stacks/%s.yaml"
+
+	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		"",
+		"",
+		"",
+		"",
+		"",
+		nil,
+		processStackDeps,
+		processComponentDeps,
+		processImports,
+		stackConfigPathTemplate,
+	)
+
+	assert.Nil(t, err)
+
+	// Verify tenant2 stack exists
+	tenant2Ue2DevInfraVpc := spaceliftStacks["tenant2-ue2-dev-infra-vpc"].(map[string]any)
+	assert.Equal(t, "tenant2-ue2-dev", tenant2Ue2DevInfraVpc["stack"].(string))
+	tenant2Backend := tenant2Ue2DevInfraVpc["backend"].(map[string]any)
+	assert.Equal(t, "infra-vpc", tenant2Backend["workspace_key_prefix"])
+}
+
+// TestSpaceliftStackProcessorComponentBaseComponent tests that component overrides
+// correctly reference their base components.
+func TestSpaceliftStackProcessorComponentBaseComponent(t *testing.T) {
+	processStackDeps := true
+	processComponentDeps := true
+	processImports := true
+	stackConfigPathTemplate := "stacks/%s.yaml"
+
+	spaceliftStacks, err := s.CreateSpaceliftStacks(
+		"",
+		"",
+		"",
+		"",
+		"",
+		nil,
+		processStackDeps,
+		processComponentDeps,
+		processImports,
+		stackConfigPathTemplate,
+	)
+
+	assert.Nil(t, err)
+
+	// Verify component override has correct base_component
+	overrideComponent := spaceliftStacks["tenant1-ue2-dev-test-test-component-override"].(map[string]any)
+	assert.Equal(t, "test/test-component", overrideComponent["base_component"].(string))
+
+	// Verify the workspace is the overridden value
+	assert.Equal(t, "test-component-override-workspace-override", overrideComponent["workspace"])
+}
+
 func TestLegacySpaceliftStackProcessor(t *testing.T) {
 	stacksBasePath := "../../examples/tests/stacks"
 	terraformComponentsBasePath := "../../examples/tests/components/terraform"
@@ -131,6 +227,7 @@ func TestLegacySpaceliftStackProcessor(t *testing.T) {
 		terraformComponentsBasePath,
 		helmfileComponentsBasePath,
 		packerComponentsBasePath,
+		"",
 		filePaths,
 		processStackDeps,
 		processComponentDeps,

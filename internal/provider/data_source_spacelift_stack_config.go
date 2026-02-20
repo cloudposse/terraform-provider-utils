@@ -98,6 +98,7 @@ func dataSourceSpaceliftStackConfigRead(ctx context.Context, d *schema.ResourceD
 		"",
 		"",
 		"",
+		"",
 		paths,
 		processStackDeps.(bool),
 		processComponentDeps.(bool),
