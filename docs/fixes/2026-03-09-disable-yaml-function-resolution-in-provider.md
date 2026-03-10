@@ -11,9 +11,9 @@ Components using `remote-state` fail during plan when the referenced stack YAML 
 `!terraform.output` YAML function calls:
 
 ```text
-Error: failed to get terraform output for component vpc in stack dev-use1-frontoffice,
+Error: failed to get terraform output for component vpc in stack dev-use1-frontend,
 output vpc_default_security_group_id: failed to execute terraform output for component vpc
-in stack dev-use1-frontoffice: terraform init failed: exit status 1
+in stack dev-use1-frontend: terraform init failed: exit status 1
 
 │ Error: Failed to install provider
 │ Error while installing hashicorp/aws v5.100.0: open
