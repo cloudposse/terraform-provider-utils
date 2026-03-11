@@ -61,6 +61,7 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GO_RELEASER_TARGET_COMMITISH: main
 
       - name: Publish release
         env:
