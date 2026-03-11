@@ -63,8 +63,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ inputs.tag }}
         run: |
-          LATEST_FLAG=""
           if [ "${{ inputs.make_latest }}" = "true" ]; then
-            LATEST_FLAG="--latest"
+            gh release edit "${TAG}" --draft=false --latest
+          else
+            gh release edit "${TAG}" --draft=false --latest=false
           fi
-          gh release edit "${TAG}" --draft=false $LATEST_FLAG
