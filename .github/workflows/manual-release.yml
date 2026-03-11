@@ -22,9 +22,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Validate tag exists
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
-          git ls-remote --tags "${{ github.server_url }}/${{ github.repository }}" "${{ inputs.tag }}" | grep -q "${{ inputs.tag }}" || {
-            echo "::error::Tag ${{ inputs.tag }} does not exist. Create it first."
+          git ls-remote --tags "${{ github.server_url }}/${{ github.repository }}" "refs/tags/${TAG}" | grep -qE "refs/tags/${TAG}$" || {
+            echo "::error::Tag ${TAG} does not exist. Create it first."
             exit 1
           }
 
@@ -59,9 +61,10 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
         run: |
           LATEST_FLAG=""
           if [ "${{ inputs.make_latest }}" = "true" ]; then
             LATEST_FLAG="--latest"
           fi
-          gh release edit "${{ inputs.tag }}" --draft=false $LATEST_FLAG
+          gh release edit "${TAG}" --draft=false $LATEST_FLAG
