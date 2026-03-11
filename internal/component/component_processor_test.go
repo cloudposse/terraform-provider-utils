@@ -283,6 +283,135 @@ func TestComponentProcessorInfraVpc(t *testing.T) {
 	assert.Equal(t, "s3", result["backend_type"])
 }
 
+// TestComponentProcessorWithProcessingDisabled verifies that passing
+// WithProcessTemplates(false) and WithProcessYamlFunctions(false) still returns
+// valid component configuration (backend, workspace, vars). This is the mode
+// used by the provider to avoid spawning child processes.
+func TestComponentProcessorWithProcessingDisabled(t *testing.T) {
+	component := "test/test-component"
+	stack := "tenant1-ue2-dev"
+
+	result, err := c.ProcessComponentInStack(component, stack, "", "",
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Backend config should still be present
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "test-test-component", backend["workspace_key_prefix"])
+
+	// Workspace should still be present
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+
+	// Vars should still be present
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "dev", vars["stage"])
+
+	// Base component should still be present
+	assert.Equal(t, "test/test-component", result["component"])
+}
+
+// TestComponentProcessorFromContextWithProcessingDisabled verifies that
+// ProcessComponentFromContext also works with processing disabled.
+func TestComponentProcessorFromContextWithProcessingDisabled(t *testing.T) {
+	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   "test/test-component",
+		Namespace:   "",
+		Tenant:      "tenant1",
+		Environment: "ue2",
+		Stage:       "dev",
+	},
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Backend config should still be present
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "test-test-component", backend["workspace_key_prefix"])
+
+	// Workspace should still be present
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+
+	// Vars should still be present
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "dev", vars["stage"])
+}
+
+// TestComponentProcessorDisabledMatchesEnabled verifies that for components
+// without templates or YAML functions, the results are identical regardless
+// of whether processing is enabled or disabled.
+func TestComponentProcessorDisabledMatchesEnabled(t *testing.T) {
+	component := "test/test-component"
+	stack := "tenant1-ue2-dev"
+
+	resultEnabled, err := c.ProcessComponentInStack(component, stack, "", "")
+	require.NoError(t, err)
+
+	resultDisabled, err := c.ProcessComponentInStack(component, stack, "", "",
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+
+	// For components without templates or YAML functions, key fields should match
+	assert.Equal(t, resultEnabled["workspace"], resultDisabled["workspace"])
+	assert.Equal(t, resultEnabled["component"], resultDisabled["component"])
+	assert.Equal(t, resultEnabled["backend_type"], resultDisabled["backend_type"])
+
+	enabledBackend := resultEnabled["backend"].(map[string]any)
+	disabledBackend := resultDisabled["backend"].(map[string]any)
+	assert.Equal(t, enabledBackend["workspace_key_prefix"], disabledBackend["workspace_key_prefix"])
+
+	enabledVars := resultEnabled["vars"].(map[string]any)
+	disabledVars := resultDisabled["vars"].(map[string]any)
+	assert.Equal(t, enabledVars["tenant"], disabledVars["tenant"])
+	assert.Equal(t, enabledVars["environment"], disabledVars["environment"])
+	assert.Equal(t, enabledVars["stage"], disabledVars["stage"])
+}
+
+// TestComponentProcessorConsistencyWithProcessingDisabled verifies that both
+// ProcessComponentInStack and ProcessComponentFromContext return the same
+// results when processing is disabled — the mode the provider actually uses.
+func TestComponentProcessorConsistencyWithProcessingDisabled(t *testing.T) {
+	component := "infra/vpc"
+	stack := "tenant1-ue2-dev"
+
+	resultByStack, err := c.ProcessComponentInStack(component, stack, "", "",
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+
+	resultByContext, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:   component,
+		Namespace:   "",
+		Tenant:      "tenant1",
+		Environment: "ue2",
+		Stage:       "dev",
+	},
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+
+	// Both paths should produce the same results with processing disabled
+	assert.Equal(t, resultByStack["workspace"], resultByContext["workspace"])
+	assert.Equal(t, resultByStack["component"], resultByContext["component"])
+	assert.Equal(t, resultByStack["backend_type"], resultByContext["backend_type"])
+
+	stackBackend := resultByStack["backend"].(map[string]any)
+	contextBackend := resultByContext["backend"].(map[string]any)
+	assert.Equal(t, stackBackend["workspace_key_prefix"], contextBackend["workspace_key_prefix"])
+}
+
 func TestComponentProcessorHierarchicalInheritance(t *testing.T) {
 	var yamlConfig string
 	component := "derived-component-2"

@@ -100,20 +100,20 @@ the provider plugin.
 
 ### Atmos library change (`pkg/describe/component_processor.go`)
 
-Add optional processing controls using a variadic options pattern for `ProcessComponentInStack`
-and `*bool` fields on `ComponentFromContextParams`. This is **fully backward compatible** —
-existing callers compile without changes, and omitted/nil values default to `true`.
+Add optional processing controls using a functional options pattern for both
+`ProcessComponentInStack` and `ProcessComponentFromContext`. This is **fully backward
+compatible** — existing callers compile without changes, and omitted options default to `true`.
 
-**New `ProcessComponentInStackOptions` struct:**
+**Functional options:**
 
 ```go
-type ProcessComponentInStackOptions struct {
-    ProcessTemplates     *bool // Controls Go template resolution. Defaults to true if nil.
-    ProcessYamlFunctions *bool // Controls YAML function resolution. Defaults to true if nil.
-}
+type ProcessOption func(*processOptions)
+
+func WithProcessTemplates(enabled bool) ProcessOption
+func WithProcessYamlFunctions(enabled bool) ProcessOption
 ```
 
-**`ProcessComponentInStack`** — add variadic options (existing 4-arg calls still compile):
+**`ProcessComponentInStack`** — add variadic functional options (existing 4-arg calls still compile):
 
 ```go
 // Before:
@@ -122,53 +122,29 @@ func ProcessComponentInStack(
     stack string,
     atmosCliConfigPath string,
     atmosBasePath string,
-) (map[string]any, error) {
+) (map[string]any, error)
 
-// After (variadic — backward compatible):
+// After (variadic functional options — backward compatible):
 func ProcessComponentInStack(
     component string,
     stack string,
     atmosCliConfigPath string,
     atmosBasePath string,
-    opts ...ProcessComponentInStackOptions,
-) (map[string]any, error) {
+    opts ...ProcessOption,
+) (map[string]any, error)
 ```
 
-**`ComponentFromContextParams`** — add optional fields (existing struct literals still compile):
+**`ProcessComponentFromContext`** — add variadic functional options:
 
 ```go
-type ComponentFromContextParams struct {
-    Component            string
-    Namespace            string
-    Tenant               string
-    Environment          string
-    Stage                string
-    AtmosCliConfigPath   string
-    AtmosBasePath        string
-    ProcessTemplates     *bool // Optional: defaults to true if nil
-    ProcessYamlFunctions *bool // Optional: defaults to true if nil
-}
-```
+// Before:
+func ProcessComponentFromContext(params *ComponentFromContextParams) (map[string]any, error)
 
-**`processComponentInStackWithConfig`** — accept and use both parameters via `boolDefault`
-helper (`nil` → `true`):
-
-```go
-func processComponentInStackWithConfig(
-    atmosConfig *schema.AtmosConfiguration,
-    component string,
-    stack string,
-    processTemplates *bool,
-    processYamlFunctions *bool,
-) (map[string]any, error) {
-    return e.ExecuteDescribeComponent(&e.ExecuteDescribeComponentParams{
-        AtmosConfig:          atmosConfig,
-        Component:            component,
-        Stack:                stack,
-        ProcessTemplates:     boolDefault(processTemplates, true),
-        ProcessYamlFunctions: boolDefault(processYamlFunctions, true),
-    })
-}
+// After (variadic functional options — backward compatible):
+func ProcessComponentFromContext(
+    params *ComponentFromContextParams,
+    opts ...ProcessOption,
+) (map[string]any, error)
 ```
 
 All existing callers (Atmos CLI, tests) continue to work without changes — the variadic
@@ -176,57 +152,131 @@ options are not passed, so both flags default to `true`.
 
 ### Provider change (`internal/provider/data_source_component_config.go`)
 
-Pass `false` for both `processTemplates` and `processYamlFunctions` in both call sites:
+Pass `WithProcessTemplates(false)` and `WithProcessYamlFunctions(false)` in both call sites:
 
 ```go
-processTemplates := false
-processYamlFunctions := false
-
 atmosMu.Lock()
 if len(stack) > 0 {
     result, err = p.ProcessComponentInStack(
         component, stack, atmosCliConfigPath, atmosBasePath,
-        p.ProcessComponentInStackOptions{
-            ProcessTemplates:     &processTemplates,
-            ProcessYamlFunctions: &processYamlFunctions,
-        },
+        p.WithProcessTemplates(false),
+        p.WithProcessYamlFunctions(false),
     )
 } else {
     result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
-        Component:            component,
-        Namespace:            namespace,
-        Tenant:               tenant,
-        Environment:          environment,
-        Stage:                stage,
-        AtmosCliConfigPath:   atmosCliConfigPath,
-        AtmosBasePath:        atmosBasePath,
-        ProcessTemplates:     &processTemplates,
-        ProcessYamlFunctions: &processYamlFunctions,
-    })
+        Component:          component,
+        Namespace:          namespace,
+        Tenant:             tenant,
+        Environment:        environment,
+        Stage:              stage,
+        AtmosCliConfigPath: atmosCliConfigPath,
+        AtmosBasePath:      atmosBasePath,
+    },
+        p.WithProcessTemplates(false),
+        p.WithProcessYamlFunctions(false),
+    )
 }
 atmosMu.Unlock()
 ```
 
 ### Test changes
 
-No changes needed for existing Atmos tests — the variadic options pattern is fully backward
-compatible. New tests were added in the Atmos library to verify:
+#### Atmos library tests (`pkg/describe/component_processor_test.go`)
 
-- `TestBoolDefault` — unit test for the `boolDefault` helper
-- `TestProcessComponentInStackWithOptionsDisabled` — verifies `false` flags return results
-  with vars/backend/workspace (no template or YAML function resolution)
-- `TestProcessComponentInStackWithOptionsNilDefaultsToTrue` — verifies nil defaults to `true`
-- `TestProcessComponentInStackBackwardCompatNoOptions` — verifies old 4-arg call still works
-- `TestProcessComponentInStackDisabledMatchesEnabled` — verifies same vars with flags disabled
-  (for configs without templates/YAML functions)
-- `TestProcessComponentFromContextWithOptionsDisabled` — verifies struct-based API with both
-  flags disabled
+Each flag is tested independently against its own fixture, proving the two flags are wired
+independently and do not interfere with each other:
+
+| Test | What It Verifies |
+|------|------------------|
+| `TestProcessComponentInStackTemplatesDisabledOnly` | `WithProcessTemplates(false)` preserves raw Go template strings while YAML functions remain enabled |
+| `TestProcessComponentInStackTemplatesEnabledOnly` | `WithProcessTemplates(true)` resolves Go templates while YAML functions are disabled |
+| `TestProcessComponentInStackYamlFunctionsDisabledOnly` | `WithProcessYamlFunctions(false)` preserves raw YAML function tags while templates remain enabled |
+| `TestProcessComponentInStackYamlFunctionsEnabledOnly` | `WithProcessYamlFunctions(true)` resolves YAML function tags while templates are disabled |
+| `TestProcessComponentInStackBackwardCompatNoOptions` | Old 4-arg call (no options) still works and returns correct vars |
+| `TestProcessComponentFromContextWithProcessingDisabled` | `ProcessComponentFromContext` respects `WithProcessTemplates(false)` functional option |
+
+#### Provider tests (`internal/component/component_processor_test.go`)
+
+| Test | What It Verifies |
+|------|------------------|
+| `TestComponentProcessorWithProcessingDisabled` | `ProcessComponentInStack` with both flags `false` returns backend, workspace, vars |
+| `TestComponentProcessorFromContextWithProcessingDisabled` | `ProcessComponentFromContext` with both flags `false` returns backend, workspace, vars |
+| `TestComponentProcessorDisabledMatchesEnabled` | For configs without templates/YAML functions, results are identical with flags enabled or disabled |
+| `TestComponentProcessorConsistencyWithProcessingDisabled` | Both API paths return the same results when processing is disabled |
+
+## v1 Backward Compatibility Analysis
+
+This fix will be released as a **v1 minor version** (v1.32.0) rather than a v2 release, because
+all Cloud Posse `remote-state` modules and Terraform components pin the provider to `< 2`.
+Releasing as v2 would require updating every downstream module.
+
+### Version history and behavioral timeline
+
+| Provider Version | Atmos Version | Templates Processed | YAML Functions Processed | Status |
+|-----------------|---------------|--------------------|-----------------------|--------|
+| **v1.31.0** | v1.189.0 | No | No | Last stable v1 release |
+| **v2.0.0–v2.0.2** | v1.207.0 | Yes (hardcoded) | Yes (hardcoded) | Broken — `ETXTBSY` crash on Linux |
+| **v1.32.0** (this fix) | v1.209.0 | No (`WithProcessTemplates(false)`) | No (`WithProcessYamlFunctions(false)`) | Restores v1.31.0 behavior |
+
+### What changed between v1.31.0 and this branch
+
+The commits between v1.31.0 and this branch are:
+
+1. `43053f7` — Added Go linting (CI/tooling only, no behavioral change)
+2. `762b3bd` — Use atmos instead of Makefile (build tooling only)
+3. `d306476` — Fix release workflow (CI only)
+4. `d668a0c` — Update Atmos to v1.207.0 (moved import from `pkg/component` to `pkg/describe`)
+5. `3b54de6` — Serialize Atmos library calls with mutex (concurrent safety fix)
+6. `01465c9` — Revert goreleaser config to v1 format (CI only)
+7. `e035573` — Delete .goreleaser.yml (CI only)
+8. `d397136`–`dd3547d` — Update Atmos to v1.208.0 then v1.209.0 (dependency update)
+9. This PR — Disable template and YAML function processing
+
+### Compatibility assessment
+
+| Aspect | v1.31.0 | v1.32.0 (this fix) | Breaking? |
+|--------|---------|---------------------|-----------|
+| **Terraform provider schema** | All data sources unchanged | Identical schema | No |
+| **Templates processed** | No (atmos v1.189.0 didn't process them) | No (`WithProcessTemplates(false)`) | No — same behavior |
+| **YAML functions processed** | No (atmos v1.189.0 didn't process them) | No (`WithProcessYamlFunctions(false)`) | No — same behavior |
+| **Concurrent access** | No serialization | Serialized with mutex | No — strictly safer |
+| **Go version** | 1.22 | 1.26 | No — provider is a compiled binary |
+| **Backend/workspace/vars output** | Works | Works (all tests pass) | No |
+| **Import path** | `pkg/component` | `pkg/describe` | No — internal implementation detail |
+| **`ProcessComponentFromContext` signature** | Positional args | Struct params | No — internal implementation detail |
+
+### Why this is safe as a v1 minor release
+
+1. **The provider is a compiled binary.** Users install it as a Terraform plugin — they never
+   import Go packages from it. All Go-level API changes (import paths, function signatures,
+   struct fields) are internal implementation details invisible to users.
+
+2. **The Terraform provider schema is unchanged.** All data source schemas (`utils_component_config`,
+   `utils_stack_config_yaml`, `utils_describe_stacks`, `utils_spacelift_stack_config`,
+   `utils_deep_merge_yaml`, `utils_deep_merge_json`) have identical attributes, types, and
+   defaults between v1.31.0 and this branch.
+
+3. **Processing behavior matches v1.31.0.** In v1.31.0 (atmos v1.189.0), templates and YAML
+   functions were not processed — they were treated as opaque strings. This fix explicitly
+   disables both with `WithProcessTemplates(false)` and `WithProcessYamlFunctions(false)`,
+   restoring the exact same behavior. The v2.0.0 regression (hardcoded `true`) is bypassed.
+
+4. **All existing tests pass.** The full provider test suite (`internal/provider`,
+   `internal/component`, `internal/describe`, `internal/merge`, `internal/spacelift`,
+   `internal/stack`, `internal/convert`) passes without modification.
+
+5. **The mutex serialization is additive.** The concurrent `ReadDataSource` fix (#523) only
+   makes the provider safer under concurrent access — it cannot break existing single-threaded
+   usage.
 
 ## Rollout
 
-1. **Atmos**: Merge the `processYamlFunctions` parameter change, release new version (e.g. v1.209.0)
-2. **Provider**: Update `go.mod` to new Atmos version, add `processYamlFunctions: false`, release v2.1.0
-3. **Downstream**: Update `remote-state` module to pin `utils >= 2.1.0`
+1. **Atmos**: ~~Merge the functional options change, release new version~~ Done — merged as
+   [PR #2161](https://github.com/cloudposse/atmos/pull/2161), released as **v1.209.0**
+2. **Provider**: Update `go.mod` to atmos v1.209.0, pass `WithProcessTemplates(false)` and
+   `WithProcessYamlFunctions(false)`, release as **v1.32.0** (minor v1 bump)
+3. **Downstream**: No changes needed — `remote-state` modules pinned to `< 2` will
+   automatically pick up v1.32.0 on next `terraform init -upgrade`
 
 ## Alternative Approaches Considered
 

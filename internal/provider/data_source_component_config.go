@@ -116,7 +116,10 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	atmosMu.Lock()
 	if len(stack) > 0 {
-		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath)
+		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath,
+			p.WithProcessTemplates(false),
+			p.WithProcessYamlFunctions(false),
+		)
 	} else {
 		result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
 			Component:          component,
@@ -126,7 +129,10 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			Stage:              stage,
 			AtmosCliConfigPath: atmosCliConfigPath,
 			AtmosBasePath:      atmosBasePath,
-		})
+		},
+			p.WithProcessTemplates(false),
+			p.WithProcessYamlFunctions(false),
+		)
 	}
 	atmosMu.Unlock()
 
