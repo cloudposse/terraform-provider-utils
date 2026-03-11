@@ -50,13 +50,14 @@ jobs:
 
       - name: Patch goreleaser config
         run: |
-          sed -i 's/{{ .Env.ARCHIVES_FORMAT }}/zip/g' .goreleaser.yml
+          cp .goreleaser.yml /tmp/.goreleaser-patched.yml
+          sed -i 's/{{ .Env.ARCHIVES_FORMAT }}/zip/g' /tmp/.goreleaser-patched.yml
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
-          args: release --clean --timeout 45m
+          args: release --config /tmp/.goreleaser-patched.yml --clean --timeout 45m
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
