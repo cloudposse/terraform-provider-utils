@@ -186,23 +186,23 @@ atmosMu.Unlock()
 Each flag is tested independently against its own fixture, proving the two flags are wired
 independently and do not interfere with each other:
 
-| Test | What It Verifies |
-|------|------------------|
-| `TestProcessComponentInStackTemplatesDisabledOnly` | `WithProcessTemplates(false)` preserves raw Go template strings while YAML functions remain enabled |
-| `TestProcessComponentInStackTemplatesEnabledOnly` | `WithProcessTemplates(true)` resolves Go templates while YAML functions are disabled |
-| `TestProcessComponentInStackYamlFunctionsDisabledOnly` | `WithProcessYamlFunctions(false)` preserves raw YAML function tags while templates remain enabled |
-| `TestProcessComponentInStackYamlFunctionsEnabledOnly` | `WithProcessYamlFunctions(true)` resolves YAML function tags while templates are disabled |
-| `TestProcessComponentInStackBackwardCompatNoOptions` | Old 4-arg call (no options) still works and returns correct vars |
-| `TestProcessComponentFromContextWithProcessingDisabled` | `ProcessComponentFromContext` respects `WithProcessTemplates(false)` functional option |
+| Test                                                    | What It Verifies                                                                                    |
+|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| `TestProcessComponentInStackTemplatesDisabledOnly`      | `WithProcessTemplates(false)` preserves raw Go template strings while YAML functions remain enabled |
+| `TestProcessComponentInStackTemplatesEnabledOnly`       | `WithProcessTemplates(true)` resolves Go templates while YAML functions are disabled                |
+| `TestProcessComponentInStackYamlFunctionsDisabledOnly`  | `WithProcessYamlFunctions(false)` preserves raw YAML function tags while templates remain enabled   |
+| `TestProcessComponentInStackYamlFunctionsEnabledOnly`   | `WithProcessYamlFunctions(true)` resolves YAML function tags while templates are disabled           |
+| `TestProcessComponentInStackBackwardCompatNoOptions`    | Old 4-arg call (no options) still works and returns correct vars                                    |
+| `TestProcessComponentFromContextWithProcessingDisabled` | `ProcessComponentFromContext` respects `WithProcessTemplates(false)` functional option              |
 
 #### Provider tests (`internal/component/component_processor_test.go`)
 
-| Test | What It Verifies |
-|------|------------------|
-| `TestComponentProcessorWithProcessingDisabled` | `ProcessComponentInStack` with both flags `false` returns backend, workspace, vars |
-| `TestComponentProcessorFromContextWithProcessingDisabled` | `ProcessComponentFromContext` with both flags `false` returns backend, workspace, vars |
-| `TestComponentProcessorDisabledMatchesEnabled` | For configs without templates/YAML functions, results are identical with flags enabled or disabled |
-| `TestComponentProcessorConsistencyWithProcessingDisabled` | Both API paths return the same results when processing is disabled |
+| Test                                                      | What It Verifies                                                                                   |
+|-----------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| `TestComponentProcessorWithProcessingDisabled`            | `ProcessComponentInStack` with both flags `false` returns backend, workspace, vars                 |
+| `TestComponentProcessorFromContextWithProcessingDisabled` | `ProcessComponentFromContext` with both flags `false` returns backend, workspace, vars             |
+| `TestComponentProcessorDisabledMatchesEnabled`            | For configs without templates/YAML functions, results are identical with flags enabled or disabled |
+| `TestComponentProcessorConsistencyWithProcessingDisabled` | Both API paths return the same results when processing is disabled                                 |
 
 ## v1 Backward Compatibility Analysis
 
@@ -212,11 +212,11 @@ Releasing as v2 would require updating every downstream module.
 
 ### Version history and behavioral timeline
 
-| Provider Version | Atmos Version | Templates Processed | YAML Functions Processed | Status |
-|-----------------|---------------|--------------------|-----------------------|--------|
-| **v1.31.0** | v1.189.0 | No | No | Last stable v1 release |
-| **v2.0.0–v2.0.2** | v1.207.0 | Yes (hardcoded) | Yes (hardcoded) | Broken — `ETXTBSY` crash on Linux |
-| **v1.32.0** (this fix) | v1.209.0 | No (`WithProcessTemplates(false)`) | No (`WithProcessYamlFunctions(false)`) | Restores v1.31.0 behavior |
+| Provider Version       | Atmos Version | Templates Processed                | YAML Functions Processed               | Status                            |
+|------------------------|---------------|------------------------------------|----------------------------------------|-----------------------------------|
+| **v1.31.0**            | v1.189.0      | No                                 | No                                     | Last stable v1 release            |
+| **v2.0.0–v2.0.2**      | v1.207.0      | Yes (hardcoded)                    | Yes (hardcoded)                        | Broken — `ETXTBSY` crash on Linux |
+| **v1.32.0** (this fix) | v1.209.0      | No (`WithProcessTemplates(false)`) | No (`WithProcessYamlFunctions(false)`) | Restores v1.31.0 behavior         |
 
 ### What changed between v1.31.0 and this branch
 
@@ -234,16 +234,16 @@ The commits between v1.31.0 and this branch are:
 
 ### Compatibility assessment
 
-| Aspect | v1.31.0 | v1.32.0 (this fix) | Breaking? |
-|--------|---------|---------------------|-----------|
-| **Terraform provider schema** | All data sources unchanged | Identical schema | No |
-| **Templates processed** | No (atmos v1.189.0 didn't process them) | No (`WithProcessTemplates(false)`) | No — same behavior |
-| **YAML functions processed** | No (atmos v1.189.0 didn't process them) | No (`WithProcessYamlFunctions(false)`) | No — same behavior |
-| **Concurrent access** | No serialization | Serialized with mutex | No — strictly safer |
-| **Go version** | 1.22 | 1.26 | No — provider is a compiled binary |
-| **Backend/workspace/vars output** | Works | Works (all tests pass) | No |
-| **Import path** | `pkg/component` | `pkg/describe` | No — internal implementation detail |
-| **`ProcessComponentFromContext` signature** | Positional args | Struct params | No — internal implementation detail |
+| Aspect                                      | v1.31.0                                 | v1.32.0 (this fix)                     | Breaking?                           |
+|---------------------------------------------|-----------------------------------------|----------------------------------------|-------------------------------------|
+| **Terraform provider schema**               | All data sources unchanged              | Identical schema                       | No                                  |
+| **Templates processed**                     | No (atmos v1.189.0 didn't process them) | No (`WithProcessTemplates(false)`)     | No — same behavior                  |
+| **YAML functions processed**                | No (atmos v1.189.0 didn't process them) | No (`WithProcessYamlFunctions(false)`) | No — same behavior                  |
+| **Concurrent access**                       | No serialization                        | Serialized with mutex                  | No — strictly safer                 |
+| **Go version**                              | 1.22                                    | 1.26                                   | No — provider is a compiled binary  |
+| **Backend/workspace/vars output**           | Works                                   | Works (all tests pass)                 | No                                  |
+| **Import path**                             | `pkg/component`                         | `pkg/describe`                         | No — internal implementation detail |
+| **`ProcessComponentFromContext` signature** | Positional args                         | Struct params                          | No — internal implementation detail |
 
 ### Why this is safe as a v1 minor release
 
@@ -259,7 +259,7 @@ The commits between v1.31.0 and this branch are:
 3. **Processing behavior matches v1.31.0.** In v1.31.0 (atmos v1.189.0), templates and YAML
    functions were not processed — they were treated as opaque strings. This fix explicitly
    disables both with `WithProcessTemplates(false)` and `WithProcessYamlFunctions(false)`,
-   restoring the exact same behavior. The v2.0.0 regression (hardcoded `true`) is bypassed.
+   restoring the same behavior. The v2.0.0 regression (hardcoded `true`) is bypassed.
 
 4. **All existing tests pass.** The full provider test suite (`internal/provider`,
    `internal/component`, `internal/describe`, `internal/merge`, `internal/spacelift`,
