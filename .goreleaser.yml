@@ -1,0 +1,70 @@
+# Visit https://goreleaser.com for documentation on how to customize this behavior.
+# Based on the shared cloudposse/.github goreleaser config with 32-bit FreeBSD exclusions.
+
+builds:
+- env:
+    # goreleaser does not work with CGO, it could also complicate
+    # usage by users in CI/CD systems like Terraform Cloud where
+    # they are unable to install libraries.
+    - CGO_ENABLED=0
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - -trimpath
+  ldflags:
+    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+  goos:
+    - freebsd
+    - windows
+    - linux
+    - darwin
+  goarch:
+    - amd64
+    - '386'
+    - arm
+    - arm64
+  ignore:
+    # Go 1.24+ dropped support for windows/arm (32-bit ARM).
+    # https://go.dev/doc/go1.24#ports
+    - goos: windows
+      goarch: arm
+    # modernc.org/libc (transitive dependency via modernc.org/sqlite from atmos)
+    # has type mismatch bugs on 32-bit FreeBSD that are unresolved upstream.
+    # https://gitlab.com/cznic/libc/-/issues
+    - goos: freebsd
+      goarch: '386'
+    - goos: freebsd
+      goarch: arm
+  binary: '{{ .ProjectName }}'
+
+archives:
+- format: "{{ .Env.ARCHIVES_FORMAT }}"
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+
+signs:
+  - artifacts: checksum
+    args:
+      # since we are using this in a GitHub action we need to pass the batch flag to indicate its not interactive.
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}" # set this environment variable for your signing key
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
+release:
+  draft: true
+  replace_existing_draft: true
+  replace_existing_artifacts: true
+  mode: keep-existing
+  make_latest: false
+  name_template: '{{.Tag}}'
+  target_commitish: '{{ if index .Env "GO_RELEASER_TARGET_COMMITISH"  }}{{ .Env.GO_RELEASER_TARGET_COMMITISH }}{{ else }}{{ .Branch }}{{ end }}'
+  prerelease: auto
+
+changelog:
+  skip: true
