@@ -19,7 +19,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Validate tag exists
         env:
@@ -48,6 +48,10 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
 
+      - name: Patch goreleaser config
+        run: |
+          sed -i 's/{{ .Env.ARCHIVES_FORMAT }}/zip/g' .goreleaser.yml
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
@@ -56,7 +60,6 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ARCHIVES_FORMAT: zip
 
       - name: Publish release
         env:
