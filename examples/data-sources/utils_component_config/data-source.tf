@@ -15,6 +15,7 @@ locals {
   result1 = yamldecode(data.utils_component_config.example1.output)
   result2 = yamldecode(data.utils_component_config.example2.output)
   result3 = yamldecode(data.utils_component_config.example3.output)
+  result4 = yamldecode(data.utils_component_config.example4.output)
 }
 
 data "utils_component_config" "example1" {
@@ -40,4 +41,14 @@ data "utils_component_config" "example3" {
   ignore_errors         = false
   atmos_cli_config_path = "."
   atmos_base_path       = "../../tests"
+}
+
+# Enable Go template processing for configs that use templates in backend paths
+# (e.g., {{ .component }}, {{ getenv "..." }})
+data "utils_component_config" "example4" {
+  component          = local.component
+  stack              = local.stack
+  ignore_errors      = false
+  env                = local.env
+  process_templates  = true
 }

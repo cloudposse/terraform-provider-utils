@@ -82,6 +82,18 @@ func dataSourceComponentConfig() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 			},
+			"process_templates": {
+				Description: "Set to true to enable Go template processing in the component config output.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
+			"process_yaml_functions": {
+				Description: "Set to true to enable YAML function processing (e.g., !terraform.output) in the component config output.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"output": {
 				Description: "Component configuration.",
 				Type:        schema.TypeString,
@@ -102,6 +114,8 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	env := d.Get("env").(map[string]any)
 	atmosCliConfigPath := d.Get("atmos_cli_config_path").(string)
 	atmosBasePath := d.Get("atmos_base_path").(string)
+	processTemplates := d.Get("process_templates").(bool)
+	processYamlFunctions := d.Get("process_yaml_functions").(bool)
 
 	var result map[string]any
 	var err error
@@ -117,8 +131,8 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	atmosMu.Lock()
 	if len(stack) > 0 {
 		result, err = p.ProcessComponentInStack(component, stack, atmosCliConfigPath, atmosBasePath,
-			p.WithProcessTemplates(false),
-			p.WithProcessYamlFunctions(false),
+			p.WithProcessTemplates(processTemplates),
+			p.WithProcessYamlFunctions(processYamlFunctions),
 		)
 	} else {
 		result, err = p.ProcessComponentFromContext(&p.ComponentFromContextParams{
@@ -130,8 +144,8 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 			AtmosCliConfigPath: atmosCliConfigPath,
 			AtmosBasePath:      atmosBasePath,
 		},
-			p.WithProcessTemplates(false),
-			p.WithProcessYamlFunctions(false),
+			p.WithProcessTemplates(processTemplates),
+			p.WithProcessYamlFunctions(processYamlFunctions),
 		)
 	}
 	atmosMu.Unlock()
