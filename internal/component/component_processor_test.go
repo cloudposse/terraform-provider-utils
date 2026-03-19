@@ -484,6 +484,28 @@ func TestComponentProcessorWithRelativeBasePath(t *testing.T) {
 	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
 }
 
+// TestComponentProcessorFromContextWithRuntimeRelativeBasePath verifies that
+// passing a relative path via AtmosBasePath (runtime source) resolves correctly.
+// This covers the core fix path from Atmos v1.210.1 — runtime-source relative
+// base paths should resolve relative to CWD, not the config directory.
+func TestComponentProcessorFromContextWithRuntimeRelativeBasePath(t *testing.T) {
+	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:          "infra/vpc",
+		Namespace:          "",
+		Tenant:             "tenant1",
+		Environment:        "ue2",
+		Stage:              "dev",
+		AtmosCliConfigPath: "",
+		AtmosBasePath:      "../../examples/tests", // runtime relative input
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "infra-vpc", backend["workspace_key_prefix"])
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+}
+
 // TestComponentProcessorWithProcessingDisabledAndEmptyPath verifies the actual
 // provider mode: both template/YAML function processing disabled AND empty base
 // path. This is the exact combination used in production by the provider's

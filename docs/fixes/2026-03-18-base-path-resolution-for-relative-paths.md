@@ -67,7 +67,7 @@ The provider passes `atmos_base_path` to `configAndStacksInfo.AtmosBasePath`. In
 
 ### Internal Code Path Analysis
 
-#### `resolveAbsolutePath` (config.go:227-253)
+#### `resolveAbsolutePath` (`pkg/config/config.go`)
 
 Three-way routing based on path classification:
 
@@ -80,17 +80,17 @@ Three-way routing based on path classification:
 Note: `.terraform/modules/monorepo` does NOT match dot-prefixed (`.t` != `./`). It is
 classified as a bare path. `.terraform` is a directory name, not a relative path prefix.
 
-#### `resolveDotPrefixPath` (config.go:269-283)
+#### `resolveDotPrefixPath` (`pkg/config/config.go`)
 
 - `source == "runtime"` → `filepath.Abs(path)` (CWD-relative, shell convention)
 - `source != "runtime"` + `cliConfigPath != ""` → `filepath.Abs(filepath.Join(cliConfigPath, path))` (
   config-dir-relative)
 - `source != "runtime"` + `cliConfigPath == ""` → `filepath.Abs(path)` (CWD fallback)
 
-#### `tryResolveWithGitRoot` (config.go:289-333)
+#### `tryResolveWithGitRoot` (`pkg/config/config.go`)
 
 1. Get git root. If empty → `tryResolveWithConfigPath` fallback
-2. If `path == ""` → return git root directly (early return at line 297)
+2. If `path == ""` → return git root directly (early return, never hits `os.Stat` code)
 3. `os.Stat(gitRoot/path)` — if exists, return it
 4. If `os.IsNotExist` → try `os.Stat(CWD/path)` — if exists, return it (NEW fallback)
 5. Neither exists → return `gitRoot/path` (original behavior for consistent error messages)
@@ -99,17 +99,17 @@ classified as a bare path. `.terraform` is a directory name, not a relative path
 
 `processEnvVars` sets `BasePathSource = "runtime"` for `ATMOS_BASE_PATH` env var →
 `setBasePaths` overrides for `--base-path` CLI flag →
-`InitCliConfig` lines 38-41 override for `AtmosBasePath` struct field (provider param).
+`InitCliConfig` overrides for `AtmosBasePath` struct field (provider param).
 Last one wins. Correct precedence: provider param > CLI flag > env var > config file.
 
 ### Scenario-by-Scenario Analysis
 
 #### Scenario A: Empty `atmos_base_path` (most common — default provider usage)
 
-1. `InitCliConfig` line 38: `AtmosBasePath == ""` — condition false, skip
+1. `InitCliConfig`: `AtmosBasePath == ""` — condition false, skip
 2. `BasePathSource` stays `""` (config source)
 3. `BasePath` comes from `atmos.yaml` (e.g., `base_path: "../../examples/tests"` in test fixtures)
-4. `resolveAbsolutePath("../../examples/tests", cliConfigPath, "")` at line 389
+4. `AtmosConfigAbsolutePaths` calls `resolveAbsolutePath("../../examples/tests", cliConfigPath, "")`
 5. `"../"` prefix → `isExplicitRelative = true` → `resolveDotPrefixPath`
 6. `source != "runtime"`, `cliConfigPath != ""` → resolves relative to atmos.yaml directory
 
@@ -117,7 +117,7 @@ Last one wins. Correct precedence: provider param > CLI flag > env var > config 
 
 #### Scenario B: `ATMOS_BASE_PATH=.terraform/modules/monorepo` (Spacelift scenario)
 
-1. `processEnvVars` (utils.go:198-203): `BasePath = ".terraform/modules/monorepo"`, `BasePathSource = "runtime"`
+1. `processEnvVars`: `BasePath = ".terraform/modules/monorepo"`, `BasePathSource = "runtime"`
 2. `resolveAbsolutePath(".terraform/modules/monorepo", cliConfigPath, "runtime")`
 3. `.terraform` does NOT match `"./"` — classified as bare path
 4. → `tryResolveWithGitRoot(".terraform/modules/monorepo", cliConfigPath)`
@@ -125,7 +125,7 @@ Last one wins. Correct precedence: provider param > CLI flag > env var > config 
 6. Falls back to `os.Stat(CWD/.terraform/modules/monorepo)` — exists → returns CWD path
 
 **Verdict: FIXED.** Previously step 5 returned the non-existent git root path and failed.
-Now the `os.Stat` fallback (lines 304-332) correctly finds it at CWD.
+Now the `os.Stat` fallback in `tryResolveWithGitRoot` correctly finds it at CWD.
 
 #### Scenario C: `ATMOS_BASE_PATH=./.terraform/modules/monorepo` (recommended form)
 
@@ -144,7 +144,7 @@ Same as Scenario A. Config source, dot-prefixed, resolves relative to atmos.yaml
 #### Scenario E: Empty `base_path` + run from subdirectory (v1.202.0 feature)
 
 1. `resolveAbsolutePath("", cliConfigPath, "")` → `tryResolveWithGitRoot("", cliConfigPath)`
-2. `path == ""` at line 296 → returns git root directly (early return, never hits `os.Stat` code)
+2. `path == ""` → returns git root directly (early return, never hits `os.Stat` code)
 
 **Verdict: SAFE.** Git root discovery preserved exactly as before.
 
@@ -162,7 +162,7 @@ Same as Scenario A. Config source, dot-prefixed, resolves relative to atmos.yaml
 
 | Edge Case                                                              | Behavior                                                             | Risk                               |
 |------------------------------------------------------------------------|----------------------------------------------------------------------|------------------------------------|
-| Both git root and CWD have `.terraform/modules/monorepo`               | Git root wins (line 305 checks first)                                | Low — correct for monorepo layouts |
+| Both git root and CWD have `.terraform/modules/monorepo`               | Git root wins (`tryResolveWithGitRoot` checks git root first)        | Low — correct for monorepo layouts |
 | `os.Stat` race condition (dir vanishes between stat and use)           | Theoretical only — directories checked are stable (.git, .terraform) | None                               |
 | `ATMOS_GIT_ROOT_BASEPATH=false` escape hatch                           | Returns `""` from `getGitRootOrEmpty()` → falls to config path → CWD | None — still works                 |
 | `processComponentInStackWithConfig` hardcoded `ProcessTemplates: true` | Not affected — provider already passes `WithProcessTemplates(false)` | None                               |
@@ -170,18 +170,18 @@ Same as Scenario A. Config source, dot-prefixed, resolves relative to atmos.yaml
 ### Why This Is Safe for Existing Provider Users
 
 1. **Empty `atmos_base_path` (default)** — the most common case — is completely unaffected.
-   Empty paths return early at line 296-297 before any new code is reached.
+   Empty paths return early in `tryResolveWithGitRoot` before any new code is reached.
 
 2. **Config-file relative paths** (`../../examples/tests`) — classified as dot-prefixed,
    routed to `resolveDotPrefixPath` with empty source → resolves relative to atmos.yaml dir.
    Unchanged behavior.
 
-3. **The new `os.Stat` fallback** in `tryResolveWithGitRoot` (lines 304-332) is **strictly
-   additive** — it only activates when the git-root path doesn't exist, then tries CWD. If
-   the git-root path DOES exist, behavior is identical to before. If neither exists, it
-   returns the git-root path (line 332) for consistent error messages with pre-fix behavior.
+3. **The new `os.Stat` fallback** in `tryResolveWithGitRoot` is **strictly additive** — it
+   only activates when the git-root path doesn't exist, then tries CWD. If the git-root
+   path DOES exist, behavior is identical to before. If neither exists, it returns the
+   git-root path for consistent error messages with pre-fix behavior.
 
-4. **All 7 test packages pass** (15 existing + 4 new tests) with zero regressions.
+4. **All 7 test packages pass** (15 existing + 5 new tests) with zero regressions.
 
 ## Tests
 
@@ -202,12 +202,13 @@ All existing tests in the provider must continue to pass:
 
 ### New Tests Added
 
-| Test                                                       | What It Verifies                                                                       |
-|------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| `TestComponentProcessorWithEmptyBasePath`                  | Empty `atmosBasePath` (default provider behavior) returns correct results              |
-| `TestComponentProcessorFromContextWithEmptyBasePath`       | Empty `atmosBasePath` via `ProcessComponentFromContext` returns correct results        |
-| `TestComponentProcessorWithRelativeBasePath`               | Relative `base_path` in `atmos.yaml` still works after path resolution changes         |
-| `TestComponentProcessorWithProcessingDisabledAndEmptyPath` | Both processing disabled + empty base path (actual provider mode) returns valid config |
+| Test                                                              | What It Verifies                                                                                 |
+|-------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| `TestComponentProcessorWithEmptyBasePath`                         | Empty `atmosBasePath` (default provider behavior) returns correct results                        |
+| `TestComponentProcessorFromContextWithEmptyBasePath`              | Empty `atmosBasePath` via `ProcessComponentFromContext` returns correct results                   |
+| `TestComponentProcessorWithRelativeBasePath`                      | Relative `base_path` in `atmos.yaml` still works after path resolution changes                   |
+| `TestComponentProcessorFromContextWithRuntimeRelativeBasePath`    | Runtime-source relative `AtmosBasePath` resolves relative to CWD (core fix path)                 |
+| `TestComponentProcessorWithProcessingDisabledAndEmptyPath`        | Both processing disabled + empty base path (actual provider mode) returns valid config            |
 
 ### Test Results
 
