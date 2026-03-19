@@ -1,6 +1,8 @@
 package component
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -485,18 +487,30 @@ func TestComponentProcessorWithRelativeBasePath(t *testing.T) {
 }
 
 // TestComponentProcessorFromContextWithRuntimeRelativeBasePath verifies that
-// passing a relative path via AtmosBasePath (runtime source) resolves correctly.
-// This covers the core fix path from Atmos v1.210.1 — runtime-source relative
-// base paths should resolve relative to CWD, not the config directory.
+// passing a relative path via AtmosBasePath (runtime source) resolves correctly
+// relative to CWD, not the config directory. This covers the core fix path from
+// Atmos v1.210.1.
+//
+// To prove CWD-based resolution, the test changes CWD to the repo root and passes
+// "examples/tests" as AtmosBasePath with an explicit AtmosCliConfigPath pointing to
+// the original config directory. If AtmosBasePath resolved relative to the config
+// directory (internal/component/), the path "internal/component/examples/tests" would
+// not exist and the test would fail. It only passes because runtime-source paths
+// resolve relative to CWD (repo root), where "examples/tests" does exist.
 func TestComponentProcessorFromContextWithRuntimeRelativeBasePath(t *testing.T) {
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	repoRoot := filepath.Clean(filepath.Join(cwd, "../.."))
+	t.Chdir(repoRoot)
+
 	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
 		Component:          "infra/vpc",
 		Namespace:          "",
 		Tenant:             "tenant1",
 		Environment:        "ue2",
 		Stage:              "dev",
-		AtmosCliConfigPath: "",
-		AtmosBasePath:      "../../examples/tests", // runtime relative input
+		AtmosCliConfigPath: filepath.Join(repoRoot, "internal", "component"),
+		AtmosBasePath:      "examples/tests", // runtime relative — resolves from CWD (repo root), not config dir
 	})
 	require.NoError(t, err)
 	require.NotNil(t, result)
