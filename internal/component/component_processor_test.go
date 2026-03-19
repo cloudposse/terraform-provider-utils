@@ -270,7 +270,7 @@ func TestComponentProcessorFromContextNilParams(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-// TestComponentProcessorInfraVpc tests the infra/vpc component which is commonly
+// TestComponentProcessorInfraVpc tests the infra/vpc component, which is commonly
 // used with remote-state modules (the original bug report scenario).
 func TestComponentProcessorInfraVpc(t *testing.T) {
 	component := "infra/vpc"
