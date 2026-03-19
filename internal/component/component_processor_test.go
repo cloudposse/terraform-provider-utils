@@ -1,6 +1,8 @@
 package component
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -410,6 +412,167 @@ func TestComponentProcessorConsistencyWithProcessingDisabled(t *testing.T) {
 	stackBackend := resultByStack["backend"].(map[string]any)
 	contextBackend := resultByContext["backend"].(map[string]any)
 	assert.Equal(t, stackBackend["workspace_key_prefix"], contextBackend["workspace_key_prefix"])
+}
+
+// TestComponentProcessorWithEmptyBasePath verifies that passing empty string
+// for atmosBasePath (the default provider behavior) works correctly after the
+// base path resolution changes in Atmos v1.210.1. Empty base path should
+// trigger git root -> config dir -> CWD fallback chain.
+func TestComponentProcessorWithEmptyBasePath(t *testing.T) {
+	component := "test/test-component"
+	stack := "tenant1-ue2-dev"
+
+	// Empty atmosBasePath is the default provider behavior
+	result, err := c.ProcessComponentInStack(component, stack, "", "")
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Verify all key fields are present and correct
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "test-test-component", backend["workspace_key_prefix"])
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+	assert.Equal(t, "test/test-component", result["component"])
+
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "dev", vars["stage"])
+}
+
+// TestComponentProcessorFromContextWithEmptyBasePath verifies that
+// ProcessComponentFromContext with empty AtmosBasePath works correctly
+// after the base path resolution changes in Atmos v1.210.1.
+func TestComponentProcessorFromContextWithEmptyBasePath(t *testing.T) {
+	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:          "test/test-component",
+		Namespace:          "",
+		Tenant:             "tenant1",
+		Environment:        "ue2",
+		Stage:              "dev",
+		AtmosCliConfigPath: "",
+		AtmosBasePath:      "",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "test-test-component", backend["workspace_key_prefix"])
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "dev", vars["stage"])
+}
+
+// TestComponentProcessorWithRelativeBasePath verifies that the test fixture's
+// relative base_path ("../../examples/tests") in atmos.yaml still resolves
+// correctly after the path resolution changes. This validates that config-file
+// relative paths (non-runtime source) continue to resolve relative to the
+// atmos.yaml directory.
+func TestComponentProcessorWithRelativeBasePath(t *testing.T) {
+	// The atmos.yaml in internal/component/ has base_path: "../../examples/tests"
+	// This is a config-file relative path and should resolve relative to atmos.yaml location
+	component := "infra/vpc"
+	stack := "tenant1-ue2-dev"
+
+	result, err := c.ProcessComponentInStack(component, stack, "", "")
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "infra-vpc", backend["workspace_key_prefix"])
+	assert.Equal(t, "s3", result["backend_type"])
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+}
+
+// TestComponentProcessorFromContextWithRuntimeRelativeBasePath verifies that
+// passing a relative path via AtmosBasePath (runtime source) resolves correctly
+// relative to CWD, not the config directory. This covers the core fix path from
+// Atmos v1.210.1.
+//
+// To prove CWD-based resolution, the test changes CWD to the repo root and passes
+// "examples/tests" as AtmosBasePath with an explicit AtmosCliConfigPath pointing to
+// the original config directory. If AtmosBasePath resolved relative to the config
+// directory (internal/component/), the path "internal/component/examples/tests" would
+// not exist and the test would fail. It only passes because runtime-source paths
+// resolve relative to CWD (repo root), where "examples/tests" does exist.
+func TestComponentProcessorFromContextWithRuntimeRelativeBasePath(t *testing.T) {
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	repoRoot := filepath.Clean(filepath.Join(cwd, "../.."))
+	t.Chdir(repoRoot)
+
+	result, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:          "infra/vpc",
+		Namespace:          "",
+		Tenant:             "tenant1",
+		Environment:        "ue2",
+		Stage:              "dev",
+		AtmosCliConfigPath: filepath.Join(repoRoot, "internal", "component"),
+		AtmosBasePath:      "examples/tests", // runtime relative — resolves from CWD (repo root), not config dir
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "infra-vpc", backend["workspace_key_prefix"])
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+}
+
+// TestComponentProcessorWithProcessingDisabledAndEmptyPath verifies the actual
+// provider mode: both template/YAML function processing disabled AND empty base
+// path. This is the exact combination used in production by the provider's
+// dataSourceComponentConfigRead function.
+func TestComponentProcessorWithProcessingDisabledAndEmptyPath(t *testing.T) {
+	component := "test/test-component"
+	stack := "tenant1-ue2-dev"
+
+	result, err := c.ProcessComponentInStack(component, stack, "", "",
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, result)
+
+	// Backend config must be present for remote-state lookup
+	backend := result["backend"].(map[string]any)
+	assert.Equal(t, "test-test-component", backend["workspace_key_prefix"])
+
+	// Workspace must be present for remote-state lookup
+	assert.Equal(t, "tenant1-ue2-dev", result["workspace"])
+
+	// Vars must be present
+	vars := result["vars"].(map[string]any)
+	assert.Equal(t, "tenant1", vars["tenant"])
+	assert.Equal(t, "ue2", vars["environment"])
+	assert.Equal(t, "dev", vars["stage"])
+
+	// Base component must be present
+	assert.Equal(t, "test/test-component", result["component"])
+
+	// Also test ProcessComponentFromContext in the same mode
+	resultCtx, err := c.ProcessComponentFromContext(&c.ComponentFromContextParams{
+		Component:          component,
+		Namespace:          "",
+		Tenant:             "tenant1",
+		Environment:        "ue2",
+		Stage:              "dev",
+		AtmosCliConfigPath: "",
+		AtmosBasePath:      "",
+	},
+		c.WithProcessTemplates(false),
+		c.WithProcessYamlFunctions(false),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, resultCtx)
+
+	// Both paths should produce the same results
+	assert.Equal(t, result["workspace"], resultCtx["workspace"])
+	assert.Equal(t, result["component"], resultCtx["component"])
+
+	ctxBackend := resultCtx["backend"].(map[string]any)
+	assert.Equal(t, backend["workspace_key_prefix"], ctxBackend["workspace_key_prefix"])
 }
 
 func TestComponentProcessorHierarchicalInheritance(t *testing.T) {
