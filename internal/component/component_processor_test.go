@@ -204,6 +204,7 @@ func TestComponentProcessorConsistency(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, resultByContext)
 
+	
 	// Both paths should produce the same backend config
 	stackBackend := resultByStack["backend"].(map[string]any)
 	contextBackend := resultByContext["backend"].(map[string]any)
