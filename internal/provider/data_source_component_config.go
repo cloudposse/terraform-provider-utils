@@ -102,16 +102,19 @@ func dataSourceComponentConfig() *schema.Resource {
 				Default:     "",
 			},
 			"process_templates": {
-				Description: "Set to true to enable Go template processing in the component config output.",
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
+				Description: "Enable Go template processing in the component config output. " +
+					"Defaults to true. Can also be set via ATMOS_PROCESS_TEMPLATES env var.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			"process_yaml_functions": {
-				Description: "Set to true to enable YAML function processing (e.g., !terraform.output) in the component config output.",
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
+				Description: "Enable YAML function processing (e.g., !terraform.output) in the component config output. " +
+					"Defaults to false to avoid ETXTBSY crashes from child process execution inside the provider. " +
+					"Can also be set via ATMOS_PROCESS_FUNCTIONS env var.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"output": {
 				Description: "Component configuration.",
@@ -134,7 +137,7 @@ func dataSourceComponentConfigRead(ctx context.Context, d *schema.ResourceData, 
 	atmosCliConfigPath := d.Get("atmos_cli_config_path").(string)
 	atmosBasePath := d.Get("atmos_base_path").(string)
 	// Default from env var, can be overridden by schema attribute
-	processTemplates := parseBoolEnv("ATMOS_PROCESS_TEMPLATES", false)
+	processTemplates := parseBoolEnv("ATMOS_PROCESS_TEMPLATES", true)
 	if v, ok := d.GetOk("process_templates"); ok {
 		processTemplates = v.(bool)
 	}

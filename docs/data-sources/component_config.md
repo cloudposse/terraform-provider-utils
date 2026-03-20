@@ -58,14 +58,13 @@ data "utils_component_config" "example3" {
   atmos_base_path       = "../../tests"
 }
 
-# Enable Go template processing for configs that use templates in backend paths
-# (e.g., {{ .component }}, {{ getenv "..." }})
+# Disable Go template processing (templates are enabled by default)
 data "utils_component_config" "example4" {
   component          = local.component
   stack              = local.stack
   ignore_errors      = false
   env                = local.env
-  process_templates  = true
+  process_templates  = false
 }
 ```
 
@@ -103,8 +102,8 @@ export ATMOS_PROCESS_FUNCTIONS=true
 - `environment` (String) Environment.
 - `ignore_errors` (Boolean) Flag to ignore errors if the component is not found in the stack.
 - `namespace` (String) Namespace.
-- `process_templates` (Boolean) Set to true to enable Go template processing in the component config output. Defaults to `false`, or to the value of the `ATMOS_PROCESS_TEMPLATES` environment variable if set (accepts `true`/`1`/`yes` or `false`/`0`/`no`). The schema attribute takes precedence over the environment variable when explicitly set.
-- `process_yaml_functions` (Boolean) Set to true to enable YAML function processing (e.g., !terraform.output) in the component config output. Defaults to `false`, or to the value of the `ATMOS_PROCESS_FUNCTIONS` environment variable if set (accepts `true`/`1`/`yes` or `false`/`0`/`no`). The schema attribute takes precedence over the environment variable when explicitly set.
+- `process_templates` (Boolean) Enable Go template processing in the component config output. Defaults to `true`. Can be overridden via the `ATMOS_PROCESS_TEMPLATES` environment variable (accepts `true`/`1`/`yes` or `false`/`0`/`no`). The schema attribute takes precedence over the environment variable.
+- `process_yaml_functions` (Boolean) Enable YAML function processing (e.g., !terraform.output) in the component config output. Defaults to `false` to avoid ETXTBSY crashes from child process execution inside the provider. Can be overridden via the `ATMOS_PROCESS_FUNCTIONS` environment variable. The schema attribute takes precedence over the environment variable.
 - `stack` (String) Stack name.
 - `stage` (String) Stage.
 - `tenant` (String) Tenant.

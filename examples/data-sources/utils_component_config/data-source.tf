@@ -43,12 +43,13 @@ data "utils_component_config" "example3" {
   atmos_base_path       = "../../tests"
 }
 
-# Enable Go template processing for configs that use templates in backend paths
-# (e.g., {{ .component }}, {{ getenv "..." }})
+# Disable Go template processing (enabled by default).
+# YAML function processing (e.g., !terraform.output) is disabled by default.
 data "utils_component_config" "example4" {
-  component          = local.component
-  stack              = local.stack
-  ignore_errors      = false
-  env                = local.env
-  process_templates  = true
+  component              = local.component
+  stack                  = local.stack
+  ignore_errors          = false
+  env                    = local.env
+  process_templates      = false
+  process_yaml_functions = false
 }
