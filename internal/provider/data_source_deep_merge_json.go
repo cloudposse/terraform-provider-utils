@@ -55,13 +55,13 @@ func dataSourceDeepMergeJSONRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	merged, err := m.MergeWithOptions(data, appendList, deepCopyList)
+	merged, err := m.MergeWithOptions(nil, data, appendList, deepCopyList)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Convert result to JSON
-	var json = jsoniter.ConfigDefault
+	json := jsoniter.ConfigDefault
 	jsonResult, err := json.Marshal(merged)
 	if err != nil {
 		return diag.FromErr(err)

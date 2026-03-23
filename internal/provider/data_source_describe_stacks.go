@@ -151,31 +151,37 @@ func dataSourceDescribeStacksRead(ctx context.Context, d *schema.ResourceData, m
 		AtmosCliConfigPath: atmosCliConfigPath,
 	}
 
-	cliConfig, err := cfg.InitCliConfig(info, true)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	result, err = func() (map[string]any, error) {
+		atmosMu.Lock()
+		defer atmosMu.Unlock()
 
-	var filterByStack string
-
-	if stack != "" {
-		filterByStack = stack
-	} else if namespace != "" || tenant != "" || environment != "" || stage != "" {
-		filterByStack, err = cfg.GetStackNameFromContextAndStackNamePattern(namespace, tenant, environment, stage, cliConfig.Stacks.NamePattern)
+		cliConfig, err := cfg.InitCliConfig(info, true)
 		if err != nil {
-			return diag.FromErr(err)
+			return nil, err
 		}
-	}
 
-	result, err = describe.ExecuteDescribeStacks(
-		cliConfig,
-		filterByStack,
-		componentsList,
-		componentTypesList,
-		sectionsList,
-		false,
-		true,
-	)
+		var filterByStack string
+
+		if stack != "" {
+			filterByStack = stack
+		} else if namespace != "" || tenant != "" || environment != "" || stage != "" {
+			filterByStack, err = cfg.GetStackNameFromContextAndStackNamePattern(namespace, tenant, environment, stage, cliConfig.Stacks.NamePattern)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return describe.ExecuteDescribeStacks(
+			cliConfig,
+			filterByStack,
+			componentsList,
+			componentTypesList,
+			sectionsList,
+			false,
+			true,
+		)
+	}()
+
 	if err != nil && !ignoreErrors {
 		return diag.FromErr(err)
 	}

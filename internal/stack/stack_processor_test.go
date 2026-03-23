@@ -46,6 +46,7 @@ func TestStackProcessor(t *testing.T) {
 		terraformComponentsBasePath,
 		helmfileComponentsBasePath,
 		packerComponentsBasePath,
+		"",
 		filePaths,
 		processStackDeps,
 		processComponentDeps,

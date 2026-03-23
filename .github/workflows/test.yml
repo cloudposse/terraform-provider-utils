@@ -18,6 +18,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  CGO_ENABLED: "0"
+
 jobs:
   # ensure the code builds...
   build:
@@ -26,7 +29,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Install Atmos
+        uses: cloudposse/github-action-setup-atmos@v2
+        with:
+          token: ${{ github.token }}
+          install-wrapper: false
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -40,7 +49,7 @@ jobs:
 
       - name: Build
         run: |
-          make build
+          atmos go build
 
   # run acceptance tests in a matrix with Terraform core versions
   test:
@@ -60,7 +69,13 @@ jobs:
           - "1.6.3"
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Install Atmos
+        uses: cloudposse/github-action-setup-atmos@v2
+        with:
+          token: ${{ github.token }}
+          install-wrapper: false
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -76,7 +91,7 @@ jobs:
 
       - name: Get dependencies
         run: |
-          make deps
+          atmos go deps
 
       - name: TF acceptance tests
         timeout-minutes: 10
@@ -84,7 +99,7 @@ jobs:
           TF_ACC: "1"
           TF_ACC_TERRAFORM_VERSION: ${{ matrix.terraform }}
         run: |
-          make testacc
+          atmos testacc
 
   release:
     needs: test
