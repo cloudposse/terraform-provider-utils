@@ -25,7 +25,7 @@ with `cliConfigPath` (the `atmos.yaml` directory), producing a wrong/nonexistent
 
 ### Failure Path (Before Fix)
 
-```
+```text
 ATMOS_BASE_PATH=.terraform/modules/monorepo  (no .git directory)
   → tryResolveWithGitRoot("...", cliConfigPath)
   → getGitRootOrEmpty() returns ""
@@ -60,7 +60,7 @@ When git root is unavailable, the resolution order now depends on path source:
 
 ### Resolution Path (After Fix)
 
-```
+```text
 ATMOS_BASE_PATH=.terraform/modules/monorepo  (no .git directory, runtime source)
   → tryResolveWithGitRoot("...", cliConfigPath, "runtime")
   → getGitRootOrEmpty() returns ""
