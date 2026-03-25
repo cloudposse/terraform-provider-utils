@@ -38,7 +38,7 @@ jobs:
           install-wrapper: false
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
         id: go
@@ -78,7 +78,7 @@ jobs:
           install-wrapper: false
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
         id: go
