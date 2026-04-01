@@ -94,6 +94,9 @@ usage: |-
 
   See the [Docs](./docs) for additional information.
 
+  > **Important:** Pin both the `cloudposse/utils` provider **and** the Atmos CLI to compatible versions.
+  > See [docs/versions.md](docs/versions.md) for the full compatibility matrix.
+
 # Example usage
 examples: |-
   Here is an example of using this provider:
@@ -130,6 +133,7 @@ examples: |-
   - [`examples/data-sources/utils_deep_merge_yaml`](examples/data-sources/utils_deep_merge_yaml)
 
 include:
+  - "docs/versions.md"
   - "docs/developer.md"
 
 # Contributors to this project
