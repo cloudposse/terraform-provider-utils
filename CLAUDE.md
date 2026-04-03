@@ -14,17 +14,19 @@ documentation so downstream users can pin correctly.
    grep 'cloudposse/atmos' go.mod
    ```
 
-2. **Update `docs/versions.md`** — add a new row at the top of the table:
-   ```markdown
-   | [vX.Y.Z](https://github.com/cloudposse/atmos/releases/tag/vX.Y.Z) | [vA.B.C](https://github.com/cloudposse/terraform-provider-utils/releases/tag/vA.B.C) |
-   ```
-   Replace `vX.Y.Z` with the Atmos version and `vA.B.C` with the new provider release tag.
+2. **Update `docs/versions.md`** — add or update a row in the table.
 
-   - Only add one row per unique Atmos version.
-   - If the new provider release uses the same Atmos version as the previous one, **update** the existing row
-     to point to the newer provider tag instead of adding a duplicate.
-   - If there are parallel `1.x` and `2.x` releases for the same Atmos version, prefer the `2.x` release as
-     the recommended version.
+   The table has three columns: **Atmos Version**, **2.x provider release**, **1.x provider release**.
+
+   - If the new release introduces a **new Atmos version**, add a new row at the top of the table:
+     ```markdown
+     | [vX.Y.Z](https://github.com/cloudposse/atmos/releases/tag/vX.Y.Z) | [v2.A.B](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.A.B) | — |
+     ```
+     (Use `—` in the column that does not apply to this release.)
+   - If the new release uses the **same Atmos version** as the previous one, **update** the existing row
+     to point to the newer provider tag in the appropriate column instead of adding a duplicate row.
+   - The `2.x` column tracks the actively developed release line; the `1.x` column tracks parallel
+     backport releases for users who cannot yet migrate to `2.x`.
 
 3. **Update `README.md`** — the version table in `README.md` is a copy of the table in `docs/versions.md`
    (it is inlined when `atmos docs generate` is run). Replicate the same change in `README.md` under the
