@@ -179,6 +179,23 @@ Use the table below to pin both tools to compatible versions.
 | [v1.4.2](https://github.com/cloudposse/atmos/releases/tag/v1.4.2) | — | [v0.17.19](https://github.com/cloudposse/terraform-provider-utils/releases/tag/0.17.19) |
 | [v1.4.1](https://github.com/cloudposse/atmos/releases/tag/v1.4.1) | — | [v0.17.18](https://github.com/cloudposse/terraform-provider-utils/releases/tag/0.17.18) |
 
+## Version Compatibility: `terraform-yaml-stack-config` ↔ `cloudposse/utils` Provider
+
+The [`cloudposse/terraform-yaml-stack-config`](https://github.com/cloudposse/terraform-yaml-stack-config) module
+uses the `cloudposse/utils` provider internally. Its `modules/remote-state` child module declares explicit provider
+version constraints — if you source that child module in a root module, both the child's constraint and any
+constraint declared by the root module must be satisfiable simultaneously.
+
+Use the table below to pick a `terraform-yaml-stack-config` release that is compatible with your chosen
+`cloudposse/utils` provider version.
+
+| [`terraform-yaml-stack-config`](https://github.com/cloudposse/terraform-yaml-stack-config/releases) | Required `cloudposse/utils` (root module) | Required `cloudposse/utils` (`modules/remote-state`) |
+|---|---|---|
+| [v2.0.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/v2.0.0) | `>= 2.0.0, < 3.0.0` | `>= 2.0.0, < 3.0.0` |
+| [v1.5.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.5.0)–[v1.8.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/v1.8.0) | `>= 1.7.1` | `>= 1.7.1, < 2.0.0` |
+| [v1.1.1](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.1.1)–[v1.4.3](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.4.3) | `>= 1.5.0` | `= 1.5.0` |
+| [v1.0.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.0.0) | `>= 1.2.0` | `>= 1.2.0` |
+
 
 
 
