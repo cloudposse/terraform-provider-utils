@@ -274,3 +274,125 @@ func TestMergeWithOptionsEmptyInputs(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]any{}, result)
 }
+
+// TestMergeWithOptionsTypeOverride verifies the deep-merge "src always wins at the
+// leaf level regardless of type" contract through the public API that the provider's
+// utils_deep_merge_json and utils_deep_merge_yaml data sources call
+// (m.MergeWithOptions(nil, inputs, false, false)).
+//
+// Atmos v1.212.0 reworked the deep-merge engine (mergo -> reflection-free native merge,
+// atmos #2201) and fixed a regression where guards rejected some heterogeneous-type
+// overrides (atmos #2248). Those overrides — a list replaced by a map, a scalar, a bool
+// or null — show up in real-world configs (e.g. blanking out an inherited list with `{}`
+// or null). This test pins that behavior so a future atmos bump that reintroduces the
+// guard is caught here rather than silently changing user merge results.
+func TestMergeWithOptionsTypeOverride(t *testing.T) {
+	tests := []struct {
+		name    string
+		first   map[string]any
+		second  map[string]any
+		wantKey string
+		wantVal any
+	}{
+		{
+			name:    "list overridden by empty map",
+			first:   map[string]any{"accounts": []any{"a", "b"}},
+			second:  map[string]any{"accounts": map[string]any{}},
+			wantKey: "accounts",
+			wantVal: map[string]any{},
+		},
+		{
+			name:    "list overridden by non-empty map",
+			first:   map[string]any{"accounts": []any{"a", "b"}},
+			second:  map[string]any{"accounts": map[string]any{"only": "one"}},
+			wantKey: "accounts",
+			wantVal: map[string]any{"only": "one"},
+		},
+		{
+			name:    "list overridden by scalar string",
+			first:   map[string]any{"cidrs": []any{"10.0.0.0/16"}},
+			second:  map[string]any{"cidrs": "10.99.0.0/16"},
+			wantKey: "cidrs",
+			wantVal: "10.99.0.0/16",
+		},
+		{
+			name:    "list overridden by scalar int",
+			first:   map[string]any{"ports": []any{80, 443}},
+			second:  map[string]any{"ports": 8080},
+			wantKey: "ports",
+			wantVal: 8080,
+		},
+		{
+			name:    "list overridden by null",
+			first:   map[string]any{"rules": []any{"allow"}},
+			second:  map[string]any{"rules": nil},
+			wantKey: "rules",
+			wantVal: nil,
+		},
+		{
+			name:    "list overridden by bool false",
+			first:   map[string]any{"features": []any{"a", "b"}},
+			second:  map[string]any{"features": false},
+			wantKey: "features",
+			wantVal: false,
+		},
+		{
+			name:    "map overridden by scalar string",
+			first:   map[string]any{"backend": map[string]any{"type": "s3"}},
+			second:  map[string]any{"backend": "local"},
+			wantKey: "backend",
+			wantVal: "local",
+		},
+		{
+			name:    "scalar overridden by list",
+			first:   map[string]any{"cidr": "10.0.0.0/16"},
+			second:  map[string]any{"cidr": []any{"10.0.0.0/16", "10.1.0.0/16"}},
+			wantKey: "cidr",
+			wantVal: []any{"10.0.0.0/16", "10.1.0.0/16"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inputs := []map[string]any{tt.first, tt.second}
+
+			// Matches the data sources' call: nil config, no append, no deep-copy list.
+			result, err := m.MergeWithOptions(nil, inputs, false, false)
+			assert.Nil(t, err, "type override must not error")
+			assert.Equal(t, tt.wantVal, result[tt.wantKey])
+		})
+	}
+}
+
+// TestMergeWithOptionsTypeOverrideNestedWithSliceFlags verifies that a heterogeneous-type
+// override of a nested value holds even when the slice flags (appendSlice / sliceDeepCopy)
+// are set — i.e. the type override takes precedence over list-merge handling, matching the
+// utils_deep_merge_* data sources when callers pass append=true or deep_copy_list=true.
+func TestMergeWithOptionsTypeOverrideNestedWithSliceFlags(t *testing.T) {
+	flagCases := []struct {
+		name          string
+		appendSlice   bool
+		sliceDeepCopy bool
+	}{
+		{"appendSlice", true, false},
+		{"sliceDeepCopy", false, true},
+		{"bothFlags", true, true},
+	}
+
+	for _, fc := range flagCases {
+		t.Run(fc.name, func(t *testing.T) {
+			first := map[string]any{
+				"vars": map[string]any{"accounts": []any{"a", "b"}},
+			}
+			second := map[string]any{
+				"vars": map[string]any{"accounts": map[string]any{}},
+			}
+
+			result, err := m.MergeWithOptions(nil, []map[string]any{first, second}, fc.appendSlice, fc.sliceDeepCopy)
+			assert.Nil(t, err, "type override must work regardless of slice flags")
+
+			vars := result["vars"].(map[string]any)
+			assert.Equal(t, map[string]any{}, vars["accounts"])
+		})
+	}
+}

@@ -1,0 +1,11 @@
+# Base (lowest-priority) layer: global vars shared by every component in the stack.
+# Each component below overrides these in its own `vars`, and how the override
+# combines with this base is determined by the component's
+# `settings.list_merge_strategy`.
+vars:
+  my_list:
+    - a
+    - b
+  my_map_list:
+    - key1: v1
+      key2: v2

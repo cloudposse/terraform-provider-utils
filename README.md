@@ -116,6 +116,10 @@ Here are some additional examples:
 
 
 
+
+
+
+
 ## Version Compatibility: Atmos ↔ `cloudposse/utils` Provider
 
 The `cloudposse/utils` Terraform provider embeds the [Atmos](https://atmos.tools) Go library to perform
@@ -132,6 +136,7 @@ Use the table below to pin both tools to compatible versions.
 
 | Atmos Version | `cloudposse/utils` 2.x | `cloudposse/utils` 1.x |
 |---|---|---|
+| [v1.220.0](https://github.com/cloudposse/atmos/releases/tag/v1.220.0) | [v2.6.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.6.0) | — |
 | [v1.211.0](https://github.com/cloudposse/atmos/releases/tag/v1.211.0) | [v2.5.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.5.0) | [v1.35.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v1.35.0) |
 | [v1.210.1](https://github.com/cloudposse/atmos/releases/tag/v1.210.1) | [v2.4.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.4.0) | [v1.34.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v1.34.0) |
 | [v1.209.0](https://github.com/cloudposse/atmos/releases/tag/v1.209.0) | [v2.1.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.1.0) | [v1.33.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v1.33.0) |
@@ -195,14 +200,6 @@ Use the table below to pick a `terraform-yaml-stack-config` release that is comp
 | [v1.5.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.5.0)–[v1.8.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/v1.8.0) | `>= 1.7.1` | `>= 1.7.1, < 2.0.0` |
 | [v1.1.1](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.1.1)–[v1.4.3](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.4.3) | `>= 1.5.0` | `= 1.5.0` |
 | [v1.0.0](https://github.com/cloudposse/terraform-yaml-stack-config/releases/tag/1.0.0) | `>= 1.2.0` | `>= 1.2.0` |
-
-
-
-
-## Developing the Provider
-
-
-
 ## Developing the Provider
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
@@ -371,7 +368,7 @@ For additional context, refer to some of these links.
 > - **Customer Workshops.** Engage with our team in weekly workshops, gaining insights and strategies to continuously improve and innovate.
 >
 > <a href="https://cpco.io/commercial-support?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-provider-utils&utm_content=commercial_support"><img alt="Request Quote" src="https://img.shields.io/badge/request%20quote-success.svg?style=for-the-badge"/></a>
->
+> 
 </details>
 
 ## ✨ Contributing
