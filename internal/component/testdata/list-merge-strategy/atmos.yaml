@@ -1,0 +1,26 @@
+# Minimal, self-contained Atmos fixture for exercising component-level
+# `settings.list_merge_strategy` through ProcessComponentInStack.
+# Kept isolated from ../../examples/tests so it cannot perturb the assertions
+# in the main component-processor tests.
+base_path: "."
+
+components:
+  terraform:
+    base_path: "components/terraform"
+
+stacks:
+  base_path: "stacks"
+  included_paths:
+    - "orgs/**/*"
+  excluded_paths:
+    - "**/_defaults.yaml"
+  name_pattern: "{tenant}-{environment}-{stage}"
+
+# Static vars only — no templating needed for this fixture.
+templates:
+  settings:
+    enabled: false
+
+logs:
+  file: "/dev/stderr"
+  level: Off

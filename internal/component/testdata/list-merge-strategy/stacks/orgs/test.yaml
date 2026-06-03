@@ -1,0 +1,51 @@
+# Leaf stack. Resolves to stack name "acme-ue2-test" via the
+# `{tenant}-{environment}-{stage}` name pattern. Imports the shared global base
+# lists (catalog/lists), then defines three components that each override the
+# base with the SAME values but a DIFFERENT component-level
+# `settings.list_merge_strategy`, so the strategy alone determines the result.
+#
+# The merge happens across var layers: global vars (base) -> component vars (override).
+import:
+  - catalog/lists
+
+vars:
+  tenant: acme
+  environment: ue2
+  stage: test
+
+components:
+  terraform:
+    # replace (the global default): override wins entirely -> [x, y, z]
+    list-replace:
+      metadata:
+        component: list-merge-test
+      settings:
+        list_merge_strategy: replace
+      vars:
+        my_list:
+          - x
+          - "y"
+          - z
+
+    # append: global base then component override -> [a, b, x, y, z]
+    list-append:
+      metadata:
+        component: list-merge-test
+      settings:
+        list_merge_strategy: append
+      vars:
+        my_list:
+          - x
+          - "y"
+          - z
+
+    # merge: element-wise deep merge of list items -> [{key1: v1b, key2: v2, key3: v3}]
+    list-merge:
+      metadata:
+        component: list-merge-test
+      settings:
+        list_merge_strategy: merge
+      vars:
+        my_map_list:
+          - key1: v1b
+            key3: v3
