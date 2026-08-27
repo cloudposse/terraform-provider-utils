@@ -14,6 +14,7 @@ Use the table below to pin both tools to compatible versions.
 
 | Atmos Version | `cloudposse/utils` 2.x | `cloudposse/utils` 1.x |
 |---|---|---|
+| [v1.227.0](https://github.com/cloudposse/atmos/releases/tag/v1.227.0) | [v2.7.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.7.0) | — |
 | [v1.220.0](https://github.com/cloudposse/atmos/releases/tag/v1.220.0) | [v2.6.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.6.0) | — |
 | [v1.211.0](https://github.com/cloudposse/atmos/releases/tag/v1.211.0) | [v2.5.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.5.0) | [v1.35.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v1.35.0) |
 | [v1.210.1](https://github.com/cloudposse/atmos/releases/tag/v1.210.1) | [v2.4.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v2.4.0) | [v1.34.0](https://github.com/cloudposse/terraform-provider-utils/releases/tag/v1.34.0) |
