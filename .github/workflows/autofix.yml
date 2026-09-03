@@ -11,7 +11,7 @@ jobs:
     permissions: {}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: aquaproj/aqua-installer@5e54e5cee8a95ee2ce7c04cb993da6dfad13e59c # v3.1.2
@@ -22,7 +22,7 @@ jobs:
         run: aqua upc -prune
 
       # go mod tidy
-      - uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
       - run: go mod tidy
@@ -30,7 +30,7 @@ jobs:
       # gofumpt
       - name: Get changed Go files
         id: changed-files
-        uses: tj-actions/changed-files@e7b157b1c4ad44acfc8d9be14b8cd8f5058636e3 # v45.0.6
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
         with:
           use_rest_api: "true"
           files: |
@@ -53,4 +53,4 @@ jobs:
           pre-commit run trailing-whitespace --all-files || true
           pre-commit run end-of-file-fixer --all-files || true
 
-      - uses: autofix-ci/action@2891949f3779a1cafafae1523058501de3d4e944 # v1.3.1
+      - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
