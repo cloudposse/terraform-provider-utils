@@ -1,7 +1,8 @@
-version: 2
-
 # Visit https://goreleaser.com for documentation on how to customize this behavior.
 # Based on the shared cloudposse/.github goreleaser config with 32-bit FreeBSD exclusions.
+
+# GoReleaser v2 requires an explicit configuration version.
+version: 2
 
 builds:
 - env:
@@ -39,7 +40,7 @@ builds:
   binary: '{{ .ProjectName }}'
 
 archives:
-- formats: ["{{ .Env.ARCHIVES_FORMAT }}"]
+- formats: ['{{ .Env.ARCHIVES_FORMAT }}']
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 checksum:
